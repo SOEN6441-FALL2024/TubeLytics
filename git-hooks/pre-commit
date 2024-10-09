@@ -2,7 +2,7 @@
 
 echo "*****Running unit tests******"
 
-./gradlew test
+sbt -v +test
 
 status=$?
 

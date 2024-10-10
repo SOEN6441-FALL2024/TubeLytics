@@ -27,6 +27,8 @@ jobs:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - name: Compile
         run: sbt compile
+      - name: Generate Report
+        run: sbt jacoco
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:

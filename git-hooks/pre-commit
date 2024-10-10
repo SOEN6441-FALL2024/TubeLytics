@@ -8,4 +8,14 @@ status=$?
 
 echo "*****Done with unit tests******"
 
+echo "*****Reformat Java Files******"
+
+sbt javafmtAll
+
+sbt javafmtCheckAll
+status=$?
+
+echo "*****Done with Java Files******"
+
+
 exit $status

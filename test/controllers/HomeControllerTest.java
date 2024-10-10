@@ -12,6 +12,9 @@ import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.GET;
 import static play.test.Helpers.route;
 
+/**
+ * @author Deniz Dinchdonmez
+ */
 public class HomeControllerTest extends WithApplication {
 
     @Override
@@ -21,9 +24,11 @@ public class HomeControllerTest extends WithApplication {
 
     @Test
     public void testIndex() {
+
         Http.RequestBuilder request = new Http.RequestBuilder()
                 .method(GET)
                 .uri("/");
+
 
         Result result = route(app, request);
         assertEquals(OK, result.status());

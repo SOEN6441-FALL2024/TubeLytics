@@ -16,6 +16,8 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: 'sbt'
+      - name: Run compile
+        run: sbt compile
       - name: Run tests
         run: sbt test
   sonarcloud:

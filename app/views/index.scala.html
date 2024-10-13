@@ -1,5 +1,118 @@
 @()
 
-@main("Welcome to Play") {
-  <h1>Welcome to Play!</h1>
-}
+<!DOCTYPE html>
+<html lang="en">
+<!-- Aidassj -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YT lytics</title>
+    <style>
+        body {
+
+           font-family: Arial, sans-serif;
+           text-align: center;
+           margin-top: 50px;
+        }
+
+        h1 {
+           font-size: 24px;
+           margin-bottom: 20px;
+        }
+
+        .search-container {
+           position: relative;
+           display: inline-block;
+        }
+
+        input[type="text"] {
+           width: 250px;
+           padding: 10px 40px 10px 10px;
+           font-size: 16px;
+           border: 1px solid #ccc;
+           border-radius: 4px;
+           outline: none;
+        }
+
+        input[type="text"]:focus {
+           border-color: #007bff;
+        }
+
+        .search-icon {
+           position: absolute;
+           right: 10px;
+           top: 50%;
+           transform: translateY(-50%);
+           cursor: pointer;
+        }
+
+        button {
+           padding: 10px 20px;
+           font-size: 16px;
+           background-color: #007bff;
+           color: #fff;
+           border: none;
+           border-radius: 20px;
+           cursor: pointer;
+           margin-left: 10px;
+        }
+
+        button:hover {
+           background-color: #0056b3;
+        }
+
+        /* Style for the result container */
+        .results {
+           margin-top: 30px;
+           text-align: left;
+        }
+
+        .result-item {
+           margin: 15px 0;
+           border-bottom: 1px solid #ccc;
+           padding-bottom: 10px;
+        }
+
+        .result-item h3 {
+           font-size: 18px;
+           margin-bottom: 5px;
+        }
+
+        .result-item img {
+           max-width: 120px;
+           vertical-align: middle;
+           margin-right: 10px;
+        }
+
+        .result-item a {
+           text-decoration: none;
+           color: #007bff;
+        }
+
+        .result-item a:hover {
+           text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Welcome to YT lytics</h1>
+
+<form id="search-form" onsubmit="return handleSubmit(event)">
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="Enter search terms" required>
+        <span class="search-icon">&#128269;</span> <!-- Unicode for search icon -->
+    </div>
+
+    <button type="submit">Go!</button>
+</form>
+
+<!-- This div will hold the search results -->
+<div class="results" id="results"></div>
+
+
+</body>
+
+</html>

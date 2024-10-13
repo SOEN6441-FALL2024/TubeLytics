@@ -12,20 +12,27 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.test.WithApplication;
 
-/** @author Deniz Dinchdonmez */
+/**
+ * Unit test for HomeController
+ * Author: Deniz Dinchdonmez, Aidassj
+ */
 public class HomeControllerTest extends WithApplication {
 
   @Override
   protected Application provideApplication() {
+    // Building the application using Guice
     return new GuiceApplicationBuilder().build();
   }
 
   @Test
   public void testIndex() {
-
+    // Creating a request to the root URL ("/")
     Http.RequestBuilder request = new Http.RequestBuilder().method(GET).uri("/");
 
+    // Routing the request and getting the result
     Result result = route(app, request);
+
+    // Asserting that the response status is OK (200)
     assertEquals(OK, result.status());
   }
 }

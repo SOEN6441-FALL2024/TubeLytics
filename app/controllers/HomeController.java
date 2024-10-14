@@ -11,6 +11,3 @@ public class HomeController extends Controller {
     return ok(index.render()); // No need to pass request header anymore
   }
 }
-
-
-

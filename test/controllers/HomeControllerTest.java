@@ -12,10 +12,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.test.WithApplication;
 
-/**
- * Unit test for HomeController
- * Author: Deniz Dinchdonmez, Aidassj
- */
+/** Unit test for HomeController Author: Deniz Dinchdonmez, Aidassj */
 public class HomeControllerTest extends WithApplication {
 
   @Override

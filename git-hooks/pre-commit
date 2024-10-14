@@ -1,21 +1,22 @@
 #!/bin/sh
 
-#echo "*****Running unit tests******"
+echo "*****Running unit tests******"
 
-#sbt -v +test
+sbt -v +test
 
-#status=$?
+status=$?
 
-#echo "*****Done with unit tests******"
+echo "*****Done with unit tests******"
 
-#echo "*****Reformat Java Files******"
+echo "*****Reformat Java Files******"
 
-#sbt javafmtAll
-
-#sbt javafmtCheckAll
-#status=$?
-
-#echo "*****Done with Java Files******"
+sbt javafmtAll
 
 
-#exit $status
+sbt javafmtCheckAll
+status=$?
+
+echo "*****Done with Java Files******"
+
+
+exit $status

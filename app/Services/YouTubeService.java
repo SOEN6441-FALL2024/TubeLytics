@@ -1,21 +1,19 @@
 package services;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
-import java.util.stream.Collectors;
+import javax.inject.Inject;
 import play.libs.ws.WSClient;
 
 /**
- * Service to interact with the YouTube Data API and fetch videos based on search queries. Uses
- * Play's WSClient to perform asynchronous HTTP requests.
+ * Service class to interact with the YouTube Data API and fetch videos based on search queries.
+ * Uses Play's WSClient to perform asynchronous HTTP requests.
  *
  * @author Marjan Khassafi
  */
 public class YouTubeService {
 
-  private final String API_KEY =
-      "AIzaSyAeSvvGH1fA3f57nH-W2HI-ZUYebsYq-KA"; // The API key taken by Marjan
+  private final String API_KEY = "AIzaSyAeSvvGH1fA3f57nH-W2HI-ZUYebsYq-KA";
   private final String YT_SEARCH_URL = "https://www.googleapis.com/youtube/v3/search";
   private final WSClient ws;
 
@@ -24,6 +22,7 @@ public class YouTubeService {
    *
    * @param ws Play WSClient to handle HTTP requests.
    */
+  @Inject
   public YouTubeService(WSClient ws) {
     this.ws = ws;
   }
@@ -38,10 +37,12 @@ public class YouTubeService {
     String url =
         String.format(
             "%s?part=snippet&q=%s&type=video&maxResults=10&key=%s", YT_SEARCH_URL, query, API_KEY);
+
     return ws.url(url)
         .get()
         .thenApply(
             response -> {
+              // Process JSON response
               JsonNode items = response.asJson().get("items");
               return items.findValues("snippet").stream()
                   .map(

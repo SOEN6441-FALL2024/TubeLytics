@@ -12,6 +12,7 @@ echo "*****Reformat Java Files******"
 
 sbt javafmtAll
 
+
 sbt javafmtCheckAll
 status=$?
 

@@ -1,5 +1,32 @@
 @()
 
-@main("Welcome to Play") {
-  <h1>Welcome to Play!</h1>
-}
+<!DOCTYPE html>
+<!-- Aidas -->
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YT Lytics</title>
+    <link rel="stylesheet" href='@routes.Assets.versioned("css/styles.css")' />
+</head>
+
+<body>
+
+<h1>Welcome to YT Lytics</h1>
+
+<form id="search-form" onsubmit="return handleSubmit(event)">
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="Enter search terms" required />
+        <span class="search-icon">&#128269;</span> <!-- Unicode for search icon -->
+    </div>
+
+    <button type="submit">Go!</button>
+</form>
+
+<!-- This div will hold the search results -->
+<div class="results" id="results"></div>
+
+</body>
+</html>
+

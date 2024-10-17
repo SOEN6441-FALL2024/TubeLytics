@@ -1,0 +1,20 @@
+@(videos: List[models.Video])
+
+<html>
+<head>
+    <title>Welcome to Tubelytics</title>
+</head>
+<body>
+    <h1>YouTube Search Results</h1>
+    <ul>
+        @for(video <- videos) {
+            <li>
+                <img src="@video.getThumbnailUrl()" alt="Thumbnail">
+                <h2><a href="https://www.youtube.com/watch?v=@video.getVideoId()">@video.getTitle()</a></h2>
+                <p>@video.getDescription()</p>
+                <p><a href="https://www.youtube.com/channel/@video.getChannelId()">Channel</a></p>
+            </li>
+        }
+    </ul>
+</body>
+</html>

@@ -6,9 +6,9 @@ lazy val root = (project in file(".")).enablePlugins(PlayJava)
 scalaVersion := "2.13.15"
 
 libraryDependencies ++= Seq(
-  "com.typesafe.play" %% "play" % "2.8.18",
-  "com.typesafe.play" %% "play-json" % "2.9.2",
-  "com.typesafe.play" %% "play-test" % "2.8.18" % Test
+  guice,
+  ws,
+  "org.playframework" %% "play-json" % "3.0.4",
+  "org.junit.jupiter" % "junit-jupiter-engine" % "5.10.2",
+  "org.mockito" % "mockito-core" % "5.12.0"
 )
-
-enablePlugins(PlayScala)

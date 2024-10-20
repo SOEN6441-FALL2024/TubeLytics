@@ -2,43 +2,28 @@ package controllers;
 
 import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
-import play.libs.concurrent.HttpExecutionContext;
+
 import play.mvc.Controller;
-import play.mvc.Result;
+import scala.concurrent.ExecutionContext;
 import services.YouTubeService;
 
 /**
- * Controller to handle YouTube video search requests and display results. This class connects the
- * frontend to the backend service (YouTubeService) and returns search results as HTML.
- *
- * @author Marjan Khassafi
+ * Controller to handle YouTube video search requests and display results.
  */
 public class YouTubeController extends Controller {
 
-  private final YouTubeService youTubeService;
-  private final HttpExecutionContext ec;
+  public final YouTubeService youTubeService;
+  public final ExecutionContext ec; // تغییر به ExecutionContext
 
-  /**
-   * Constructor to initialize the YouTubeController with necessary dependencies.
-   *
-   * @param youTubeService Service to handle YouTube API interactions.
-   * @param ec Execution context for asynchronous operations.
-   */
   @Inject
-  public YouTubeController(YouTubeService youTubeService, HttpExecutionContext ec) {
+  public YouTubeController(YouTubeService youTubeService, ExecutionContext ec) { // تغییر
     this.youTubeService = youTubeService;
     this.ec = ec;
   }
 
-  /**
-   * Searches YouTube videos based on a query and returns the results page.
-   *
-   * @param query The search query provided by the user.
-   * @return A CompletionStage that completes with the rendered results page.
-   */
-  public CompletionStage<Result> search(String query) {
+  public CompletionStage search(String query) {
     return youTubeService
-        .searchVideos(query)
-        .thenApplyAsync(videos -> ok(views.html.results.render(videos)), ec.current());
+            .searchVideos(query)
+            .thenApplyAsync(videos -> ok(views.html.results.render(videos))); // تغییر
   }
 }

@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import com.fasterxml.jackson.databind.JsonNode;
 import models.Video;
 import play.libs.ws.WSClient;
-import play.libs.ws.WSResponse;
 
 /**
  * Service class to interact with the YouTube Data API and fetch videos based on search queries.
@@ -17,8 +16,8 @@ import play.libs.ws.WSResponse;
  */
 public class YouTubeService {
 
-  private final String API_KEY = "AIzaSyAeSvvGH1fA3f57nH-W2HI-ZUYebsYq-KA";
-  private final String YT_SEARCH_URL = "https://www.googleapis.com/youtube/v3/search";
+  private final String APIKEY = "Your API Key";
+  private final String YoutubeUrl = "https://www.googleapis.com/youtube/v3/search";
   private final WSClient ws;
 
   /**
@@ -40,10 +39,9 @@ public class YouTubeService {
   public CompletionStage<List<Video>> searchVideos(String query) {
     String url =
         String.format(
-            "%s?part=snippet&q=%s&type=video&maxResults=10&key=%s", YT_SEARCH_URL, query, API_KEY);
+            "%s?part=snippet&q=%s&type=video&maxResults=10&key=%s", YoutubeUrl, query, APIKEY);
 
 
-    // TODO I could have modified the logic to make it compilable, please double check, leaving full responsibility on you @Marjan1371
     return ws.url(url)
             .get()
             .thenApply(

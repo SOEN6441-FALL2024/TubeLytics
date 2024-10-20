@@ -1,56 +1,49 @@
 package services;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-import java.util.List;
-import java.util.concurrent.CompletionStage;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import models.Video;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import play.libs.ws.WSClient;
 import play.libs.ws.WSResponse;
+import play.libs.ws.WSRequest;
 
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
-/**
- * Unit tests for the YouTubeService class. Uses Mockito to mock WSClient interactions for testing
- * without calling the actual YouTube API.
- * @author Marjan, Deniz
- */
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 public class YouTubeServiceTest {
 
-  private YouTubeService youTubeService;
-  private WSClient wsClient;
-  private WSResponse wsResponse;
-
-  @Before
-  public void setUp() {
-    wsClient = mock(WSClient.class);
-    wsResponse = mock(WSResponse.class);
-    youTubeService = mock(YouTubeService.class);
-  }
-
   @Test
-  public void testSearchVideos_returnsVideosList() throws Exception {
-    // Mock the behavior of WSClient to return a dummy JSON response
+  public void testSearchVideos() throws JsonProcessingException {
+    // Mocking WSClient, WSResponse, and WSRequest
+    WSClient mockWsClient = mock(WSClient.class);
+    WSResponse mockResponse = mock(WSResponse.class);
+    WSRequest mockRequest = mock(WSRequest.class);
 
-    // TODO Write the test for the searchVideos method, this block is just a dummy way of testing whether mockito is working
-    when(youTubeService.searchVideos(anyString())).thenReturn(mock(CompletionStage.class));// You'd further mock the response here
-    CompletionStage<List<Video>> result = youTubeService.searchVideos("test query");
-    assertNotNull(result);
+    // Sample JSON response simulating the YouTube API response
+    String jsonResponse = "{ \"items\": [ { \"snippet\": { \"title\": \"Sample Title\", \"description\": \"Sample Description\", \"channelId\": \"channelId123\", \"resourceId\": { \"videoId\": \"videoId123\" }, \"thumbnails\": { \"default\": { \"url\": \"thumbnailUrl.jpg\" } } } } ] } }";
 
+    // Setup mock behavior
+    when(mockWsClient.url(anyString())).thenReturn(mockRequest);
+    when(mockRequest.get()).thenReturn(CompletableFuture.completedFuture(mockResponse));
+    when(mockResponse.asJson()).thenReturn(new com.fasterxml.jackson.databind.ObjectMapper().readTree(jsonResponse));
 
+    // Instantiate the YouTubeService with the mocked WSClient
+    YouTubeService youTubeService = new YouTubeService(mockWsClient);
 
-    // old code
+    // Calling the method to test
+    List<Video> videos = youTubeService.searchVideos("test query").toCompletableFuture().join();
 
-//    when(wsClient.url(anyString())).thenReturn(mock(CompletionStage.class));
-//    when(wsResponse.asJson())
-//        .thenReturn(mock(JsonNode.class)); // You'd further mock the response here
-//
-//    // Call the searchVideos method
-//    CompletionStage<List<Video>> result = youTubeService.searchVideos("test query");
-//
-//    // Assert the results are as expected (in this case, mock results)
-//    assertNotNull(result);
+    // Validating the result
+    assertNotNull(videos);
+    assertEquals(1, videos.size());
+
+    Video video = videos.get(0);
+    assertEquals("Sample Title", video.title());
+    assertEquals("Sample Description", video.description());
+    assertEquals("channelId123", video.channelId());
+    assertEquals("videoId123", video.videoId());
+    assertEquals("thumbnailUrl.jpg", video.thumbnailUrl());
   }
 }

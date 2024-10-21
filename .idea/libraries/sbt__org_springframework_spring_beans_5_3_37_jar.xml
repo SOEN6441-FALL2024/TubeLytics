@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="sbt: org.springframework:spring-beans:5.3.37:jar" external-system-id="SBT">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/AppData/Local/Coursier/cache/v1/https/repo1.maven.org/maven2/org/springframework/spring-beans/5.3.37/spring-beans-5.3.37.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/AppData/Local/Coursier/cache/v1/https/repo1.maven.org/maven2/org/springframework/spring-beans/5.3.37/spring-beans-5.3.37-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

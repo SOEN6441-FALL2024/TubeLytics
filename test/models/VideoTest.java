@@ -9,11 +9,11 @@ public class VideoTest {
     public void testVideoCreation() {
         Video video = new Video("Sample Title", "Sample Description", "channelId123", "videoId123", "thumbnailUrl.jpg");
 
-        assertEquals("Sample Title", video.title());
-        assertEquals("Sample Description", video.description());
-        assertEquals("channelId123", video.channelId());
-        assertEquals("videoId123", video.videoId());
-        assertEquals("thumbnailUrl.jpg", video.thumbnailUrl());
+        assertEquals("Sample Title", video.title());  // بدون get
+        assertEquals("Sample Description", video.description());  // بدون get
+        assertEquals("channelId123", video.channelId());  // بدون get
+        assertEquals("videoId123", video.videoId());  // بدون get
+        assertEquals("thumbnailUrl.jpg", video.thumbnailUrl());  // بدون get
     }
 
     @Test

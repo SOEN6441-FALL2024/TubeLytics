@@ -1,9 +1,13 @@
 package controllers;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
 
+import models.Video;
 import play.mvc.Controller;
+import play.mvc.Result;
 import scala.concurrent.ExecutionContext;
 import services.YouTubeService;
 
@@ -21,9 +25,8 @@ public class YouTubeController extends Controller {
     this.ec = ec;
   }
 
-  public CompletionStage search(String query) {
-    return youTubeService
-            .searchVideos(query)
-            .thenApplyAsync(videos -> ok(views.html.results.render(videos))); // تغییر
+  public Result search(String query) {
+    var videos = youTubeService.searchVideos(query);
+  return ok(views.html.results.render(videos)); // تغییر
   }
 }

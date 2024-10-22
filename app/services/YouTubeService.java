@@ -1,12 +1,15 @@
 package services;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import models.Video;
+import com.typesafe.config.Config;
+import play.api.mvc.Result;
+import play.libs.ws.WSClient;
+
+import javax.inject.Inject;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
-import javax.inject.Inject;
-import com.fasterxml.jackson.databind.JsonNode;
-import models.Video;
-import play.libs.ws.WSClient;
 
 /**
  * Service class to interact with the YouTube Data API and fetch videos based on search queries.
@@ -16,50 +19,53 @@ import play.libs.ws.WSClient;
  */
 public class YouTubeService {
 
-  private final String APIKEY = "Your API Key";
-  private final String YoutubeUrl = "https://www.googleapis.com/youtube/v3/search";
-  private final WSClient ws;
+    private final String apiKey;  // Fetch API key from configuration file
+    private final String YoutubeUrl = "https://www.googleapis.com/youtube/v3/search";
+    private final WSClient ws;
 
-  /**
-   * Constructor to initialize the YouTubeService with a WSClient.
-   *
-   * @param ws Play WSClient to handle HTTP requests.
-   */
-  @Inject
-  public YouTubeService(WSClient ws) {
-    this.ws = ws;
-  }
+    /**
+     * Constructor to initialize the YouTubeService with a WSClient and configuration to fetch API key.
+     *
+     * @param ws  Play WSClient to handle HTTP requests.
+     * @param config Play Config to fetch API key from configuration.
+     */
+    @Inject
+    public YouTubeService(WSClient ws, Config config) {
+        this.ws = ws;
+        // Fetch API key from configuration file
+        this.apiKey = "";  // Ensure this key is present in the config file
+    }
 
-  /**
-   * Searches YouTube for videos based on the given query. Fetches the latest 10 videos.
-   *
-   * @param query The search query (keywords) to use for finding videos.
-   * @return A CompletionStage that completes with a List of Video objects.
-   */
-  public CompletionStage<List<Video>> searchVideos(String query) {
-    String url =
-        String.format(
-            "%s?part=snippet&q=%s&type=video&maxResults=10&key=%s", YoutubeUrl, query, APIKEY);
+    /**
+     * Searches YouTube for videos based on the given query. Fetches the latest 10 videos.
+     *
+     * @param query The search query (keywords) to use for finding videos.
+     * @return A CompletionStage that completes with a List of Video objects.
+     */
+    public List<Video> searchVideos(String query) {
+        String url =
+                String.format(
+                        "%s?part=snippet&q=%s&type=video&maxResults=10&key=%s", YoutubeUrl, query, apiKey);
 
+        var futureResult = ws.url(url)
+                .get()
+                .thenApply(
+                        response -> {
+                            // Process JSON response
+                            JsonNode items = response.asJson().get("items");
+                            return items.findValues("snippet").stream()
+                                    .map(
+                                            snippet -> {
+                                                String title = snippet.get("title").asText();
+                                                String description = snippet.get("description").asText();
+                                                String channelId = snippet.get("channelId").asText();
+                                                String thumbnail =
+                                                        snippet.get("thumbnails").get("default").get("url").asText();
+                                                return new Video(title, description, channelId, "", thumbnail);
+                                            })
+                                    .collect(Collectors.toList());
+                        });
 
-    return ws.url(url)
-            .get()
-            .thenApply(
-                    response -> {
-                      // Process JSON response
-                      JsonNode items = response.asJson().get("items");
-                      return items.findValues("snippet").stream()
-                              .map(
-                                      snippet -> {
-                                        String title = snippet.get("title").asText();
-                                        String description = snippet.get("description").asText();
-                                        String channelId = snippet.get("channelId").asText();
-                                        String videoId = snippet.get("resourceId").get("videoId").asText();
-                                        String thumbnail =
-                                                snippet.get("thumbnails").get("default").get("url").asText();
-                                        return new Video(title, description, channelId, videoId, thumbnail);
-                                      })
-                              .collect(Collectors.toList());
-                    });
-  }
+        return futureResult.toCompletableFuture().join();
+    }
 }

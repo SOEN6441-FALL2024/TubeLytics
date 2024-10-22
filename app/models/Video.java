@@ -53,26 +53,6 @@ public class Video {
     return thumbnailUrl;
   }
 
-  public String title() {
-    return title;
-  }
-
-  public String description() {
-    return description;
-  }
-
-  public String channelId() {
-    return channelId;
-  }
-
-  public String videoId() {
-    return videoId;
-  }
-
-  public String thumbnailUrl() {
-    return thumbnailUrl;
-  }
-
   // Override equals() to compare Video objects by their fields
   @Override
   public boolean equals(Object o) {

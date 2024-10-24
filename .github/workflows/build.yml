@@ -13,7 +13,6 @@ jobs:
 
       # نصب جاوا 17
       - name: Set up JDK 17
-        uses: lokkju/github-action-sbt@master
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -25,7 +24,6 @@ jobs:
 
       # اجرای تست‌ها
       - name: Run tests
-        uses: lokkju/github-action-sbt@master
         run: sbt test
 
   coveralls_coverage:

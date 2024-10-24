@@ -26,3 +26,5 @@ Test / test := {
 
 logLevel := Level.Debug
 
+jacocoReportSettings := JacocoReportSettings().withFormats(JacocoReportFormats.XML, JacocoReportFormats.HTML)
+

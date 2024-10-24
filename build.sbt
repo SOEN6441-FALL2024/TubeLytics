@@ -33,5 +33,3 @@ Test / test := {
 logLevel := Level.Debug
 
 enablePlugins(JacocoCoverallsPlugin)
-
-

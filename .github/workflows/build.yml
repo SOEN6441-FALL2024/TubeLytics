@@ -50,9 +50,8 @@ jobs:
       - name: Generate Report
         run: sbt jacoco
 
-      # اجرای اسکن SonarCloud برای تحلیل کیفیت کد
-      - name: SonarCloud Scan
-        uses: actions/checkout@v1
+      - name: Coveralls GitHub Action
+        uses: coverallsapp/github-action@v2.3.3
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
           run: |

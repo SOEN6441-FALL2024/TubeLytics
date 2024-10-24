@@ -9,6 +9,13 @@ lazy val root = (project in file(".")).enablePlugins(PlayJava).settings(
   jacocoCoverallsRepoToken := sys.env.get("COVERALLS_REPO_TOKEN")
 )
 
+jacocoReportSettings := JacocoReportSettings(
+  "Jacoco Coverage Report",
+  None,
+  JacocoThresholds(),
+  Seq(JacocoReportFormats.HTML, JacocoReportFormats.XML), // note XML formatter
+  "utf-8")
+
 enablePlugins(JacocoPlugin)
 
 

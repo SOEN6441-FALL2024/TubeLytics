@@ -23,9 +23,10 @@ Test / testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
 
 logLevel := Level.Debug
 
-//jacocoReportSettings := JacocoReportSettings(
-//  "Jacoco Coverage Report",
-//  None,
-//  JacocoThresholds(),
-//  Seq(JacocoReportFormats.HTML, JacocoReportFormats.XML), // note XML formatter
-//  "utf-8")
+
+jacocoReportSettings := JacocoReportSettings(
+  "Jacoco Coverage Report",
+  None,
+  JacocoThresholds(),
+  Seq(JacocoReportFormats.HTML, JacocoReportFormats.XML), // note XML formatter
+  "utf-8")

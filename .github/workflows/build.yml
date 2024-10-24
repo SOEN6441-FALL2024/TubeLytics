@@ -24,6 +24,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          java-version: '17'
+          distribution: 'temurin'
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - name: Compile
         run: sbt compile

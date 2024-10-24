@@ -35,6 +35,13 @@ jobs:
         with:
           fetch-depth: 0  # شبیه‌سازی کامل برای تحلیل بهتر
 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'sbt'
+
       # کامپایل پروژه
       - name: Compile
         run: sbt compile

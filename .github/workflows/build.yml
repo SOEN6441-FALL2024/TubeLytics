@@ -44,15 +44,15 @@ jobs:
 
       # کامپایل پروژه
       - name: Compile
-        run: sbt compile
+        run: sbt clean compile
 
       # تولید گزارش کاوریج تست‌ها
       - name: Generate Report
         run: sbt jacoco
 
-      # اجرای اسکن SonarCloud برای تحلیل کیفیت کد
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+      - name: Coverage Scan
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # کلید GitHub برای پردازش PR
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}     # کلید مخفی SonarCloud برای تحلیل
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          run: |
+            export CI_BRANCH="${GITHUB_REF#refs/heads/}"
+            sbt clean jacoco jacocoCoveralls

@@ -2,10 +2,13 @@ name := """TubeLytics"""
 
 version := "1.0-SNAPSHOT"
 
-lazy val jacoco = Seq(jacocoReportSettings in Test := JacocoReportSettings().withTitle("Jacoco Coverage Report").withFormats(JacocoReportFormats.XML))
+lazy val root = (project in file(".")).enablePlugins(PlayJava).settings(
+  jacocoCoverallsServiceName := "github-actions",
+  jacocoCoverallsBranch := sys.env.get("CI_BRANCH"),
+  jacocoCoverallsPullRequest := sys.env.get("GITHUB_EVENT_NAME"),
+  jacocoCoverallsRepoToken := sys.env.get("COVERALLS_REPO_TOKEN")
+)
 
-
-lazy val root = (project in file(".")).enablePlugins(PlayJava).settings(jacoco *)
 enablePlugins(JacocoPlugin)
 
 
@@ -29,5 +32,6 @@ Test / test := {
 
 logLevel := Level.Debug
 
-//jacocoReportSettings := JacocoReportSettings().withFormats(JacocoReportFormats.XML, JacocoReportFormats.HTML)
+enablePlugins(JacocoCoverallsPlugin)
+
 

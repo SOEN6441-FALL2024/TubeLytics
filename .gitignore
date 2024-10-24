@@ -1,6 +1,7 @@
 logs
 target
 /.bsp
+.idea
 /.idea_modules
 /.classpath
 /.project

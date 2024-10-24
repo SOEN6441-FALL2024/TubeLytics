@@ -27,34 +27,13 @@ jobs:
       - name: Run tests
         run: sbt test
 
-  sonarcloud:
-    name: SonarCloud
+  coveralls_scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # شبیه‌سازی کامل برای تحلیل بهتر
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: 'sbt'
-
-      # کامپایل پروژه
-      - name: Compile
-        run: sbt compile
-
-      # تولید گزارش کاوریج تست‌ها
-      - name: Generate Report
-        run: sbt jacoco
-
-      - name: Coveralls GitHub Action
-        uses: coverallsapp/github-action@v2.3.3
+      - uses: coverallsapp/github-action@v2.3.3
+      - name: Build Project
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-          run: |
-            export CI_BRANCH="${GITHUB_REF#refs/heads/}"
-            sbt clean jacoco jacocoCoveralls
-        
+        run: |
+          export CI_BRANCH="${GITHUB_REF#refs/heads/}"
+          sbt clean jacoco jacocoCoveralls

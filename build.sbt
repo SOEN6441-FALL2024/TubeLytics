@@ -16,6 +16,7 @@ jacocoReportSettings := JacocoReportSettings(
   Seq(JacocoReportFormats.HTML, JacocoReportFormats.XML), // note XML formatter
   "utf-8")
 
+
 enablePlugins(JacocoPlugin)
 
 

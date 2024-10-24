@@ -3,6 +3,8 @@ name := """TubeLytics"""
 version := "1.0-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayJava)
+enablePlugins(JacocoPlugin)
+
 
 scalaVersion := "2.13.15"
 
@@ -17,10 +19,6 @@ libraryDependencies ++= Seq(
 
 
 Test / testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
-
-import com.github.sbt.jacoco.JacocoPlugin.autoImport._
-
-enablePlugins(JacocoPlugin)
 
 Test / test := {
   (Test / test).dependsOn(Test / jacocoReport).value

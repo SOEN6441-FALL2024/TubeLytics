@@ -3,12 +3,10 @@ package services;
 import com.fasterxml.jackson.databind.JsonNode;
 import models.Video;
 import com.typesafe.config.Config;
-import play.api.mvc.Result;
 import play.libs.ws.WSClient;
 
 import javax.inject.Inject;
 import java.util.List;
-import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 /**
@@ -20,7 +18,6 @@ import java.util.stream.Collectors;
 public class YouTubeService {
 
     private final String apiKey;  // Fetch API key from configuration file
-    private final String YoutubeUrl = "https://www.googleapis.com/youtube/v3/search";
     private final WSClient ws;
 
     /**
@@ -43,9 +40,10 @@ public class YouTubeService {
      * @return A CompletionStage that completes with a List of Video objects.
      */
     public List<Video> searchVideos(String query) {
+        String youtubeUrl = "https://www.googleapis.com/youtube/v3/search";
         String url =
                 String.format(
-                        "%s?part=snippet&q=%s&type=video&maxResults=10&key=%s", YoutubeUrl, query, apiKey);
+                        "%s?part=snippet&q=%s&type=video&maxResults=10&key=%s", youtubeUrl, query, apiKey);
 
         var futureResult = ws.url(url)
                 .get()
@@ -69,3 +67,4 @@ public class YouTubeService {
         return futureResult.toCompletableFuture().join();
     }
 }
+

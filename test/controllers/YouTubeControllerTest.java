@@ -41,6 +41,7 @@ public class YouTubeControllerTest extends WithApplication {
 
     @Test
     public void testSearchSuccess() {
+
         // Creating a sample Video object
         Video sampleVideo = new Video("title", "description", "channelId123", "videoId123", "thumbnailUrl.jpg");
         this.mockYouTubeService = mock(YouTubeService.class);

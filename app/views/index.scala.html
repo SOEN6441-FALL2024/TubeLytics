@@ -1,8 +1,6 @@
-@()
+@(videos: scala.collection.immutable.List[models.Video], searchTerm: String)
 
 <!DOCTYPE html>
-<!-- Aidas -->
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -15,18 +13,41 @@
 
 <h1>Welcome to YT Lytics</h1>
 
-<form id="search-form" onsubmit="return handleSubmit(event)">
-    <div class="search-container">
-        <input type="text" id="search-input" placeholder="Enter search terms" required />
-        <span class="search-icon">&#128269;</span> <!-- Unicode for search icon -->
-    </div>
-
+<!-- Search form -->
+<form id="search-form" action="@routes.HomeController.index()" method="GET" class="search-bar">
+    <input type="text" name="query" id="search-input" placeholder="Enter search terms" required />
     <button type="submit">Go!</button>
 </form>
 
-<!-- This div will hold the search results -->
-<div class="results" id="results"></div>
+<!-- Results Section -->
+<div class="results" id="results">
+    @if(videos.nonEmpty) {
+    <!-- Display search term and stats -->
+    <div class="search-stats">
+        <p>Search terms: <strong>@searchTerm</strong> (Flesch-Kincaid Grade Level Avg.= ##, Flesch Reading Ease Score Avg.= ##)</p>
+        <a href="#" class="more-stats-link">More stats</a>
+    </div>
+
+    <!-- List of videos -->
+    <ul>
+        @for((video, index) <- videos.zipWithIndex) {
+        <li class="video-item">
+            <div class="video-details">
+                <p class="video-title">@{index + 1}. <strong>Title:</strong> <a href="https://www.youtube.com/watch?v=@video.getVideoId()" target="_blank">@video.getTitle()</a></p>
+                <p class="channel-link"><strong>Channel:</strong> <a href="https://www.youtube.com/channel/@video.getChannelId()" target="_blank">@video.getChannelTitle()</a></p>
+                <p class="video-description"><strong>Description:</strong> @video.getDescription().take(150) + "..."</p>
+                <p class="video-stats">Flesch-Kincaid Grade Level = ##, Flesch Reading Ease Score = ##. <a href="#" class="more-stats-link">Tags</a></p>
+            </div>
+            <div class="video-thumbnail">
+                <img src="@video.getThumbnailUrl()" alt="Thumbnail">
+            </div>
+        </li>
+        }
+    </ul>
+    } else {
+    <p>No results found. Please try searching for a video .</p>
+    }
+</div>
 
 </body>
 </html>
-

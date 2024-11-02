@@ -2,35 +2,21 @@ package models;
 
 import java.util.Objects;
 
-/**
- * Represents a YouTube video with basic information such as title, description, channelId, videoId,
- * and thumbnailUrl. This class is used as a data model to store video information fetched from the
- * YouTube Data API.
- *
- * @author Marjan Khassafi
- */
 public class Video {
     private final String title;
     private final String description;
     private final String channelId;
     private final String videoId;
     private final String thumbnailUrl;
+    private final String channelTitle;  // New field
 
-    /**
-     * Constructor for creating a new Video object.
-     *
-     * @param title        The title of the video.
-     * @param description  The description of the video.
-     * @param channelId    The ID of the channel that uploaded the video.
-     * @param videoId      The unique ID of the video.
-     * @param thumbnailUrl The URL of the video's thumbnail.
-     */
-    public Video(String title, String description, String channelId, String videoId, String thumbnailUrl) {
+    public Video(String title, String description, String channelId, String videoId, String thumbnailUrl, String channelTitle) {
         this.title = title;
         this.description = description;
         this.channelId = channelId;
         this.videoId = videoId;
         this.thumbnailUrl = thumbnailUrl;
+        this.channelTitle = channelTitle;  // Initialize the new field
     }
 
     public String getTitle() {
@@ -53,7 +39,11 @@ public class Video {
         return thumbnailUrl;
     }
 
-    // Override equals() to compare Video objects by their fields
+    public String getChannelTitle() {  // Getter for the new field
+        return channelTitle;
+    }
+
+    // Override equals() and hashCode() to include channelTitle
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -63,12 +53,12 @@ public class Video {
                 Objects.equals(description, video.description) &&
                 Objects.equals(channelId, video.channelId) &&
                 Objects.equals(videoId, video.videoId) &&
-                Objects.equals(thumbnailUrl, video.thumbnailUrl);
+                Objects.equals(thumbnailUrl, video.thumbnailUrl) &&
+                Objects.equals(channelTitle, video.channelTitle);
     }
 
-    // Override hashCode() to ensure Video objects with the same fields have the same hash code
     @Override
     public int hashCode() {
-        return Objects.hash(title, description, channelId, videoId, thumbnailUrl);
+        return Objects.hash(title, description, channelId, videoId, thumbnailUrl, channelTitle);
     }
 }

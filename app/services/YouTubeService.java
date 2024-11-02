@@ -9,47 +9,26 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Service class to interact with the YouTube Data API and fetch videos based on search queries.
- * Uses Play's WSClient to perform asynchronous HTTP requests.
- *
- * @author Marjan Khassafi, Deniz Dinchdonmez
- */
 public class YouTubeService {
 
-    private final String apiKey;  // Fetch API key from configuration file
+    private final String apiKey;
     private final WSClient ws;
 
-    /**
-     * Constructor to initialize the YouTubeService with a WSClient and configuration to fetch API key.
-     *
-     * @param ws  Play WSClient to handle HTTP requests.
-     * @param config Play Config to fetch API key from configuration.
-     */
     @Inject
     public YouTubeService(WSClient ws, Config config) {
         this.ws = ws;
-        // Fetch API key from configuration file
-        this.apiKey = "";  // Ensure this key is present in the config file
+        this.apiKey = "AIzaSyClI-qUlL1t3a924x6h4W372lii8-lPsfQ";
     }
 
-    /**
-     * Searches YouTube for videos based on the given query. Fetches the latest 10 videos.
-     *
-     * @param query The search query (keywords) to use for finding videos.
-     * @return A CompletionStage that completes with a List of Video objects.
-     */
     public List<Video> searchVideos(String query) {
         String youtubeUrl = "https://www.googleapis.com/youtube/v3/search";
-        String url =
-                String.format(
-                        "%s?part=snippet&q=%s&type=video&maxResults=10&key=%s", youtubeUrl, query, apiKey);
+        String url = String.format(
+                "%s?part=snippet&q=%s&type=video&maxResults=10&key=%s", youtubeUrl, query, apiKey);
 
         var futureResult = ws.url(url)
                 .get()
                 .thenApply(
                         response -> {
-                            // Process JSON response
                             JsonNode items = response.asJson().get("items");
                             return items.findValues("snippet").stream()
                                     .map(
@@ -57,9 +36,9 @@ public class YouTubeService {
                                                 String title = snippet.get("title").asText();
                                                 String description = snippet.get("description").asText();
                                                 String channelId = snippet.get("channelId").asText();
-                                                String thumbnail =
-                                                        snippet.get("thumbnails").get("default").get("url").asText();
-                                                return new Video(title, description, channelId, "", thumbnail);
+                                                String channelTitle = snippet.get("channelTitle").asText(); // Fetch channel title
+                                                String thumbnail = snippet.get("thumbnails").get("default").get("url").asText();
+                                                return new Video(title, description, channelId, "", thumbnail, channelTitle);
                                             })
                                     .collect(Collectors.toList());
                         });

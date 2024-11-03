@@ -1,4 +1,4 @@
-@(videos: scala.collection.immutable.List[models.Video], searchTerm: String)
+@(searchResults: List[SearchResult])
 
 <!DOCTYPE html>
 <html lang="en">
@@ -21,31 +21,33 @@
 
 <!-- Results Section -->
 <div class="results" id="results">
-    @if(videos.nonEmpty) {
-    <!-- Display search term and stats -->
-    <div class="search-stats">
-        <p>Search terms: <strong>@searchTerm</strong> (Flesch-Kincaid Grade Level Avg.= ##, Flesch Reading Ease Score Avg.= ##)</p>
-        <a href="#" class="more-stats-link">More stats</a>
-    </div>
+    @for(searchResult <- searchResults) {
+        @if(searchResult.videos.nonEmpty) {
+        <!-- Display search term and stats -->
+        <div class="search-stats">
+            <p>Search terms: <strong>@searchResult.query</strong> (Flesch-Kincaid Grade Level Avg.= ##, Flesch Reading Ease Score Avg.= ##)</p>
+            <a href="#" class="more-stats-link">More stats</a>
+        </div>
 
-    <!-- List of videos -->
-    <ul>
-        @for((video, index) <- videos.zipWithIndex) {
-        <li class="video-item">
-            <div class="video-details">
-                <p class="video-title">@{index + 1}. <strong>Title:</strong> <a href="https://www.youtube.com/watch?v=@video.getVideoId()" target="_blank">@video.getTitle()</a></p>
-                <p class="channel-link"><strong>Channel:</strong> <a href="https://www.youtube.com/channel/@video.getChannelId()" target="_blank">@video.getChannelTitle()</a></p>
-                <p class="video-description"><strong>Description:</strong> @video.getDescription().take(150) + "..."</p>
-                <p class="video-stats">Flesch-Kincaid Grade Level = ##, Flesch Reading Ease Score = ##. <a href="#" class="more-stats-link">Tags</a></p>
-            </div>
-            <div class="video-thumbnail">
-                <img src="@video.getThumbnailUrl()" alt="Thumbnail">
-            </div>
-        </li>
+        <!-- List of videos -->
+        <ul>
+            @for((video, index) <- searchResult.videos.zipWithIndex) {
+                <li class="video-item">
+                    <div class="video-details">
+                        <p class="video-title">@{index + 1}. <strong>Title:</strong> <a href="https://www.youtube.com/watch?v=@video.getVideoId()" target="_blank">@video.getTitle()</a></p>
+                        <p class="channel-link"><strong>Channel:</strong> <a href="https://www.youtube.com/channel/@video.getChannelId()" target="_blank">@video.getChannelTitle()</a></p>
+                        <p class="video-description"><strong>Description:</strong> @video.getDescription().take(150) + "..."</p>
+                        <p class="video-stats">Flesch-Kincaid Grade Level = ##, Flesch Reading Ease Score = ##. <a href="#" class="more-stats-link">Tags</a></p>
+                    </div>
+                    <div class="video-thumbnail">
+                        <img src="@video.getThumbnailUrl()" alt="Thumbnail">
+                    </div>
+                </li>
+            }
+        </ul>
+        } else {
+        <p>No results found. Please try searching for a video .</p>
         }
-    </ul>
-    } else {
-    <p>No results found. Please try searching for a video .</p>
     }
 </div>
 

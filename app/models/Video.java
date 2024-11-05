@@ -1,5 +1,7 @@
 package models;
 
+import utils.Helpers;
+
 import java.util.Objects;
 
 public class Video {
@@ -9,6 +11,8 @@ public class Video {
     private final String videoId;
     private final String thumbnailUrl;
     private final String channelTitle;  // New field
+    private final double fleschKincaidGradeLevel;
+    private final double fleschReadingEaseScore;
 
     public Video(String title, String description, String channelId, String videoId, String thumbnailUrl, String channelTitle) {
         this.title = title;
@@ -17,6 +21,8 @@ public class Video {
         this.videoId = videoId;
         this.thumbnailUrl = thumbnailUrl;
         this.channelTitle = channelTitle;  // Initialize the new field
+        this.fleschKincaidGradeLevel = Helpers.calculateFleschKincaidGradeLevel(description);
+        this.fleschReadingEaseScore = Helpers.calculateFleschReadingEaseScore(description);
     }
 
     public String getTitle() {
@@ -41,6 +47,14 @@ public class Video {
 
     public String getChannelTitle() {  // Getter for the new field
         return channelTitle;
+    }
+
+    public double getFleschKincaidGradeLevel() {
+        return fleschKincaidGradeLevel;
+    }
+
+    public double getFleschReadingEaseScore() {
+        return fleschReadingEaseScore;
     }
 
     // Override equals() and hashCode() to include channelTitle

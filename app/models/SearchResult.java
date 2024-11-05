@@ -1,7 +1,10 @@
 package models;
 
+import utils.Helpers;
+
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * This SearchResult class is created to help us store the information for each search query in order to pass
@@ -14,6 +17,15 @@ import java.util.Objects;
 public class SearchResult {
     public String query;
     public List<Video> videos;
+    public double averageFleschKincaidGradeLevel;
+    public double averageFleschReadingEaseScore;
+
+    public SearchResult(String query, List<Video> videos) {
+        this.query = query;
+        this.videos = videos;
+        this.averageFleschKincaidGradeLevel = Helpers.formatDouble(getAverageFleschKincaidGradeLevel(videos));
+        this.averageFleschReadingEaseScore = Helpers.formatDouble(getAverageFleschReadingEaseScore(videos));
+    }
 
     @Override
     public final boolean equals(Object o) {
@@ -31,8 +43,24 @@ public class SearchResult {
         return result;
     }
 
-    public SearchResult(String query, List<Video> videos) {
-        this.query = query;
-        this.videos = videos;
+
+    private static double getAverageFleschKincaidGradeLevel(List<Video> videos) {
+        if (Optional.ofNullable(videos).isEmpty() || videos.isEmpty()) {
+            return 0;
+        }
+        return videos.stream()
+                .mapToDouble(Video::getFleschKincaidGradeLevel)
+                .average()
+                .orElse(0);
+    }
+
+    private static double getAverageFleschReadingEaseScore(List<Video> videos) {
+        if (Optional.ofNullable(videos).isEmpty() || videos.isEmpty()) {
+            return 0;
+        }
+        return videos.stream()
+                .mapToDouble(Video::getFleschReadingEaseScore)
+                .average()
+                .orElse(0);
     }
 }

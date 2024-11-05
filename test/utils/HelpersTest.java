@@ -1,8 +1,9 @@
 package utils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import org.junit.Test;
 import play.Application;
 import play.inject.guice.GuiceApplicationBuilder;
@@ -18,12 +19,21 @@ public class HelpersTest extends WithApplication {
   }
 
   @Test
-  public void testPrivateConstructor() {
-    // Testing that the private constructor throws an exception
+  public void testPrivateConstructor() throws Exception {
+    // Access the private constructor of Helpers
+    Constructor<Helpers> constructor = Helpers.class.getDeclaredConstructor();
+    constructor.setAccessible(true);
+
+    // Assert that the constructor throws an IllegalStateException when invoked
+    assertThrows(InvocationTargetException.class, constructor::newInstance);
+
     try {
-      Helpers.class.getDeclaredConstructor().newInstance();
-    } catch (Exception e) {
-      assertTrue(e.getMessage().contains("private"));
+      constructor.newInstance();
+    } catch (InvocationTargetException e) {
+      // Ensure the cause is an IllegalStateException
+      assertEquals(IllegalStateException.class, e.getCause().getClass());
+      assertEquals(
+          "private constructor invoked for class: class utils.Helpers", e.getCause().getMessage());
     }
   }
 

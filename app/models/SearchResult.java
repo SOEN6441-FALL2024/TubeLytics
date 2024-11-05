@@ -18,7 +18,8 @@ public class SearchResult {
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SearchResult that)) return false;
+        if (!(o instanceof SearchResult)) return false;
+        SearchResult that = (SearchResult) o;
 
         return Objects.equals(query, that.query) && Objects.equals(videos, that.videos);
     }

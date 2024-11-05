@@ -1,12 +1,14 @@
 package utils;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import play.Application;
 import play.inject.guice.GuiceApplicationBuilder;
 import play.test.WithApplication;
 
+/** Tests for the helper methods in the Helpers class. author: Deniz Dinchdonmez */
 public class HelpersTest extends WithApplication {
 
   @Override
@@ -15,6 +17,22 @@ public class HelpersTest extends WithApplication {
     return new GuiceApplicationBuilder().build();
   }
 
+  @Test
+  public void testPrivateConstructor() {
+    // Testing that the private constructor throws an exception
+    try {
+      Helpers.class.getDeclaredConstructor().newInstance();
+    } catch (Exception e) {
+      assertTrue(e.getMessage().contains("private"));
+    }
+  }
+
+  /**
+   * Tests the calculation of the Flesch-Kincaid Grade Level for a given text. the grade level is
+   * taken from <a
+   * href="https://goodcalculators.com/flesch-kincaid-calculator/">flesch-kincaid-calculator</a> as
+   * a reference
+   */
   @Test
   public void testCalculateFleschKincaidGradeLevel() {
     String description1 = "This is a simple sentence.";
@@ -25,6 +43,12 @@ public class HelpersTest extends WithApplication {
     assertEquals(2.1, Helpers.calculateFleschKincaidGradeLevel(description2), 0.3);
   }
 
+  /**
+   * Tests the calculation of the Flesch Reading Ease Score for a given text. the score is taken
+   * from <a
+   * href="https://goodcalculators.com/flesch-kincaid-calculator/">flesch-kincaid-calculator</a> as
+   * a reference
+   */
   @Test
   public void testCalculateFleschReadingEaseScore() {
     String description1 = "This is a simple sentence.";

@@ -47,11 +47,9 @@ public class SearchResult {
     return averageFleschKincaidGradeLevel;
   }
 
-
   public double getAverageFleschReadingEaseScore() {
     return averageFleschReadingEaseScore;
   }
-
 
   private static double getAverageFleschKincaidGradeLevel(List<Video> videos) {
     if (Optional.ofNullable(videos).isEmpty() || videos.isEmpty()) {

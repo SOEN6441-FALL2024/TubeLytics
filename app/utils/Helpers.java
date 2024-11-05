@@ -5,19 +5,31 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
+/** Helper class to calculate readability scores for text author: Deniz Dinchdonmez */
 public class Helpers {
 
   private Helpers() {
-    throw new IllegalStateException("Utility class");
+    throw new IllegalStateException("private constructor invoked for class: " + getClass());
   }
 
-  public final static DecimalFormat decimalFormat = new DecimalFormat("#.##");
+  public static final DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
+  /**
+   * Formats a double to two decimal places
+   *
+   * @param value the double to format
+   * @return the formatted double
+   */
   public static double formatDouble(double value) {
     return Double.parseDouble(decimalFormat.format(value));
   }
 
-  // Helper method to calculate counts needed for readability formulas
+  /**
+   * Calculates the Flesch-Kincaid Grade Level of a given text
+   *
+   * @param description the text to analyze
+   * @return the Flesch-Kincaid Grade Level
+   */
   private static TextMetrics calculateTextMetrics(String description) {
     List<String> words = Arrays.asList(description.split("\\s+"));
 
@@ -28,6 +40,12 @@ public class Helpers {
     return new TextMetrics(sentenceCount, wordCount, syllableCount);
   }
 
+  /**
+   * Calculates the Flesch-Kincaid Grade Level of a given text
+   *
+   * @param description the text to analyze
+   * @return the Flesch-Kincaid Grade Level
+   */
   public static double calculateFleschKincaidGradeLevel(String description) {
     TextMetrics metrics = calculateTextMetrics(description);
 
@@ -37,6 +55,12 @@ public class Helpers {
     return formatDouble(0.39 * wordsPerSentence + 11.8 * syllablesPerWord - 15.59);
   }
 
+  /**
+   * Calculates the Flesch Reading Ease Score of a given text
+   *
+   * @param description the text to analyze
+   * @return the Flesch Reading Ease Score
+   */
   public static double calculateFleschReadingEaseScore(String description) {
     TextMetrics metrics = calculateTextMetrics(description);
 
@@ -46,6 +70,12 @@ public class Helpers {
     return formatDouble(206.835 - 1.015 * wordsPerSentence - 84.6 * syllablesPerWord);
   }
 
+  /**
+   * Counts the number of syllables in a word
+   *
+   * @param word the word to count syllables in
+   * @return the number of syllables in the word
+   */
   public static int countSyllables(String word) {
     word = word.toLowerCase();
     int count = 0;
@@ -71,11 +101,17 @@ public class Helpers {
     return count;
   }
 
+  /**
+   * Counts the number of sentences in a text
+   *
+   * @param description the text to count sentences in
+   * @return the number of sentences in the text
+   */
   public static long countSentences(String description) {
     return Pattern.compile("[.!?]").splitAsStream(description).count();
   }
 
-  // helper Inner class to hold text metrics for readability calculations
+  /** Helper class to store the metrics of a text */
   private static class TextMetrics {
     long sentenceCount;
     long wordCount;

@@ -14,15 +14,24 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
+/**
+ * This controller contains an action to handle HTTP requests to the application's home page.
+ * It obtains queries from the user, retrieves, processes and renders video results to page
+ *
+ *
+ * @author Deniz Dinchdonmez, Aynaz, Jessica Chen
+ */
+
 public class HomeController extends Controller {
 
   private final YouTubeService youTubeService;
-  private final LinkedHashMap<String, List<Video>>  multipleQueryResult = new LinkedHashMap<>();
+  private LinkedHashMap<String, List<Video>>  multipleQueryResult = new LinkedHashMap<>();
 
 
   @Inject
-  public HomeController(YouTubeService youTubeService) {
+  public HomeController(YouTubeService youTubeService, LinkedHashMap<String, List<Video>> multipleQueryResult) {
     this.youTubeService = youTubeService;
+    this.multipleQueryResult = multipleQueryResult;
   }
 
   public CompletionStage<Result> index(String query) {

@@ -1,5 +1,7 @@
 package controllers;
 
+import models.Video;
+import org.junit.Before;
 import static org.junit.Assert.*;
 import static play.mvc.Http.Status.OK;
 import static org.mockito.Mockito.*;
@@ -10,11 +12,17 @@ import models.SearchResult;
 import models.Video;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoAnnotations;
 import play.Application;
 import play.inject.guice.GuiceApplicationBuilder;
 import play.mvc.Http;
 import play.mvc.Result;
+import services.YouTubeService;
+
+import java.util.List;
 import play.test.WithApplication;
 import services.YouTubeService;
 
@@ -23,6 +31,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
+import static play.mvc.Http.Status.OK;
+import static play.test.Helpers.contentAsString;
 /**
  * Unit test for HomeController
  *
@@ -36,22 +49,57 @@ public class HomeControllerTest extends WithApplication {
   private List<Video> videos;
   private String query;
 
-  @Override
-  protected Application provideApplication() {
-    // Building the application using Guice
-    return new GuiceApplicationBuilder().build();
-  }
+public class HomeControllerTest {
 
-  @Test
-  public void testIndex() {
-    // Creating a request to the root URL ("/")
-    Http.RequestBuilder request = new Http.RequestBuilder().method(GET).uri("/");
+    @Mock
+    private YouTubeService mockYouTubeService;
 
-    // Routing the request and getting the result
-    Result result = route(app, request);
+    @InjectMocks
+    private HomeController homeController;
 
-    // Asserting that the response status is OK (200)
-    assertEquals(OK, result.status());
+    @Before
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+        homeController = new HomeController(mockYouTubeService);
+    }
+
+    @Test
+    public void testIndexWithQuery() {
+        // Arrange
+        List<Video> mockVideos = List.of(
+                new Video("Title1", "Description1", "Channel1", "VideoId1", "ThumbnailUrl1", "ChannelTitle1"),
+                new Video("Title2", "Description2", "Channel2", "VideoId2", "ThumbnailUrl2", "ChannelTitle2")
+        );
+        when(mockYouTubeService.searchVideos("test")).thenReturn(mockVideos);
+
+        // Act
+        Result result = homeController.index("test");
+
+        // Assert
+        assertEquals(OK, result.status());
+        assertTrue(contentAsString(result).contains("Title1"));
+        assertTrue(contentAsString(result).contains("Title2"));
+    }
+
+    @Test
+    public void testIndexWithEmptyQuery() {
+        // Act
+        Result result = homeController.index("");
+
+        // Assert
+        assertEquals(OK, result.status());
+        assertTrue(contentAsString(result).contains("No results found")); // Assuming index page shows this text for empty results
+    }
+
+    @Test
+    public void testIndexWithNullQuery() {
+        // Act
+        Result result = homeController.index(null);
+
+        // Assert
+        assertEquals(OK, result.status());
+        assertTrue(contentAsString(result).contains("No results found")); // Assuming index page shows this text for empty results
+    }
   }
 
   @Before

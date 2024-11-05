@@ -13,7 +13,6 @@ import play.test.WithApplication;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -28,7 +27,7 @@ public class YouTubeServiceTest extends WithApplication {
 
     @Test
     public void testVideoFields() {
-        Video video = new Video("Title", "Description", "ChannelId", "VideoId", "ThumbnailUrl");
+        Video video = new Video("Title", "Description", "ChannelId", "VideoId", "ThumbnailUrl","channelTitle");
 
         assertEquals("Title", video.getTitle());
         assertEquals("Description", video.getDescription());

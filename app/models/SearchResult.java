@@ -15,8 +15,8 @@ import utils.Helpers;
 public class SearchResult {
   public String query;
   public List<Video> videos;
-  public double averageFleschKincaidGradeLevel;
-  public double averageFleschReadingEaseScore;
+  private double averageFleschKincaidGradeLevel;
+  private double averageFleschReadingEaseScore;
 
   public SearchResult(String query, List<Video> videos) {
     this.query = query;
@@ -42,6 +42,16 @@ public class SearchResult {
     result = 31 * result + Objects.hashCode(videos);
     return result;
   }
+
+  public double getAverageFleschKincaidGradeLevel() {
+    return averageFleschKincaidGradeLevel;
+  }
+
+
+  public double getAverageFleschReadingEaseScore() {
+    return averageFleschReadingEaseScore;
+  }
+
 
   private static double getAverageFleschKincaidGradeLevel(List<Video> videos) {
     if (Optional.ofNullable(videos).isEmpty() || videos.isEmpty()) {

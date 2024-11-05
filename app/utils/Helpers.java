@@ -7,10 +7,14 @@ import java.util.regex.Pattern;
 
 public class Helpers {
 
-  public static DecimalFormat DF = new DecimalFormat("#.##");
+  private Helpers() {
+    throw new IllegalStateException("Utility class");
+  }
+
+  public final static DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
   public static double formatDouble(double value) {
-    return Double.parseDouble(DF.format(value));
+    return Double.parseDouble(decimalFormat.format(value));
   }
 
   // Helper method to calculate counts needed for readability formulas

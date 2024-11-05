@@ -25,7 +25,7 @@
         @if(searchResult.videos.nonEmpty) {
         <!-- Display search term and stats -->
         <div class="search-stats">
-            <p>Search terms: <strong>@searchResult.query</strong> (Flesch-Kincaid Grade Level Avg.= @searchResult.averageFleschKincaidGradeLevel, Flesch Reading Ease Score Avg.= @searchResult.averageFleschReadingEaseScore)</p>
+            <p>Search terms: <strong>@searchResult.query</strong> (Flesch-Kincaid Grade Level Avg.= @searchResult.getAverageFleschKincaidGradeLevel(), Flesch Reading Ease Score Avg.= @searchResult.getAverageFleschReadingEaseScore())</p>
             <a href="#" class="more-stats-link">More stats</a>
         </div>
 

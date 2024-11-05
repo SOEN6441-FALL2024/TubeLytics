@@ -5,52 +5,34 @@ import org.junit.Before;
 import static org.junit.Assert.*;
 import static play.mvc.Http.Status.OK;
 import static org.mockito.Mockito.*;
-import static play.test.Helpers.*;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import models.SearchResult;
-import models.Video;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.MockitoAnnotations;
-import play.Application;
-import play.inject.guice.GuiceApplicationBuilder;
-import play.mvc.Http;
 import play.mvc.Result;
 import services.YouTubeService;
 
 import java.util.List;
-import play.test.WithApplication;
-import services.YouTubeService;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
-import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.contentAsString;
 /**
  * Unit test for HomeController
  *
- * @author Deniz Dinchdonmez, Aidassj, Jessica Chen
+ * @author Deniz Dinchdonmez, Aynaz Javanivayeghan, Jessica Chen
  */
 
-public class HomeControllerTest extends WithApplication {
-  private YouTubeService youTubeService;
-  private HomeController homeController;
-  private LinkedHashMap<String, List<Video>> queryResults;
-  private List<Video> videos;
-  private String query;
-
 public class HomeControllerTest {
-
+    private LinkedHashMap<String, List<Video>> queryResults;
+    private List<Video> videos;
+    private String query;
     @Mock
     private YouTubeService mockYouTubeService;
 
@@ -60,7 +42,19 @@ public class HomeControllerTest {
     @Before
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        homeController = new HomeController(mockYouTubeService);
+        mockYouTubeService = mock(YouTubeService.class);
+        queryResults = new LinkedHashMap<>();
+        homeController = new HomeController(mockYouTubeService, queryResults);
+
+        query = "cat";
+        // Adding mock entries into List<Video>
+        videos = new ArrayList<>();
+        Video video1 = new Video("CatVideoTitle1", "CatVideoDescription1", "CatVideoChannelId1",
+                "CatVideoVideoId1", "CatVideoThumbnailUrl.jpg1", "CatVideoChannelTitle1");
+        Video video2 = new Video("CatVideoTitle2", "CatVideoDescription2", "CatVideoChannelId2",
+                "CatVideoVideoId2", "CatVideoThumbnailUrl.jpg2", "CatVideoChannelTitle2");
+        videos.add(video1);
+        videos.add(video2);
     }
 
     @Test
@@ -73,7 +67,7 @@ public class HomeControllerTest {
         when(mockYouTubeService.searchVideos("test")).thenReturn(mockVideos);
 
         // Act
-        Result result = homeController.index("test");
+        Result result = homeController.index("test").toCompletableFuture().join();
 
         // Assert
         assertEquals(OK, result.status());
@@ -84,7 +78,7 @@ public class HomeControllerTest {
     @Test
     public void testIndexWithEmptyQuery() {
         // Act
-        Result result = homeController.index("");
+        Result result = homeController.index("").toCompletableFuture().join();
 
         // Assert
         assertEquals(OK, result.status());
@@ -94,31 +88,12 @@ public class HomeControllerTest {
     @Test
     public void testIndexWithNullQuery() {
         // Act
-        Result result = homeController.index(null);
+        Result result = homeController.index(null).toCompletableFuture().join();
 
         // Assert
         assertEquals(OK, result.status());
         assertTrue(contentAsString(result).contains("No results found")); // Assuming index page shows this text for empty results
     }
-  }
-
-  @Before
-  public void setUp(){
-    MockitoAnnotations.openMocks(this);
-    // Creating a mock YouTubeService class and injecting it into HomeController
-    youTubeService = mock(YouTubeService.class);
-    queryResults = new LinkedHashMap<>();
-    homeController = new HomeController(youTubeService, queryResults);
-    query = "cat";
-    // Adding mock entries into List<Video>
-    videos = new ArrayList<>();
-    Video video1 = new Video("CatVideoTitle1", "CatVideoDescription1", "CatVideoChannelId1",
-            "CatVideoVideoId1", "CatVideoThumbnailUrl.jpg1", "CatVideoChannelTitle1");
-    Video video2 = new Video("CatVideoTitle2", "CatVideoDescription2", "CatVideoChannelId2",
-            "CatVideoVideoId2", "CatVideoThumbnailUrl.jpg2", "CatVideoChannelTitle2");
-    videos.add(video1);
-    videos.add(video2);
-  }
 
   @Test
   // Test equivalence class: eldest key is removed when array size reaches maximum
@@ -128,7 +103,7 @@ public class HomeControllerTest {
       queryResults.put(queryNew, videos);
     }
 
-    when(youTubeService.searchVideos("query11")).thenReturn(videos);
+    when(mockYouTubeService.searchVideos("query11")).thenReturn(videos);
     homeController.index("query11").toCompletableFuture().join();
 
     assertEquals(10, queryResults.size());
@@ -139,7 +114,7 @@ public class HomeControllerTest {
   @Test
   // Test equivalence class: query fetched result is added to map
   public void testIndexResultAddedToMap() throws ExecutionException, InterruptedException {
-    when(youTubeService.searchVideos(query)).thenReturn(videos);
+    when(mockYouTubeService.searchVideos(query)).thenReturn(videos);
     homeController.index(query).toCompletableFuture().join();
 
     assertTrue("There query should exist in Map", queryResults.containsKey(query));
@@ -151,11 +126,11 @@ public class HomeControllerTest {
   // Test equivalence class: existing query re-added to map
   public void testIndexExistingResultReAddedToMap()  {
     // Fetching first entry
-    when(youTubeService.searchVideos(query)).thenReturn(videos);
+    when(mockYouTubeService.searchVideos(query)).thenReturn(videos);
     homeController.index(query).toCompletableFuture().join();
 
     // Fetching second entry
-    when(youTubeService.searchVideos("dog")).thenReturn(List.of(new Video("DogVideoTitle1",
+    when(mockYouTubeService.searchVideos("dog")).thenReturn(List.of(new Video("DogVideoTitle1",
             "DogVideoDescription1", "DogVideoChannelId1", "DogVideoVideoId1",
             "DogVideoThumbnailUrl.jpg1", "DogVideoChannelTitle1")));
     homeController.index("dog").toCompletableFuture().join();
@@ -163,18 +138,10 @@ public class HomeControllerTest {
     // Adding first entry again
     homeController.index(query).toCompletableFuture().join();
     // Verifying "query" is only fetched once
-    verify(youTubeService, times(1)).searchVideos(query);
+    verify(mockYouTubeService, times(1)).searchVideos(query);
 
     assertTrue("There query should exist in Map", queryResults.containsKey(query));
     assertEquals(videos, queryResults.get(query));
     assertEquals(2, queryResults.size());
-  }
-
-  @Test
-  // Test equivalence class: verify List<SearchResult> is correctly created, reversed and rendered
-  public void testIndexSearchResultList() {
-    when(youTubeService.searchVideos(query)).thenReturn(videos);
-    Result result = homeController.index(query).toCompletableFuture().join();
-    JsonNode jsonResult = play.libs.Json.parse(contentAsString(result));
   }
 }

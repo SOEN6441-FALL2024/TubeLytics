@@ -18,6 +18,12 @@ public class HelpersTest extends WithApplication {
     return new GuiceApplicationBuilder().build();
   }
 
+  /**
+   * Tests the private constructor of the Helpers class. The constructor should throw an
+   * IllegalStateException when invoked.
+   *
+   * @author Deniz Dinchdonmez
+   */
   @Test
   public void testPrivateConstructor() throws Exception {
     // Access the private constructor of Helpers
@@ -42,6 +48,8 @@ public class HelpersTest extends WithApplication {
    * taken from <a
    * href="https://goodcalculators.com/flesch-kincaid-calculator/">flesch-kincaid-calculator</a> as
    * a reference
+   *
+   * @author Deniz Dinchdonmez
    */
   @Test
   public void testCalculateFleschKincaidGradeLevel() {
@@ -58,6 +66,8 @@ public class HelpersTest extends WithApplication {
    * from <a
    * href="https://goodcalculators.com/flesch-kincaid-calculator/">flesch-kincaid-calculator</a> as
    * a reference
+   *
+   * @author Deniz Dinchdonmez
    */
   @Test
   public void testCalculateFleschReadingEaseScore() {
@@ -69,6 +79,12 @@ public class HelpersTest extends WithApplication {
     assertEquals(96.2, Helpers.calculateFleschReadingEaseScore(description2), 2);
   }
 
+  /**
+   * Tests the counting of syllables in a given word. The method should return the number of
+   * syllables in the word.
+   *
+   * @author Deniz Dinchdonmez
+   */
   @Test
   public void testCountSyllables() {
     // Testing the syllable counting directly for accuracy
@@ -78,6 +94,10 @@ public class HelpersTest extends WithApplication {
     assertEquals(1, Helpers.countSyllables("dog"));
   }
 
+  /**
+   * Tests the counting of sentences in a given text. The method should return the number of
+   * sentences in the text. author: Deniz Dinchdonmez
+   */
   @Test
   public void testCountSentences() {
     String text1 = "Hello! How are you? I hope you're doing well.";

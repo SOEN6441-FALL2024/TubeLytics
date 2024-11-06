@@ -10,7 +10,7 @@ import utils.Helpers;
  * order to pass into the scala.html file successfully. Each SearchResult holds a String (query) and
  * a List<Video> (results of query).
  *
- * @author Jessica Chen
+ * @author Jessica Chen, Deniz Dinchdonmez
  */
 public class SearchResult {
   public String query;
@@ -43,14 +43,33 @@ public class SearchResult {
     return result;
   }
 
+  /**
+   * Get the average Flesch-Kincaid Grade Level of the videos in the search result.
+   *
+   * @return the average Flesch-Kincaid Grade Level
+   * @author Deniz Dinchdonmez
+   */
   public double getAverageFleschKincaidGradeLevel() {
     return averageFleschKincaidGradeLevel;
   }
 
+  /**
+   * Get the average Flesch Reading Ease Score of the videos in the search result.
+   *
+   * @return the average Flesch Reading Ease Score
+   * @author Deniz Dinchdonmez
+   */
   public double getAverageFleschReadingEaseScore() {
     return averageFleschReadingEaseScore;
   }
 
+  /**
+   * Get the average Flesch-Kincaid Grade Level of the videos in the search result.
+   *
+   * @param videos the list of videos to calculate the average Flesch-Kincaid Grade Level
+   * @return the average Flesch-Kincaid Grade Level
+   * @author Deniz Dinchdonmez
+   */
   private static double getAverageFleschKincaidGradeLevel(List<Video> videos) {
     if (Optional.ofNullable(videos).isEmpty() || videos.isEmpty()) {
       return 0;
@@ -58,6 +77,13 @@ public class SearchResult {
     return videos.stream().mapToDouble(Video::getFleschKincaidGradeLevel).average().orElse(0);
   }
 
+  /**
+   * Get the average Flesch Reading Ease Score of the videos in the search result.
+   *
+   * @param videos the list of videos to calculate the average Flesch Reading Ease Score
+   * @return the average Flesch Reading Ease Score
+   * @author Deniz Dinchdonmez
+   */
   private static double getAverageFleschReadingEaseScore(List<Video> videos) {
     if (Optional.ofNullable(videos).isEmpty() || videos.isEmpty()) {
       return 0;

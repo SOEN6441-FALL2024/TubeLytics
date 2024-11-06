@@ -5,9 +5,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
-/** Helper class to calculate readability scores for text author: Deniz Dinchdonmez */
+/** Helper class to calculate readability scores for text @author Deniz Dinchdonmez */
 public class Helpers {
 
+  /**
+   * Private constructor to prevent instantiation of this class
+   *
+   * @author Deniz Dinchdonmez
+   */
   private Helpers() {
     throw new IllegalStateException("private constructor invoked for class: " + getClass());
   }
@@ -19,6 +24,7 @@ public class Helpers {
    *
    * @param value the double to format
    * @return the formatted double
+   * @author Deniz Dinchdonmez
    */
   public static double formatDouble(double value) {
     return Double.parseDouble(decimalFormat.format(value));
@@ -29,6 +35,7 @@ public class Helpers {
    *
    * @param description the text to analyze
    * @return the Flesch-Kincaid Grade Level
+   * @author Deniz Dinchdonmez
    */
   private static TextMetrics calculateTextMetrics(String description) {
     List<String> words = Arrays.asList(description.split("\\s+"));
@@ -45,6 +52,7 @@ public class Helpers {
    *
    * @param description the text to analyze
    * @return the Flesch-Kincaid Grade Level
+   * @author Deniz Dinchdonmez
    */
   public static double calculateFleschKincaidGradeLevel(String description) {
     TextMetrics metrics = calculateTextMetrics(description);
@@ -60,6 +68,7 @@ public class Helpers {
    *
    * @param description the text to analyze
    * @return the Flesch Reading Ease Score
+   * @author Deniz Dinchdonmez
    */
   public static double calculateFleschReadingEaseScore(String description) {
     TextMetrics metrics = calculateTextMetrics(description);
@@ -75,6 +84,7 @@ public class Helpers {
    *
    * @param word the word to count syllables in
    * @return the number of syllables in the word
+   * @author Deniz Dinchdonmez
    */
   public static int countSyllables(String word) {
     word = word.toLowerCase();
@@ -106,12 +116,17 @@ public class Helpers {
    *
    * @param description the text to count sentences in
    * @return the number of sentences in the text
+   * @author Deniz Dinchdonmez
    */
   public static long countSentences(String description) {
     return Pattern.compile("[.!?]").splitAsStream(description).count();
   }
 
-  /** Helper class to store the metrics of a text */
+  /**
+   * Helper class to store the metrics of a text
+   *
+   * @author Deniz Dinchdonmez
+   */
   private static class TextMetrics {
     long sentenceCount;
     long wordCount;

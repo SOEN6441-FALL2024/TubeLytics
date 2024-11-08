@@ -22,7 +22,7 @@ import services.YouTubeService;
 public class HomeController extends Controller {
 
   private final YouTubeService youTubeService;
-  private LinkedHashMap<String, List<Video>> multipleQueryResult = new LinkedHashMap<>();
+  private final LinkedHashMap<String, List<Video>> multipleQueryResult;
 
   @Inject
   public HomeController(
@@ -31,6 +31,12 @@ public class HomeController extends Controller {
     this.multipleQueryResult = multipleQueryResult;
   }
 
+    /**
+     * Given a query a list of videos are fetched from the youtubeAPI, processed and rendered
+     * @param query user's string input
+     * @return completion stage result of the rendering of given query/queries
+     * @author Jessica Chen, Aynaz Javanivayeghan
+     */
   public CompletionStage<Result> index(String query) {
     return CompletableFuture.supplyAsync(
             () -> {

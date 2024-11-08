@@ -4,12 +4,18 @@ import static org.junit.Assert.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
+
+import junit.framework.TestResult;
+import models.SearchResult;
+import models.Video;
 import org.junit.Test;
 import play.Application;
 import play.inject.guice.GuiceApplicationBuilder;
 import play.test.WithApplication;
 
-/** Tests for the helper methods in the Helpers class. author: Deniz Dinchdonmez */
+/** Tests for the helper methods in the Helpers class. author: Deniz Dinchdonmez , Jessica Chen */
 public class HelpersTest extends WithApplication {
 
   @Override
@@ -105,5 +111,101 @@ public class HelpersTest extends WithApplication {
 
     assertEquals(3, Helpers.countSentences(text1));
     assertEquals(1, Helpers.countSentences(text2));
+  }
+
+  /**
+   * Tests the accuracy in counting the number of happy matches between the video description and the happy word list
+   * @author Jessica Chen
+   */
+  @Test
+  public void calculateHappyWordCountTest() {
+    String description1 = "Today is a great day with amazing weather. I am very happy and not sad at all. This is a happy sentence.";
+    String description2 = "Today is a terrible day with awful weather. I am angry and not happy. This is a sad sentence.";
+    String description3 = "Today is a good day but with awful weather. I am happy but also sad. This is a neutral sentence.";
+    String description4 = "This is a test sentence with no words matching the predetermined list. This is a neutral sentence.";
+
+    assertEquals(4, Helpers.calculateHappyWordCount(description1));
+    assertEquals(1, Helpers.calculateHappyWordCount(description2));
+    assertEquals(2, Helpers.calculateHappyWordCount(description3));
+    assertEquals(0, Helpers.calculateHappyWordCount(description4));
+  }
+
+  /**
+   * Tests the accuracy in counting the number of sad matches between the video description and the sad word list
+   * @author Jessica Chen
+   */
+  @Test
+  public void calculateSadWordCountTest() {
+    String description1 = "Today is a great day with amazing weather. I am very happy and not sad at all. This is a happy sentence.";
+    String description2 = "Today is a terrible day with awful weather. I am angry and not happy. This is a sad sentence.";
+    String description3 = "Today is a good day but with awful weather. I am happy but also sad. This is a neutral sentence.";
+    String description4 = "This is a test sentence with no words matching the predetermined list. This is a neutral sentence.";
+
+    assertEquals(1, Helpers.calculateSadWordCount(description1));
+    assertEquals(4, Helpers.calculateSadWordCount(description2));
+    assertEquals(2, Helpers.calculateSadWordCount(description3));
+    assertEquals(0, Helpers.calculateSadWordCount(description4));
+  }
+
+  /**
+   * Tests the sentiment calculation when given the number of happy word counts and the number of sad word counts
+   * @author Jessica Chen
+   */
+  @Test
+  public void calculateSentimentTest() {
+    String description1 = "Today is a great day with amazing weather. I am very happy and not sad at all. This is a happy sentence.";
+    String description2 = "Today is a terrible day with awful weather. I am angry and not happy. This is a sad sentence.";
+    String description3 = "Today is a good day but with awful weather. I am happy but also sad. This is a neutral sentence.";
+    String description4 = "This is a test sentence with no words matching the predetermined list. This is a neutral sentence.";
+
+    long happyWordCount1 = Helpers.calculateHappyWordCount(description1);
+    long sadWordCount1 = Helpers.calculateSadWordCount(description1);
+
+    long happyWordCount2 = Helpers.calculateHappyWordCount(description2);
+    long sadWordCount2 = Helpers.calculateSadWordCount(description2);
+
+    long happyWordCount3 = Helpers.calculateHappyWordCount(description3);
+    long sadWordCount3 = Helpers.calculateSadWordCount(description3);
+
+    long happyWordCount4 = Helpers.calculateHappyWordCount(description4);
+    long sadWordCount4 = Helpers.calculateSadWordCount(description4);
+
+
+    assertEquals(":-)", Helpers.calculateSentiment(happyWordCount1, sadWordCount1));
+    assertEquals(":-(", Helpers.calculateSentiment(happyWordCount2, sadWordCount2));
+    assertEquals(":-|", Helpers.calculateSentiment(happyWordCount3, sadWordCount3));
+    assertEquals(":-|", Helpers.calculateSentiment(happyWordCount4, sadWordCount4));
+  }
+
+  /**
+   * Tests the sentiment overall for a list of videos (up to 50). Added 25 happy sentiment videos and then 27 sad sentiment. The limit is 50 and so the overall sentiment should be balanced out.
+   * @author Jessica Chen
+   */
+  @Test
+  public void calculateOverallSentimentTest() {
+    List<Video> testVideos = new ArrayList<>();
+    for (int i = 0; i < 52; i++) {
+        Video video;
+        if (i <= 25) {
+            video = new Video(
+                    "Happy Sentiment",
+                    "Today is a great day with amazing weather. I am very happy and not sad at all. This is a happy sentence.",
+                    "channelId123",
+                    "videoId123",
+                    "thumbnailUrl.jpg",
+                    "channelTitle");
+        } else {
+            video = new Video(
+                    "Sad Sentiment",
+                    "Today is a terrible day with awful weather. I am angry and not happy. This is a sad sentence.",
+                    "channelId123",
+                    "videoId123",
+                    "thumbnailUrl.jpg",
+                    "channelTitle");
+        }
+        testVideos.add(video);
+    }
+    SearchResult test = new SearchResult("test", testVideos);
+    assertEquals(":-|", test.getOverallSentiment());
   }
 }

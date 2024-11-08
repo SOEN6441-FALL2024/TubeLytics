@@ -54,6 +54,7 @@ public class VideoTest extends WithApplication {
             "channelTitle");
 
     assertEquals(video1, video2);
+    assertTrue(video1.equals(video1));
   }
 
   @Test
@@ -211,5 +212,25 @@ public class VideoTest extends WithApplication {
             "ThumbnailUrl",
             "Different ChannelTitle");
     assertNotEquals(video1, video7, "Two videos with different channel titles should not be equal");
+  }
+
+  /**
+   * Tests sentiment analysis for individual Video.
+   * @author Jessica Chen
+   */
+  @Test
+  public void getSubmissionSentimentTest() {
+    Video video =
+            new Video(
+                    "Sample Title",
+                    "Today is a great day with amazing weather. I am very happy and not sad at all. This is a happy sentence.",
+                    "channelId123",
+                    "videoId123",
+                    "thumbnailUrl.jpg",
+                    "channelTitle");
+
+    assertEquals(4, video.getHappyWordCount());
+    assertEquals(1, video.getSadWordCount());
+    assertEquals(":-)", video.getSubmissionSentiment());
   }
 }

@@ -1,12 +1,27 @@
 package utils;
 
+import models.Video;
+
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
-/** Helper class to calculate readability scores for text @author Deniz Dinchdonmez */
+import static java.util.Arrays.stream;
+
+/** Helper class to calculate readability scores for text and to calculate sentiment submission
+ * @author Deniz Dinchdonmez, Jessica Chen
+ * */
 public class Helpers {
+  private static String[] happyList = {"happy", "wonderful", "great", "lovely", "excited", "yay", "!", "amazing",
+          "benefits", "love", "excellent", "good", "laugh", "smile", "thankful", "thanks", "funny", "laugh-out-loud",
+          "hilarious", "sweet", ":)", "awesome", "cute", "best", "U+1F600", "U+1F604", "U+1F602", "U+1F606", "U+1F60A",
+          "U+1F970", "U+1F61A", "U+263A", "U+1F973"};
+
+  private static String[] sadList = {"sad", "disappointed", "depressed", "upset", "hate", "angry", "frustrated",
+          "gloomy", "terrible", "awful", "difficult", ":(", "cry", "death", "murder", "accident", "sickness", "illness", "disease",
+          "lost", "loss", "sick", ">:(", "U+1F912", "U+1F61F", "U+1FAE4", "U+1F641", "U+1F621", "U+1F622" };
+
 
   /**
    * Private constructor to prevent instantiation of this class
@@ -137,5 +152,69 @@ public class Helpers {
       this.wordCount = wordCount;
       this.syllableCount = syllableCount;
     }
+  }
+
+  /**
+   * Calculates happy word count in video description
+   * @param videoDescription - description of video
+   * @return number of matches between happy word list and video description
+   * @author Jessica Chen
+   */
+  public static long calculateHappyWordCount(String videoDescription) {
+    long happyWordCount = Arrays.asList(videoDescription.replaceAll("[^a-zA-Z0-9\\s:;()\\-_<>=*!^|\\u1F600-\\u1F64F]+",
+                    "").split("\\s+")).stream().map((word) -> (word.toLowerCase()))
+            .filter(stream(happyList).toList()::contains).count();
+
+    return happyWordCount;
+  }
+
+  /**
+   * Calculates sad word count in video description
+   * @param videoDescription - description of video
+   * @return number of matches between sad word list and video description
+   * @author Jessica Chen
+   */
+  public static long calculateSadWordCount(String videoDescription) {
+    long sadWordCount = Arrays.asList(videoDescription.replaceAll("[^a-zA-Z0-9\\s:;()\\-_<>=*!^|\\u1F600-\\u1F64F]",
+                    "").split("\\s+")).stream().map((word) -> (word.toLowerCase()))
+            .filter(stream(sadList).toList()::contains).count();
+
+    return sadWordCount;
+  }
+
+  /**
+   * Compares happy word count versus sad word count for each video. Assess whether it is happier, sadder or neutral.
+   * @param happyWordCount - number of matches between video description and happy word list
+   * @param sadWordCount - number of matches between video description and sad word list
+   * @return happy, sad or neutral emoji
+   * @author Jessica Chen
+   */
+  public static String calculateSentiment(double happyWordCount, double sadWordCount) {
+    double totalCount = happyWordCount + sadWordCount;
+    String sentiment = ":-|";
+    // calculate percentage of happy words versus sad words
+    if (totalCount > 0) {
+      if (happyWordCount/totalCount >= 0.70) {
+        sentiment = ":-)";
+      } else if (sadWordCount/totalCount >= 0.70) {
+        sentiment = ":-(";
+      }
+    }
+    return sentiment;
+  }
+
+  /**
+   * Evaluates the overall sentiment based on sentiments of each video in the list of video results from a query
+   * @param videos list of videos from a query entered by the users
+   * @return an emoji indicating whether the overall sentiment is happy, sad or neutral
+   * @author Jessica Chen
+   */
+  public static String calculateOverallSentiment(List<Video> videos) {
+    double totalHappyWordCount = videos.stream().limit(50).mapToDouble(Video::getHappyWordCount).sum();
+    double totalSadWordCount = videos.stream().limit(50).mapToDouble(Video::getSadWordCount).sum();
+
+    String sentiment = calculateSentiment(totalHappyWordCount, totalSadWordCount);
+
+    return sentiment;
   }
 }

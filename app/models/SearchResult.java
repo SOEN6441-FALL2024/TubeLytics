@@ -107,7 +107,7 @@ public class SearchResult {
     if (Optional.ofNullable(videos).isEmpty() || videos.isEmpty()) {
       return 0;
     }
-    return videos.stream().mapToDouble(Video::getFleschKincaidGradeLevel).average().orElse(0);
+    return videos.stream().mapToDouble(Video::getFleschKincaidGradeLevel).limit(50).average().orElse(0);
   }
 
   /**
@@ -121,7 +121,7 @@ public class SearchResult {
     if (Optional.ofNullable(videos).isEmpty() || videos.isEmpty()) {
       return 0;
     }
-    return videos.stream().mapToDouble(Video::getFleschReadingEaseScore).average().orElse(0);
+    return videos.stream().mapToDouble(Video::getFleschReadingEaseScore).limit(50).average().orElse(0);
   }
 
   /**

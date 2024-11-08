@@ -120,12 +120,12 @@ public class HelpersTest extends WithApplication {
   @Test
   public void calculateHappyWordCountTest() {
     String description1 = "Today is a great day with amazing weather. I am very happy and not sad at all. This is a happy sentence.";
-    String description2 = "Today is a terrible day with awful weather. I am angry and not happy. This is a sad sentence.";
+    String description2 = "Here is a test with a bunch of emojis: u1F61A, :), u1F600, happy.";
     String description3 = "Today is a good day but with awful weather. I am happy but also sad. This is a neutral sentence.";
     String description4 = "This is a test sentence with no words matching the predetermined list. This is a neutral sentence.";
 
     assertEquals(4, Helpers.calculateHappyWordCount(description1));
-    assertEquals(1, Helpers.calculateHappyWordCount(description2));
+    assertEquals(4, Helpers.calculateHappyWordCount(description2));
     assertEquals(2, Helpers.calculateHappyWordCount(description3));
     assertEquals(0, Helpers.calculateHappyWordCount(description4));
   }

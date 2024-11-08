@@ -12,12 +12,12 @@ import java.util.regex.Pattern;
 public class Helpers {
   private static String[] happyList = {"happy", "wonderful", "great", "lovely", "excited", "yay", "!", "amazing",
           "benefits", "love", "excellent", "good", "laugh", "smile", "thankful", "thanks", "funny", "laugh-out-loud",
-          "hilarious", "sweet", ":)", "awesome", "cute", "best", "\u1F600", "\u1F604", "\u1F602", "\u1F606", "\u1F60A",
-          "\u1F970", "\u1F61A", "\u263A", "\u1F973"};
+          "hilarious", "sweet", ":)", "awesome", "cute", "best", "\\u1F600", "\\u1F604", "\\u1F602", "\\u1F606", "\\u1F60A",
+          "\\u1F970", "\\u1F61A", "\\u263A", "\\u1F973"};
 
   private static String[] sadList = {"sad", "disappointed", "depressed", "upset", "hate", "angry", "frustrated",
           "gloomy", "terrible", "awful", "difficult", ":(", "cry", "death", "murder", "accident", "sickness", "illness", "disease",
-          "lost", "loss", "sick", ">:(", "\u1F912", "\u1F61F", "\u1FAE4", "\u1F641", "\u1F621", "\u1F622" };
+          "lost", "loss", "sick", ">:(", "\\u1F912", "\\u1F61F", "\\u1FAE4", "\\u1F641", "\\u1F621", "\\u1F622" };
 
 
   /**
@@ -159,7 +159,7 @@ public class Helpers {
    */
   public static long calculateHappyWordCount(String videoDescription) {
     ArrayList<String> happyWordList = new ArrayList<>(Arrays.asList(happyList));
-    return Arrays.asList(videoDescription.replaceAll("[^a-zA-Z0-9\\s:;()\\-_<>=*!|^\\u1F600-\\u1F64F]+",
+    return Arrays.asList(videoDescription.replaceAll("[^a-zA-Z0-9\\s:;()\\-_<>=*!|]+",
                     "").split("\\s+")).stream().map(String::toLowerCase)
             .filter(happyWordList::contains).count();
   }
@@ -172,7 +172,7 @@ public class Helpers {
    */
   public static long calculateSadWordCount(String videoDescription) {
     ArrayList<String> sadWordList = new ArrayList<>(Arrays.asList(sadList));
-    return Arrays.asList(videoDescription.replaceAll("[^a-zA-Z0-9\\s:;()\\-_<>=*!^|\\u1F600-\\u1F64F]",
+    return Arrays.asList(videoDescription.replaceAll("[^a-zA-Z0-9\\s:;()\\-_<>=*!^|]+",
                     "").split("\\s+")).stream().map(String::toLowerCase)
             .filter(sadWordList::contains).count();
   }

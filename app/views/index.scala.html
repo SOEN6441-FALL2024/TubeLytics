@@ -25,6 +25,11 @@
         @if(searchResult.videos.nonEmpty) {
         <!-- Display search term and stats -->
         <div class="search-stats">
+            <p>Search terms:
+                <strong>
+                    <a href="@routes.YouTubeController.wordStats(searchResult.query)">@searchResult.query</a>
+                </strong>
+            </p>
             <p>Search terms: <strong>@searchResult.query</strong> (Flesch-Kincaid Grade Level Avg.= ##, Flesch Reading Ease Score Avg.= ##)</p>
             <a href="#" class="more-stats-link">More stats</a>
         </div>

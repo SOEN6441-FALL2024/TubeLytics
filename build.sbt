@@ -16,7 +16,7 @@ libraryDependencies ++= Seq(
 )
 
 Test / testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
-
+//
 //Test / test := {
 //  (Test / test).dependsOn(Test / jacocoReport).value
 //}

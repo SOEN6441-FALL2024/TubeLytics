@@ -21,9 +21,14 @@ public class YouTubeService {
     }
 
     public List<Video> searchVideos(String query) {
+        return this.searchVideos(query,10);
+    }
+
+
+    public List<Video> searchVideos(String query,int limit) {
         String youtubeUrl = "https://www.googleapis.com/youtube/v3/search";
         String url = String.format(
-                "%s?part=snippet&q=%s&type=video&maxResults=10&key=%s", youtubeUrl, query, apiKey);
+                "%s?part=snippet&q=%s&type=video&maxResults=%d&key=%s", youtubeUrl, query, limit,apiKey);
 
         var futureResult = ws.url(url)
                 .get()

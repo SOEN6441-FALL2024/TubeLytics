@@ -1,10 +1,35 @@
+@(wordStats: Map[String, Long], query: String)
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Statistics</title>
+    <link rel="stylesheet" href='@routes.Assets.versioned("css/styles.css")' />
 </head>
+
 <body>
-$END$
+<h1>Word Statistics for "@query"</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>Word</th>
+        <th>Count</th>
+    </tr>
+    </thead>
+    <tbody>
+    @for((word, count) <- wordStats) {
+    <tr>
+        <td>@word</td>
+        <td>@count</td>
+    </tr>
+    }
+    </tbody>
+</table>
+
+<a href="@routes.HomeController.index()">Back to Search</a>
+
 </body>
 </html>

@@ -3,6 +3,7 @@ package utils;
 import models.Video;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -161,9 +162,10 @@ public class Helpers {
    * @author Jessica Chen
    */
   public static long calculateHappyWordCount(String videoDescription) {
+    ArrayList<String> happyWordList = new ArrayList<>(Arrays.asList(happyList));
     long happyWordCount = Arrays.asList(videoDescription.replaceAll("[^a-zA-Z0-9\\s:;()\\-_<>=*!^|\\u1F600-\\u1F64F]+",
                     "").split("\\s+")).stream().map((word) -> (word.toLowerCase()))
-            .filter(stream(happyList).toList()::contains).count();
+            .filter(happyWordList::contains).count();
 
     return happyWordCount;
   }
@@ -175,9 +177,10 @@ public class Helpers {
    * @author Jessica Chen
    */
   public static long calculateSadWordCount(String videoDescription) {
+    ArrayList<String> sadWordList = new ArrayList<>(Arrays.asList(sadList));
     long sadWordCount = Arrays.asList(videoDescription.replaceAll("[^a-zA-Z0-9\\s:;()\\-_<>=*!^|\\u1F600-\\u1F64F]",
                     "").split("\\s+")).stream().map((word) -> (word.toLowerCase()))
-            .filter(stream(sadList).toList()::contains).count();
+            .filter(sadWordList::contains).count();
 
     return sadWordCount;
   }

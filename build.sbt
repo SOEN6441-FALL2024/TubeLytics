@@ -21,7 +21,6 @@ Test / testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
 //  (Test / test).dependsOn(Test / jacocoReport).value
 //}
 
-
 logLevel := Level.Debug
 
 

@@ -1,14 +1,10 @@
 package utils;
 
-import models.Video;
-
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import static java.util.Arrays.stream;
 
 /** Helper class to calculate readability scores for text and to calculate sentiment submission
  * @author Deniz Dinchdonmez, Jessica Chen
@@ -16,12 +12,12 @@ import static java.util.Arrays.stream;
 public class Helpers {
   private static String[] happyList = {"happy", "wonderful", "great", "lovely", "excited", "yay", "!", "amazing",
           "benefits", "love", "excellent", "good", "laugh", "smile", "thankful", "thanks", "funny", "laugh-out-loud",
-          "hilarious", "sweet", ":)", "awesome", "cute", "best", "U+1F600", "U+1F604", "U+1F602", "U+1F606", "U+1F60A",
-          "U+1F970", "U+1F61A", "U+263A", "U+1F973"};
+          "hilarious", "sweet", ":)", "awesome", "cute", "best", "\u1F600", "\u1F604", "\u1F602", "\u1F606", "\u1F60A",
+          "\u1F970", "\u1F61A", "\u263A", "\u1F973"};
 
   private static String[] sadList = {"sad", "disappointed", "depressed", "upset", "hate", "angry", "frustrated",
           "gloomy", "terrible", "awful", "difficult", ":(", "cry", "death", "murder", "accident", "sickness", "illness", "disease",
-          "lost", "loss", "sick", ">:(", "U+1F912", "U+1F61F", "U+1FAE4", "U+1F641", "U+1F621", "U+1F622" };
+          "lost", "loss", "sick", ">:(", "\u1F912", "\u1F61F", "\u1FAE4", "\u1F641", "\u1F621", "\u1F622" };
 
 
   /**
@@ -163,11 +159,9 @@ public class Helpers {
    */
   public static long calculateHappyWordCount(String videoDescription) {
     ArrayList<String> happyWordList = new ArrayList<>(Arrays.asList(happyList));
-    long happyWordCount = Arrays.asList(videoDescription.replaceAll("[^a-zA-Z0-9\\s:;()\\-_<>=*!^|\\u1F600-\\u1F64F]+",
-                    "").split("\\s+")).stream().map((word) -> (word.toLowerCase()))
+    return Arrays.asList(videoDescription.replaceAll("[^a-zA-Z0-9\\s:;()\\-_<>=*!|^\\u1F600-\\u1F64F]+",
+                    "").split("\\s+")).stream().map(String::toLowerCase)
             .filter(happyWordList::contains).count();
-
-    return happyWordCount;
   }
 
   /**
@@ -178,11 +172,9 @@ public class Helpers {
    */
   public static long calculateSadWordCount(String videoDescription) {
     ArrayList<String> sadWordList = new ArrayList<>(Arrays.asList(sadList));
-    long sadWordCount = Arrays.asList(videoDescription.replaceAll("[^a-zA-Z0-9\\s:;()\\-_<>=*!^|\\u1F600-\\u1F64F]",
-                    "").split("\\s+")).stream().map((word) -> (word.toLowerCase()))
+    return Arrays.asList(videoDescription.replaceAll("[^a-zA-Z0-9\\s:;()\\-_<>=*!^|\\u1F600-\\u1F64F]",
+                    "").split("\\s+")).stream().map(String::toLowerCase)
             .filter(sadWordList::contains).count();
-
-    return sadWordCount;
   }
 
   /**
@@ -203,21 +195,6 @@ public class Helpers {
         sentiment = ":-(";
       }
     }
-    return sentiment;
-  }
-
-  /**
-   * Evaluates the overall sentiment based on sentiments of each video in the list of video results from a query
-   * @param videos list of videos from a query entered by the users
-   * @return an emoji indicating whether the overall sentiment is happy, sad or neutral
-   * @author Jessica Chen
-   */
-  public static String calculateOverallSentiment(List<Video> videos) {
-    double totalHappyWordCount = videos.stream().limit(50).mapToDouble(Video::getHappyWordCount).sum();
-    double totalSadWordCount = videos.stream().limit(50).mapToDouble(Video::getSadWordCount).sum();
-
-    String sentiment = calculateSentiment(totalHappyWordCount, totalSadWordCount);
-
     return sentiment;
   }
 }

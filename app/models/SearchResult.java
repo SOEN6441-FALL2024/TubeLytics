@@ -25,7 +25,7 @@ public class SearchResult {
         Helpers.formatDouble(getAverageFleschKincaidGradeLevel(videos));
     this.averageFleschReadingEaseScore =
         Helpers.formatDouble(getAverageFleschReadingEaseScore(videos));
-    this.overallSentiment = Helpers.calculateOverallSentiment(videos);
+    this.overallSentiment = calculateOverallSentiment(videos);
   }
 
   /**
@@ -132,5 +132,18 @@ public class SearchResult {
    */
   public String getOverallSentiment() {
     return overallSentiment;
+  }
+
+  /**
+   * Evaluates the overall sentiment based on sentiments of each video in the list of video results from a query
+   * @param videos list of videos from a query entered by the users
+   * @return an emoji indicating whether the overall sentiment is happy, sad or neutral
+   * @author Jessica Chen
+   */
+  public static String calculateOverallSentiment(List<Video> videos) {
+    double totalHappyWordCount = videos.stream().limit(50).mapToDouble(Video::getHappyWordCount).sum();
+    double totalSadWordCount = videos.stream().limit(50).mapToDouble(Video::getSadWordCount).sum();
+
+    return Helpers.calculateSentiment(totalHappyWordCount, totalSadWordCount);
   }
 }

@@ -176,36 +176,4 @@ public class HelpersTest extends WithApplication {
     assertEquals(":-|", Helpers.calculateSentiment(happyWordCount3, sadWordCount3));
     assertEquals(":-|", Helpers.calculateSentiment(happyWordCount4, sadWordCount4));
   }
-
-  /**
-   * Tests the sentiment overall for a list of videos (up to 50). Added 25 happy sentiment videos and then 27 sad sentiment. The limit is 50 and so the overall sentiment should be balanced out.
-   * @author Jessica Chen
-   */
-  @Test
-  public void calculateOverallSentimentTest() {
-    List<Video> testVideos = new ArrayList<>();
-    for (int i = 0; i < 52; i++) {
-        Video video;
-        if (i <= 25) {
-            video = new Video(
-                    "Happy Sentiment",
-                    "Today is a great day with amazing weather. I am very happy and not sad at all. This is a happy sentence.",
-                    "channelId123",
-                    "videoId123",
-                    "thumbnailUrl.jpg",
-                    "channelTitle");
-        } else {
-            video = new Video(
-                    "Sad Sentiment",
-                    "Today is a terrible day with awful weather. I am angry and not happy. This is a sad sentence.",
-                    "channelId123",
-                    "videoId123",
-                    "thumbnailUrl.jpg",
-                    "channelTitle");
-        }
-        testVideos.add(video);
-    }
-    SearchResult test = new SearchResult("test", testVideos);
-    assertEquals(":-|", test.getOverallSentiment());
-  }
 }

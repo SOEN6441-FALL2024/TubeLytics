@@ -12,5 +12,4 @@ GET     /assets/*file        controllers.Assets.versioned(path="/public", file: 
 GET     /search         controllers.YouTubeController.search(query: String)
 POST    /search                 controllers.YouTubeController.search(query: String)
 
-
-
+GET    /word-stats         controllers.YouTubeController.wordStats(query: String)

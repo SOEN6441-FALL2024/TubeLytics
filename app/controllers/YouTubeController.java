@@ -62,9 +62,9 @@ public class YouTubeController extends Controller {
     }
 
     // Get the search results for the query (limit to the latest 50 videos)
-    List<Video> videos = youTubeService.searchVideos(query,50).stream()
+    List<Video> videos = youTubeService.searchVideos(query, 50).stream()
             .limit(50)
-            .toList();
+            .collect(Collectors.toList());
 
     /// Count word frequencies in titles and descriptions
     Map<String, Long> wordStats = videos.stream()

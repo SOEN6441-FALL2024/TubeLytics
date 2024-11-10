@@ -1,7 +1,14 @@
-@(videos: List[models.Video])
+@(videos: List[models.Video],query: String)
 
 @main("YouTube Search Results") {
 <h1>YouTube Search Results</h1>
+<p>
+    Search terms:
+    <a href="@routes.YouTubeController.wordStats(query)">@query</a> <!-- Hyperlinking to word stats page -->
+</p>
+@if(videos.isEmpty) {
+<p>No results found for "@query"</p>
+} else {
 <ul>
     @for(video <- videos) {
     <li>
@@ -12,5 +19,6 @@
     </li>
     }
 </ul>
+}
 }
 

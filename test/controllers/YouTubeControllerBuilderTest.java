@@ -1,33 +1,39 @@
 package controllers;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.mockito.Mockito;
 import play.Application;
 import play.inject.guice.GuiceApplicationBuilder;
 import play.test.WithApplication;
 import scala.concurrent.ExecutionContext;
 import services.YouTubeService;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 public class YouTubeControllerBuilderTest extends WithApplication {
 
   @Override
   protected Application provideApplication() {
-    // Building the application using Guice
     return new GuiceApplicationBuilder().build();
+  }
+
+  private ExecutionContext mockEc;
+
+  @BeforeEach
+  public void setUp() {
+    mockEc = Mockito.spy(ExecutionContext.global());
+    doReturn(mockEc).when(mockEc).prepare();
   }
 
   @Test
   public void testSetYouTubeService() {
-    // Mocking YouTubeService
     YouTubeService mockYouTubeService = mock(YouTubeService.class);
 
-    // Creating builder and setting YouTubeService
     YouTubeControllerBuilder builder = new YouTubeControllerBuilder();
     builder.setYouTubeService(mockYouTubeService);
 
-    // Asserting that the YouTubeService is set correctly
     YouTubeController controller = builder.createYouTubeController();
     assertNotNull(controller);
     assertEquals(mockYouTubeService, controller.youTubeService);
@@ -35,14 +41,13 @@ public class YouTubeControllerBuilderTest extends WithApplication {
 
   @Test
   public void testSetIgnoredEc() {
-    // Mocking ExecutionContext
-    ExecutionContext mockEc = mock(ExecutionContext.class);
 
-    // Creating builder and setting ExecutionContext
+    ExecutionContext mockEc = Mockito.spy(ExecutionContext.global());
+    doReturn(mockEc).when(mockEc).prepare();
+
     YouTubeControllerBuilder builder = new YouTubeControllerBuilder();
     builder.setIgnoredEc(mockEc);
 
-    // Asserting that the ExecutionContext is set correctly
     YouTubeController controller = builder.createYouTubeController();
     assertNotNull(controller);
     assertEquals(mockEc, controller.ec);
@@ -50,21 +55,18 @@ public class YouTubeControllerBuilderTest extends WithApplication {
 
   @Test
   public void testCreateYouTubeController() {
-    // Mocking dependencies
     YouTubeService mockYouTubeService = mock(YouTubeService.class);
-    ExecutionContext mockEc = mock(ExecutionContext.class);
+    ExecutionContext mockEc = Mockito.spy(ExecutionContext.global());
+    doReturn(mockEc).when(mockEc).prepare();
 
-    // Creating builder, setting dependencies, and creating the controller
     YouTubeControllerBuilder builder = new YouTubeControllerBuilder();
-    YouTubeController controller =
-        builder
-            .setYouTubeService(mockYouTubeService)
+    YouTubeController controller = builder.setYouTubeService(mockYouTubeService)
             .setIgnoredEc(mockEc)
             .createYouTubeController();
 
-    // Asserting the created controller is correct
     assertNotNull(controller);
     assertEquals(mockYouTubeService, controller.youTubeService);
     assertEquals(mockEc, controller.ec);
   }
 }
+

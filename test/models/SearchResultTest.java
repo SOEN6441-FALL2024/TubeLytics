@@ -1,22 +1,25 @@
 package models;
 
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
-
 /**
- * This test class contains equivalence classes to test the SearchResult class. Please note that our
- * SearchResult object should be created only when there is a valid String and List<Video> This
- * logic has been written in the HomeController class.
+ * This test class contains equivalence classes to test the SearchResult class.
+ * Please note that our SearchResult object should be created only when there is a valid String and List<Video>
+ * This logic has been written in the HomeController class.
  *
  * @author Jessica Chen
  */
+
 public class SearchResultTest {
   private String query;
   private List<Video> testVideos;
@@ -26,22 +29,10 @@ public class SearchResultTest {
   public void setUp() {
     query = "cat";
     testVideos = new ArrayList<>();
-    Video video1 =
-        new Video(
-            "CatVideoTitle1",
-            "CatVideoDescription1",
-            "CatVideoChannelId1",
-            "CatVideoVideoId1",
-            "CatVideoThumbnailUrl.jpg1",
-            "CatVideoChannelTitle1");
-    Video video2 =
-        new Video(
-            "CatVideoTitle2",
-            "CatVideoDescription2",
-            "CatVideoChannelId2",
-            "CatVideoVideoId2",
-            "CatVideoThumbnailUrl.jpg2",
-            "CatVideoChannelTitle2");
+    Video video1 = new Video("CatVideoTitle1", "CatVideoDescription1", "CatVideoChannelId1",
+            "CatVideoVideoId1", "CatVideoThumbnailUrl.jpg1", "CatVideoChannelTitle1","2024-11-06T04:41:46Z");
+    Video video2 = new Video("CatVideoTitle2", "CatVideoDescription2", "CatVideoChannelId2",
+            "CatVideoVideoId2", "CatVideoThumbnailUrl.jpg2", "CatVideoChannelTitle2","2024-11-06T04:41:46Z");
     testVideos.add(video1);
     testVideos.add(video2);
 
@@ -49,27 +40,14 @@ public class SearchResultTest {
   }
 
   @Test
-  // Test equivalence class: Search Result object with valid String and valid List<Video> and not
-  // null
+  // Test equivalence class: Search Result object with valid String and valid List<Video> and not null
   public void testSearchResultConstructor() {
     query = "Panda";
     testVideos = new ArrayList<>();
-    Video video1 =
-        new Video(
-            "PandaVideoTitle1",
-            "PandaVideoDescription1",
-            "PandaVideoChannelId1",
-            "PandaVideoVideoId1",
-            "PandaVideoThumbnailUrl.jpg1",
-            "PandaVideoChannelTitle1");
-    Video video2 =
-        new Video(
-            "PandaVideoTitle2",
-            "PandaVideoDescription2",
-            "PandaVideoChannelId2",
-            "PandaVideoVideoId2",
-            "PandaVideoThumbnailUrl.jpg2",
-            "PandaVideoChannelTitle2");
+    Video video1 = new Video("PandaVideoTitle1", "PandaVideoDescription1", "PandaVideoChannelId1",
+            "PandaVideoVideoId1", "PandaVideoThumbnailUrl.jpg1", "PandaVideoChannelTitle1","2024-11-06T04:41:46Z");
+    Video video2 = new Video("PandaVideoTitle2", "PandaVideoDescription2", "PandaVideoChannelId2",
+            "PandaVideoVideoId2", "PandaVideoThumbnailUrl.jpg2", "PandaVideoChannelTitle2","2024-11-06T04:41:46Z");
     testVideos.add(video1);
     testVideos.add(video2);
 
@@ -103,22 +81,10 @@ public class SearchResultTest {
     SearchResult searchResult1 = searchResult;
     String query2 = "dog";
     List<Video> videos2 = new ArrayList<>();
-    Video video1 =
-        new Video(
-            "DogVideoTitle1",
-            "DogVideoDescription1",
-            "DogVideoChannelId1",
-            "DogVideoVideoId1",
-            "DogVideoThumbnailUrl.jpg1",
-            "DogVideoChannelTitle1");
-    Video video2 =
-        new Video(
-            "DogVideoTitle2",
-            "DogVideoDescription2",
-            "DogVideoChannelId2",
-            "DogVideoVideoId2",
-            "DogVideoThumbnailUrl.jpg2",
-            "DogVideoChannelTitle2");
+    Video video1 = new Video("DogVideoTitle1", "DogVideoDescription1", "DogVideoChannelId1",
+            "DogVideoVideoId1", "DogVideoThumbnailUrl.jpg1", "DogVideoChannelTitle1","2024-11-06T04:41:46Z");
+    Video video2 = new Video("DogVideoTitle2", "DogVideoDescription2", "DogVideoChannelId2",
+            "DogVideoVideoId2", "DogVideoThumbnailUrl.jpg2", "DogVideoChannelTitle2","2024-11-06T04:41:46Z");
     videos2.add(video1);
     videos2.add(video2);
 
@@ -140,26 +106,31 @@ public class SearchResultTest {
     SearchResult searchResult1 = searchResult;
     String query2 = "dog";
     List<Video> videos2 = new ArrayList<>();
-    Video video1 =
-        new Video(
-            "DogVideoTitle1",
-            "DogVideoDescription1",
-            "DogVideoChannelId1",
-            "DogVideoVideoId1",
-            "DogVideoThumbnailUrl.jpg1",
-            "DogVideoChannelTitle1");
-    Video video2 =
-        new Video(
-            "DogVideoTitle2",
-            "DogVideoDescription2",
-            "DogVideoChannelId2",
-            "DogVideoVideoId2",
-            "DogVideoThumbnailUrl.jpg2",
-            "DogVideoChannelTitle2");
+    Video video1 = new Video("DogVideoTitle1", "DogVideoDescription1", "DogVideoChannelId1",
+            "DogVideoVideoId1", "DogVideoThumbnailUrl.jpg1", "DogVideoChannelTitle1","2024-11-06T04:41:46Z");
+    Video video2 = new Video("DogVideoTitle2", "DogVideoDescription2", "DogVideoChannelId2",
+            "DogVideoVideoId2", "DogVideoThumbnailUrl.jpg2", "DogVideoChannelTitle2","2024-11-06T04:41:46Z");
     videos2.add(video1);
     videos2.add(video2);
 
     SearchResult searchResult2 = new SearchResult(query2, videos2);
     assertNotEquals(searchResult1.hashCode(), searchResult2.hashCode());
+  }
+  // Test for equals method when comparing with itself (should return true)
+  @Test
+  public void testSearchResultEqualsWithItself() {
+    assertEquals(searchResult, searchResult);
+  }
+
+  // Test for equals method when comparing with null (should return false)
+  @Test
+  public void testSearchResultEqualsWithNull() {
+    assertNotEquals(searchResult, null);
+  }
+
+  // Test for equals method when comparing with a different type (should return false)
+  @Test
+  public void testSearchResultEqualsWithDifferentType() {
+    assertNotEquals(searchResult, "a different type");
   }
 }

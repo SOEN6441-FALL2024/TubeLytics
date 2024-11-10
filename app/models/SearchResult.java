@@ -141,7 +141,7 @@ public class SearchResult {
    * @author Jessica Chen
    */
   public static String calculateOverallSentiment(List<Video> videos) {
-    if (videos.isEmpty()) {
+    if (videos == null || videos.isEmpty()) {
       return "Unavailable";
     }
     double totalHappyWordCount = videos.stream().limit(50).mapToDouble(Video::getHappyWordCount).sum();

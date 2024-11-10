@@ -10,14 +10,14 @@ import java.util.regex.Pattern;
  * @author Deniz Dinchdonmez, Jessica Chen
  * */
 public class Helpers {
-  private static String[] happyList = {"happy", "wonderful", "great", "lovely", "excited", "yay", "!", "amazing",
+  private static String[] happyList = {"happy", "wonderful", "great", "lovely", "excited", "yay", "amazing",
           "benefits", "love", "excellent", "good", "laugh", "smile", "thankful", "thanks", "funny", "laugh-out-loud",
-          "hilarious", "sweet", ":)", "awesome", "cute", "best", "\\u1F600", "\\u1F604", "\\u1F602", "\\u1F606", "\\u1F60A",
-          "\\u1F970", "\\u1F61A", "\\u263A", "\\u1F973"};
+          "hilarious", "sweet", ":)", "awesome", "cute", "best", "\uD83D\uDE00", "\uD83D\uDE06", "\uD83D\uDE42",
+          "\uD83D\uDE03", "\uD83D\uDE04", "\uD83D\uDE01", "\uD83D\uDE0A"};
 
   private static String[] sadList = {"sad", "disappointed", "depressed", "upset", "hate", "angry", "frustrated",
           "gloomy", "terrible", "awful", "difficult", ":(", "cry", "death", "murder", "accident", "sickness", "illness", "disease",
-          "lost", "loss", "sick", ">:(", "\\u1F912", "\\u1F61F", "\\u1FAE4", "\\u1F641", "\\u1F621", "\\u1F622" };
+          "lost", "loss", "sick", ">:(", "\uD83D\uDE14", "\uD83D\uDE1E", "\uD83D\uDE29", "\uD83D\uDE41"};
 
 
   /**
@@ -158,8 +158,11 @@ public class Helpers {
    * @author Jessica Chen
    */
   public static long calculateHappyWordCount(String videoDescription) {
+    if (videoDescription == null || videoDescription.isEmpty()) {
+      return 0;
+    }
     ArrayList<String> happyWordList = new ArrayList<>(Arrays.asList(happyList));
-    return Arrays.asList(videoDescription.replaceAll("[^a-zA-Z0-9\\s:;()\\-_<>=*!|]+",
+    return Arrays.asList(videoDescription.replaceAll("[^a-zA-Z0-9\\s:()\\-_<>=*|\\p{So}]+",
                     "").split("\\s+")).stream().map(String::toLowerCase)
             .filter(happyWordList::contains).count();
   }
@@ -171,8 +174,11 @@ public class Helpers {
    * @author Jessica Chen
    */
   public static long calculateSadWordCount(String videoDescription) {
+    if (videoDescription == null || videoDescription.isEmpty()) {
+      return 0;
+    }
     ArrayList<String> sadWordList = new ArrayList<>(Arrays.asList(sadList));
-    return Arrays.asList(videoDescription.replaceAll("[^a-zA-Z0-9\\s:;()\\-_<>=*!^|]+",
+    return Arrays.asList(videoDescription.replaceAll("[^a-zA-Z0-9\\s:()\\-_<>=*|\\p{So}]+",
                     "").split("\\s+")).stream().map(String::toLowerCase)
             .filter(sadWordList::contains).count();
   }

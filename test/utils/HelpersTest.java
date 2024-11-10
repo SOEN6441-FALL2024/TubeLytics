@@ -119,15 +119,17 @@ public class HelpersTest extends WithApplication {
    */
   @Test
   public void calculateHappyWordCountTest() {
-    String description1 = "Today is a great day with amazing weather. I am very happy and not sad at all. This is a happy sentence.";
-    String description2 = "Today is a terrible day with awful weather. I am angry and not :). This is a sad sentence.";
-    String description3 = "Today is a good day but with awful weather. I am happy but also sad. This is a neutral sentence.";
-    String description4 = "This is a test sentence with no words matching the predetermined list. This is a neutral sentence.";
+    String description1 = "Today is a great day with amazing weather \uD83D\uDE0A. I am very happy and not sad at all. This is a happy sentence.";
+    String description2 = "Today is a good day but with awful weather. I am happy but also sad :). This is a neutral sentence.";
+    String description3 = "This is a test sentence with no words matching the predetermined list. This is a neutral sentence.";
+    String description4 = ":) \uD83D\uDE0A :) \uD83D\uDE0A I love everything.";
 
-    assertEquals(4, Helpers.calculateHappyWordCount(description1));
-    assertEquals(1, Helpers.calculateHappyWordCount(description2));
-    assertEquals(2, Helpers.calculateHappyWordCount(description3));
-    assertEquals(0, Helpers.calculateHappyWordCount(description4));
+    assertEquals(5, Helpers.calculateHappyWordCount(description1));
+    assertEquals(3, Helpers.calculateHappyWordCount(description2));
+    assertEquals(0, Helpers.calculateHappyWordCount(description3));
+    assertEquals(5, Helpers.calculateHappyWordCount(description4));
+    assertEquals(0, Helpers.calculateHappyWordCount(""));
+    assertEquals(0, Helpers.calculateHappyWordCount(null));
   }
 
   /**
@@ -137,14 +139,16 @@ public class HelpersTest extends WithApplication {
   @Test
   public void calculateSadWordCountTest() {
     String description1 = "Today is a great day with amazing weather. I am very happy and not sad at all. This is a happy sentence.";
-    String description2 = "Today is a terrible day with awful weather. I am angry and not happy. This is a sad sentence.";
-    String description3 = "Today is a good day but with awful weather. I am happy but also sad. This is a neutral sentence.";
+    String description2 = "Today is a terrible day with awful weather :(. I am angry and not happy \uD83D\uDE14. This is a sad sentence.";
+    String description3 = "Here is a :( emoticon. It indicates that I am sad.";
     String description4 = "This is a test sentence with no words matching the predetermined list. This is a neutral sentence.";
 
     assertEquals(1, Helpers.calculateSadWordCount(description1));
-    assertEquals(4, Helpers.calculateSadWordCount(description2));
+    assertEquals(6, Helpers.calculateSadWordCount(description2));
     assertEquals(2, Helpers.calculateSadWordCount(description3));
     assertEquals(0, Helpers.calculateSadWordCount(description4));
+    assertEquals(0, Helpers.calculateSadWordCount(""));
+    assertEquals(0, Helpers.calculateSadWordCount(null));
   }
 
   /**
@@ -153,23 +157,17 @@ public class HelpersTest extends WithApplication {
    */
   @Test
   public void calculateSentimentTest() {
-    String description1 = "Today is a great day with amazing weather. I am very happy and not sad at all. This is a happy sentence.";
-    String description2 = "Today is a terrible day with awful weather. I am angry and not happy. This is a sad sentence.";
-    String description3 = "Today is a good day but with awful weather. I am happy but also sad. This is a neutral sentence.";
-    String description4 = "This is a test sentence with no words matching the predetermined list. This is a neutral sentence.";
+    long happyWordCount1 = 9;
+    long sadWordCount1 = 3;
 
-    long happyWordCount1 = Helpers.calculateHappyWordCount(description1);
-    long sadWordCount1 = Helpers.calculateSadWordCount(description1);
+    long happyWordCount2 = 1;
+    long sadWordCount2 = 5;
 
-    long happyWordCount2 = Helpers.calculateHappyWordCount(description2);
-    long sadWordCount2 = Helpers.calculateSadWordCount(description2);
+    long happyWordCount3 = 2;
+    long sadWordCount3 = 2;
 
-    long happyWordCount3 = Helpers.calculateHappyWordCount(description3);
-    long sadWordCount3 = Helpers.calculateSadWordCount(description3);
-
-    long happyWordCount4 = Helpers.calculateHappyWordCount(description4);
-    long sadWordCount4 = Helpers.calculateSadWordCount(description4);
-
+    long happyWordCount4 = 0;
+    long sadWordCount4 = 0;
 
     assertEquals(":-)", Helpers.calculateSentiment(happyWordCount1, sadWordCount1));
     assertEquals(":-(", Helpers.calculateSentiment(happyWordCount2, sadWordCount2));

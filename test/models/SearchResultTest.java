@@ -211,4 +211,18 @@ public class SearchResultTest {
     SearchResult test = new SearchResult("test", testVideos);
     Assert.assertEquals(":-|", test.getOverallSentiment());
   }
+
+  /**
+   * Tests the sentiment overall when dealing with the list of videos is null or empty.
+   * @author Jessica Chen
+   */
+  @Test
+  public void calculateOverallSentimentTestNull() {
+    List<Video> testVideos1 = new ArrayList<>();
+
+    SearchResult test = new SearchResult("test", null);
+    Assert.assertEquals("Unavailable", test.getOverallSentiment());
+    SearchResult test1 = new SearchResult("test1", testVideos1);
+    Assert.assertEquals("Unavailable", test1.getOverallSentiment());
+  }
 }

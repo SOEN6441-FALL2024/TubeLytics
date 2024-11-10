@@ -12,6 +12,9 @@ public class Video {
   private final String channelTitle; // New field
   private final double fleschKincaidGradeLevel;
   private final double fleschReadingEaseScore;
+  private final String submissionSentiment;
+  private final double happyWordCount;
+  private final double sadWordCount;
 
   public Video(
       String title,
@@ -28,6 +31,9 @@ public class Video {
     this.channelTitle = channelTitle; // Initialize the new field
     this.fleschKincaidGradeLevel = Helpers.calculateFleschKincaidGradeLevel(description);
     this.fleschReadingEaseScore = Helpers.calculateFleschReadingEaseScore(description);
+    this.happyWordCount = Helpers.calculateHappyWordCount(description);
+    this.sadWordCount = Helpers.calculateSadWordCount(description);
+    this.submissionSentiment = Helpers.calculateSentiment(happyWordCount, sadWordCount);
   }
 
   public String getTitle() {
@@ -61,6 +67,12 @@ public class Video {
   public double getFleschReadingEaseScore() {
     return fleschReadingEaseScore;
   }
+
+  public double getHappyWordCount() { return happyWordCount; }
+
+  public double getSadWordCount() { return sadWordCount; }
+
+  public String getSubmissionSentiment() { return submissionSentiment; }
 
   // Override equals() and hashCode() to include channelTitle
   @Override

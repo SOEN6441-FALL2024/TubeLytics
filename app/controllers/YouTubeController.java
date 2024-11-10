@@ -25,10 +25,19 @@ public class YouTubeController extends Controller {
   }
 
   public Result search(String query) {
-    var videos = youTubeService.searchVideos(query);
-    return ok(views.html.results.render(videos,query));
+    try {
+      if (query == null || query.trim().isEmpty()) {
+        return badRequest("Please enter a search term.");
+      }
+      List<Video> videos = youTubeService.searchVideos(query);
+      if (videos.isEmpty()) {
+        return ok("No results found");
+      }
+      return ok(views.html.results.render(videos, query));
+    } catch (RuntimeException e) {
+      return internalServerError("An error occurred while processing your request.");
+    }
   }
-
 
   /**
    * Calculates and displays word-level statistics for the latest 50 videos based on a given query.
@@ -41,6 +50,7 @@ public class YouTubeController extends Controller {
    * @return a Result containing the rendered word statistics page with word frequency data.
    * @author Aynaz Javanivayeghan
    */
+
 
 
   public Result wordStats(String query) {

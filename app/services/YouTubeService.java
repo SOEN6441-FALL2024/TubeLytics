@@ -2,11 +2,12 @@ package services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.typesafe.config.Config;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.inject.Inject;
 import models.Video;
 import play.libs.ws.WSClient;
+
+import javax.inject.Inject;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class YouTubeService {
 
@@ -19,12 +20,15 @@ public class YouTubeService {
     this.apiKey = "";
   }
 
-  public List<Video> searchVideos(String query) {
-    String youtubeUrl = "https://www.googleapis.com/youtube/v3/search";
-    String url =
-        String.format(
-            "%s?part=snippet&q=%s&type=video&maxResults=10&key=%s", youtubeUrl, query, apiKey);
+    public List<Video> searchVideos(String query) {
+        return this.searchVideos(query,10);
+    }
 
+
+    public List<Video> searchVideos(String query,int limit) {
+        String youtubeUrl = "https://www.googleapis.com/youtube/v3/search";
+        String url = String.format(
+                "%s?part=snippet&q=%s&type=video&maxResults=%d&key=%s", youtubeUrl, query, limit,apiKey);
     var futureResult =
         ws.url(url)
             .get()

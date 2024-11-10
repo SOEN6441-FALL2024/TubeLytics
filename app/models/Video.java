@@ -13,6 +13,9 @@ public class Video {
   private final String publishedDate;
   private final double fleschKincaidGradeLevel;
   private final double fleschReadingEaseScore;
+  private final String submissionSentiment;
+  private final double happyWordCount;
+  private final double sadWordCount;
 
   public Video(
       String title,
@@ -31,6 +34,9 @@ public class Video {
     this.fleschKincaidGradeLevel = Helpers.calculateFleschKincaidGradeLevel(description);
     this.fleschReadingEaseScore = Helpers.calculateFleschReadingEaseScore(description);
     this.publishedDate = publishedDate;
+    this.happyWordCount = Helpers.calculateHappyWordCount(description);
+    this.sadWordCount = Helpers.calculateSadWordCount(description);
+    this.submissionSentiment = Helpers.calculateSentiment(happyWordCount, sadWordCount);
   }
 
   public String getTitle() {
@@ -64,6 +70,10 @@ public class Video {
   public double getFleschReadingEaseScore() {
     return fleschReadingEaseScore;
   }
+  public double getHappyWordCount() { return happyWordCount; }
+  public double getSadWordCount() { return sadWordCount; }
+  public String getSubmissionSentiment() { return submissionSentiment; }
+
   public String getPublishedDate() {
         return publishedDate;
   }

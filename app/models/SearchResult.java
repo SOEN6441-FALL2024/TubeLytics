@@ -1,5 +1,4 @@
 package models;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -13,10 +12,11 @@ import utils.Helpers;
  * @author Jessica Chen, Deniz Dinchdonmez
  */
 public class SearchResult {
-  public String query;
-  public List<Video> videos;
+  private String query;
+  private List<Video> videos;
   private double averageFleschKincaidGradeLevel;
   private double averageFleschReadingEaseScore;
+  private String overallSentiment;
 
   public SearchResult(String query, List<Video> videos) {
     this.query = query;
@@ -25,7 +25,34 @@ public class SearchResult {
         Helpers.formatDouble(getAverageFleschKincaidGradeLevel(videos));
     this.averageFleschReadingEaseScore =
         Helpers.formatDouble(getAverageFleschReadingEaseScore(videos));
+    this.overallSentiment = calculateOverallSentiment(videos);
   }
+
+  /**
+   * Get the list of videos in search result object
+   *
+   * @return the list of videos
+   * @author Jessica Chen
+   */
+  public List<Video> getVideos() {
+    return videos;
+  }
+
+  /**
+   * Get the query in search result object
+   *
+   * @return query inputted by the users
+   * @author Jessica Chen
+   */
+  public String getQuery() {
+    return query;
+  }
+  /**
+   * Compares invoking object with given object to assess if it
+   *
+   * @return query
+   * @author Jessica Chen
+   */
 
   @Override
   public final boolean equals(Object o) {
@@ -35,6 +62,13 @@ public class SearchResult {
 
     return Objects.equals(query, that.query) && Objects.equals(videos, that.videos);
   }
+
+  /**
+   * Ensures consistency in search result object content using HashCode
+   *
+   * @return query
+   * @author Jessica Chen
+   */
 
   @Override
   public int hashCode() {
@@ -89,5 +123,28 @@ public class SearchResult {
       return 0;
     }
     return videos.stream().mapToDouble(Video::getFleschReadingEaseScore).limit(50).average().orElse(0);
+  }
+  /**
+   * Get overall sentiment of all video results
+   *
+   * @return an emoji face that correlates to the overall % of happy vs sad words in each video descriptions
+   * @author Jessica Chen
+   */
+  public String getOverallSentiment() {
+    return overallSentiment;
+  }
+  /**
+   * Evaluates the overall sentiment based on sentiments of each video in the list of video results from a query
+   * @param videos list of videos from a query entered by the users
+   * @return an emoji indicating whether the overall sentiment is happy, sad or neutral
+   * @author Jessica Chen
+   */
+  public static String calculateOverallSentiment(List<Video> videos) {
+    if (videos == null || videos.isEmpty()) {
+      return "Unavailable";
+    }
+    double totalHappyWordCount = videos.stream().limit(50).mapToDouble(Video::getHappyWordCount).sum();
+    double totalSadWordCount = videos.stream().limit(50).mapToDouble(Video::getSadWordCount).sum();
+    return Helpers.calculateSentiment(totalHappyWordCount, totalSadWordCount);
   }
 }

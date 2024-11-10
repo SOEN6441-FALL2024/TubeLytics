@@ -5,10 +5,9 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Assert;
 
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -24,7 +23,9 @@ public class SearchResultTest {
   private String query;
   private List<Video> testVideos;
   private SearchResult searchResult;
-
+  /**
+   * Helps set up mock entries to create search result objects with.
+   */
   @Before
   public void setUp() {
     query = "cat";
@@ -39,8 +40,12 @@ public class SearchResultTest {
     searchResult = new SearchResult(query, testVideos);
   }
 
+  /**
+   * Asserts search result object with valid parameters is created properly and that it is not null.
+   * @author Jessica Chen
+   */
+
   @Test
-  // Test equivalence class: Search Result object with valid String and valid List<Video> and not null
   public void testSearchResultConstructor() {
     query = "Panda";
     testVideos = new ArrayList<>();
@@ -54,21 +59,15 @@ public class SearchResultTest {
     SearchResult searchResult1 = new SearchResult(query, testVideos);
 
     assertNotNull(searchResult1);
-    assertEquals("Panda", searchResult1.query);
-    assertEquals(testVideos, searchResult1.videos);
+    assertEquals("Panda", searchResult1.getQuery());
+    assertEquals(testVideos, searchResult1.getVideos());
   }
 
+  /**
+   * Asserts that two search result objects with the same parameters are equal
+   * @author Jessica Chen
+   */
   @Test
-  // Test equivalence class: Search Result object with null String and null List<Video>
-  public void testSearchResultNull() {
-    SearchResult searchResult1 = new SearchResult(null, null);
-
-    assertNull("String should be null", searchResult1.query);
-    assertNull("List<Video> should be null", searchResult1.videos);
-  }
-
-  @Test
-  // Test equivalence class: equality between two Search Result objects
   public void testSearchResultEquality() {
     SearchResult searchResult1 = searchResult;
     SearchResult searchResult2 = new SearchResult(query, testVideos);
@@ -76,7 +75,6 @@ public class SearchResultTest {
   }
 
   @Test
-  // Test equivalence class: inequality between two Search Result objects
   public void testSearchResultInequality() {
     SearchResult searchResult1 = searchResult;
     String query2 = "dog";
@@ -89,17 +87,28 @@ public class SearchResultTest {
     videos2.add(video2);
 
     SearchResult searchResult2 = new SearchResult(query2, videos2);
+    SearchResult searchResult3 = new SearchResult(query, videos2);
     assertNotEquals(searchResult1, searchResult2);
+    assertFalse("searchResult1 does not equal searchResult2", searchResult1.equals(searchResult2));
+    assertFalse(searchResult1.equals("Dog"));
+    assertFalse("searchResult1 does not equal searchResult3", searchResult1.equals(searchResult3));
   }
 
+  /**
+   * Asserts that two search result objects with the same parameters are equal in hashCode
+   * @author Jessica Chen
+   */
   @Test
-  // Test equivalence class: equality in HashCode between two Search Result objects
   public void testSearchResultHashCode() {
     SearchResult searchResult1 = searchResult;
     SearchResult searchResult2 = new SearchResult(query, testVideos);
     assertEquals(searchResult1.hashCode(), searchResult2.hashCode());
   }
 
+  /**
+   * Asserts that two search result objects with different parameters are not equal in hashCode
+   * @author Jessica Chen
+   */
   @Test
   // Test equivalence class: inequality in HashCode between two Search Result objects
   public void testSearchResultHashCodeInequality() {
@@ -116,6 +125,52 @@ public class SearchResultTest {
     SearchResult searchResult2 = new SearchResult(query2, videos2);
     assertNotEquals(searchResult1.hashCode(), searchResult2.hashCode());
   }
+  /**
+   * Tests the sentiment overall for a list of videos (up to 50). Added 25 happy sentiment videos and then 27 sad sentiment. The limit is 50 and so the overall sentiment should be balanced out.
+   * @author Jessica Chen
+   */
+  @Test
+  public void calculateOverallSentimentTest() {
+    List<Video> testVideos = new ArrayList<>();
+    for (int i = 0; i < 52; i++) {
+      Video video;
+      if (i <= 25) {
+        video = new Video(
+                "Happy Sentiment",
+                "Today is a great day with amazing weather. I am very happy and not sad at all. This is a happy sentence.",
+                "channelId123",
+                "videoId123",
+                "thumbnailUrl.jpg",
+                "channelTitle",
+                "2024-11-06T04:41:46Z");
+      } else {
+        video = new Video(
+                "Sad Sentiment",
+                "Today is a terrible day with awful weather. I am angry and not happy. This is a sad sentence.",
+                "channelId123",
+                "videoId123",
+                "thumbnailUrl.jpg",
+                "channelTitle",
+                "2024-11-06T04:41:46Z");
+      }
+      testVideos.add(video);
+    }
+    SearchResult test = new SearchResult("test", testVideos);
+    Assert.assertEquals(":-|", test.getOverallSentiment());
+  }
+  /**
+   * Tests the sentiment overall when dealing with the list of videos is null or empty.
+   * @author Jessica Chen
+   */
+  @Test
+  public void calculateOverallSentimentTestNull() {
+    List<Video> testVideos1 = new ArrayList<>();
+    SearchResult test = new SearchResult("test", null);
+    Assert.assertEquals("Unavailable", test.getOverallSentiment());
+    SearchResult test1 = new SearchResult("test1", testVideos1);
+    Assert.assertEquals("Unavailable", test1.getOverallSentiment());
+  }
+
   // Test for equals method when comparing with itself (should return true)
   @Test
   public void testSearchResultEqualsWithItself() {

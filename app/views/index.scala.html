@@ -22,16 +22,16 @@
 <!-- Results Section -->
 <div class="results" id="results">
     @for(searchResult <- searchResults) {
-        @if(searchResult.videos.nonEmpty) {
+        @if(searchResult.getVideos().nonEmpty) {
         <!-- Display search term and stats -->
         <div class="search-stats">
-            <p>Search terms: <strong>@searchResult.query</strong> (Flesch-Kincaid Grade Level Avg.= @searchResult.getAverageFleschKincaidGradeLevel(), Flesch Reading Ease Score Avg.= @searchResult.getAverageFleschReadingEaseScore())</p>
+            <p>Search terms: <strong>@searchResult.getQuery() @searchResult.getOverallSentiment()</strong> (Flesch-Kincaid Grade Level Avg.= @searchResult.getAverageFleschKincaidGradeLevel(), Flesch Reading Ease Score Avg.= @searchResult.getAverageFleschReadingEaseScore())</p>
             <a href="#" class="more-stats-link">More stats</a>
         </div>
 
         <!-- List of videos -->
         <ul>
-            @for((video, index) <- searchResult.videos.zipWithIndex) {
+            @for((video, index) <- searchResult.getVideos().zipWithIndex) {
                 <li class="video-item">
                     <div class="video-details">
                         <p class="video-title">@{index + 1}. <strong>Title:</strong> <a href="https://www.youtube.com/watch?v=@video.getVideoId()" target="_blank">@video.getTitle()</a></p>

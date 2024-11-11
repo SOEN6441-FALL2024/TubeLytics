@@ -1,17 +1,18 @@
 package controllers;
 
+import models.SearchResult;
+import models.Video;
+import play.mvc.Controller;
+import play.mvc.Result;
+import services.YouTubeService;
+
+import javax.inject.Inject;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
-import javax.inject.Inject;
-import models.SearchResult;
-import models.Video;
-import play.mvc.Controller;
-import play.mvc.Result;
-import services.YouTubeService;
 
 /**
  * This controller contains an action to handle HTTP requests to the application's home page. It
@@ -33,7 +34,6 @@ public class HomeController extends Controller {
 
     /**
      * Given a query a list of videos are fetched from the youtubeAPI, processed and rendered
-     * @param query user's string input
      * @return completion stage result of the rendering of given query/queries
      * @author Jessica Chen, Aynaz Javanivayeghan
      */

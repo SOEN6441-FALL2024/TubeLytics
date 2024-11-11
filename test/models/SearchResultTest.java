@@ -1,15 +1,15 @@
 package models;
 
-import static org.junit.Assert.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**
  * This test class contains equivalence classes to test the SearchResult class. Please note that our
@@ -31,21 +31,23 @@ public class SearchResultTest {
     query = "cat";
     testVideos = new ArrayList<>();
     Video video1 =
-        new Video(
-            "CatVideoTitle1",
-            "CatVideoDescription1",
-            "CatVideoChannelId1",
-            "CatVideoVideoId1",
-            "CatVideoThumbnailUrl.jpg1",
-            "CatVideoChannelTitle1");
+            new Video(
+                    "CatVideoTitle1",
+                    "CatVideoDescription1",
+                    "CatVideoChannelId1",
+                    "CatVideoVideoId1",
+                    "CatVideoThumbnailUrl.jpg1",
+                    "CatVideoChannelTitle1",
+                    "2024-11-06T04:41:46Z" );
     Video video2 =
-        new Video(
-            "CatVideoTitle2",
-            "CatVideoDescription2",
-            "CatVideoChannelId2",
-            "CatVideoVideoId2",
-            "CatVideoThumbnailUrl.jpg2",
-            "CatVideoChannelTitle2");
+            new Video(
+                    "CatVideoTitle2",
+                    "CatVideoDescription2",
+                    "CatVideoChannelId2",
+                    "CatVideoVideoId2",
+                    "CatVideoThumbnailUrl.jpg2",
+                    "CatVideoChannelTitle2",
+                    "2024-11-06T04:41:46Z" );
     testVideos.add(video1);
     testVideos.add(video2);
 
@@ -61,21 +63,23 @@ public class SearchResultTest {
     query = "Panda";
     testVideos = new ArrayList<>();
     Video video1 =
-        new Video(
-            "PandaVideoTitle1",
-            "PandaVideoDescription1",
-            "PandaVideoChannelId1",
-            "PandaVideoVideoId1",
-            "PandaVideoThumbnailUrl.jpg1",
-            "PandaVideoChannelTitle1");
+            new Video(
+                    "PandaVideoTitle1",
+                    "PandaVideoDescription1",
+                    "PandaVideoChannelId1",
+                    "PandaVideoVideoId1",
+                    "PandaVideoThumbnailUrl.jpg1",
+                    "PandaVideoChannelTitle1",
+                    "2024-11-06T04:41:46Z" );
     Video video2 =
-        new Video(
-            "PandaVideoTitle2",
-            "PandaVideoDescription2",
-            "PandaVideoChannelId2",
-            "PandaVideoVideoId2",
-            "PandaVideoThumbnailUrl.jpg2",
-            "PandaVideoChannelTitle2");
+            new Video(
+                    "PandaVideoTitle2",
+                    "PandaVideoDescription2",
+                    "PandaVideoChannelId2",
+                    "PandaVideoVideoId2",
+                    "PandaVideoThumbnailUrl.jpg2",
+                    "PandaVideoChannelTitle2",
+                    "2024-11-06T04:41:46Z");
     testVideos.add(video1);
     testVideos.add(video2);
 
@@ -110,21 +114,23 @@ public class SearchResultTest {
     String query2 = "dog";
     List<Video> videos2 = new ArrayList<>();
     Video video1 =
-        new Video(
-            "DogVideoTitle1",
-            "DogVideoDescription1",
-            "DogVideoChannelId1",
-            "DogVideoVideoId1",
-            "DogVideoThumbnailUrl.jpg1",
-            "DogVideoChannelTitle1");
+            new Video(
+                    "DogVideoTitle1",
+                    "DogVideoDescription1",
+                    "DogVideoChannelId1",
+                    "DogVideoVideoId1",
+                    "DogVideoThumbnailUrl.jpg1",
+                    "DogVideoChannelTitle1",
+                    "2024-11-06T04:41:46Z" );
     Video video2 =
-        new Video(
-            "DogVideoTitle2",
-            "DogVideoDescription2",
-            "DogVideoChannelId2",
-            "DogVideoVideoId2",
-            "DogVideoThumbnailUrl.jpg2",
-            "DogVideoChannelTitle2");
+            new Video(
+                    "DogVideoTitle2",
+                    "DogVideoDescription2",
+                    "DogVideoChannelId2",
+                    "DogVideoVideoId2",
+                    "DogVideoThumbnailUrl.jpg2",
+                    "DogVideoChannelTitle2",
+                    "2024-11-06T04:41:46Z" );
     videos2.add(video1);
     videos2.add(video2);
 
@@ -158,21 +164,23 @@ public class SearchResultTest {
     String query2 = "dog";
     List<Video> videos2 = new ArrayList<>();
     Video video1 =
-        new Video(
-            "DogVideoTitle1",
-            "DogVideoDescription1",
-            "DogVideoChannelId1",
-            "DogVideoVideoId1",
-            "DogVideoThumbnailUrl.jpg1",
-            "DogVideoChannelTitle1");
+            new Video(
+                    "DogVideoTitle1",
+                    "DogVideoDescription1",
+                    "DogVideoChannelId1",
+                    "DogVideoVideoId1",
+                    "DogVideoThumbnailUrl.jpg1",
+                    "DogVideoChannelTitle1",
+                    "2024-11-06T04:41:46Z" );
     Video video2 =
-        new Video(
-            "DogVideoTitle2",
-            "DogVideoDescription2",
-            "DogVideoChannelId2",
-            "DogVideoVideoId2",
-            "DogVideoThumbnailUrl.jpg2",
-            "DogVideoChannelTitle2");
+            new Video(
+                    "DogVideoTitle2",
+                    "DogVideoDescription2",
+                    "DogVideoChannelId2",
+                    "DogVideoVideoId2",
+                    "DogVideoThumbnailUrl.jpg2",
+                    "DogVideoChannelTitle2",
+                    "2024-11-06T04:41:46Z" );
     videos2.add(video1);
     videos2.add(video2);
 
@@ -196,7 +204,8 @@ public class SearchResultTest {
                 "channelId123",
                 "videoId123",
                 "thumbnailUrl.jpg",
-                "channelTitle");
+                "channelTitle",
+                "2024-11-06T04:41:46Z");
       } else {
         video = new Video(
                 "Sad Sentiment",
@@ -204,7 +213,8 @@ public class SearchResultTest {
                 "channelId123",
                 "videoId123",
                 "thumbnailUrl.jpg",
-                "channelTitle");
+                "channelTitle",
+                "2024-11-06T04:41:46Z" );
       }
       testVideos.add(video);
     }
@@ -224,5 +234,36 @@ public class SearchResultTest {
     Assert.assertEquals("Unavailable", test.getOverallSentiment());
     SearchResult test1 = new SearchResult("test1", testVideos1);
     Assert.assertEquals("Unavailable", test1.getOverallSentiment());
+  }
+
+  /**
+   * Tests the equals method by comparing the SearchResult object with itself.
+   * Expects the result to be true.
+   *  @author Aidassj
+   */
+  @Test
+  public void testSearchResultEqualsWithItself() {
+    assertEquals(searchResult, searchResult);
+  }
+
+  /**
+   * Tests the equals method by comparing the SearchResult object with null.
+   * Expects the result to be false.
+   * @author Aidassj
+   */
+  @Test
+  public void testSearchResultEqualsWithNull() {
+    assertNotEquals(searchResult, null);
+  }
+
+  /**
+   * Tests the equals method by comparing the SearchResult object with an object of a different type.
+   * Expects the result to be false.
+   * @author Aidassj
+
+   */
+  @Test
+  public void testSearchResultEqualsWithDifferentType() {
+    assertNotEquals(searchResult, "a different type");
   }
 }

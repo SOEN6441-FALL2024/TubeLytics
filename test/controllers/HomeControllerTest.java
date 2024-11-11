@@ -1,17 +1,5 @@
 package controllers;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.when;
-import static play.mvc.Http.Status.OK;
-import static play.test.Helpers.contentAsString;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 import models.Video;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +8,16 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import play.mvc.Result;
 import services.YouTubeService;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+import static play.mvc.Http.Status.OK;
+import static play.test.Helpers.contentAsString;
 
 /**
  * Unit test for HomeController
@@ -45,21 +43,23 @@ public class HomeControllerTest {
     // Adding mock entries into List<Video>
     videos = new ArrayList<>();
     Video video1 =
-        new Video(
-            "CatVideoTitle1",
-            "CatVideoDescription1",
-            "CatVideoChannelId1",
-            "CatVideoVideoId1",
-            "CatVideoThumbnailUrl.jpg1",
-            "CatVideoChannelTitle1");
+            new Video(
+                    "CatVideoTitle1",
+                    "CatVideoDescription1",
+                    "CatVideoChannelId1",
+                    "CatVideoVideoId1",
+                    "CatVideoThumbnailUrl.jpg1",
+                    "CatVideoChannelTitle1",
+                    "2024-11-06T04:41:46Z");
     Video video2 =
-        new Video(
-            "CatVideoTitle2",
-            "CatVideoDescription2",
-            "CatVideoChannelId2",
-            "CatVideoVideoId2",
-            "CatVideoThumbnailUrl.jpg2",
-            "CatVideoChannelTitle2");
+            new Video(
+                    "CatVideoTitle2",
+                    "CatVideoDescription2",
+                    "CatVideoChannelId2",
+                    "CatVideoVideoId2",
+                    "CatVideoThumbnailUrl.jpg2",
+                    "CatVideoChannelTitle2",
+                    "2024-11-06T04:41:46Z");
     videos.add(video1);
     videos.add(video2);
   }
@@ -68,16 +68,18 @@ public class HomeControllerTest {
   public void testIndexWithQuery() {
     // Arrange
     List<Video> mockVideos =
-        List.of(
-            new Video(
-                "Title1", "Description1", "Channel1", "VideoId1", "ThumbnailUrl1", "ChannelTitle1"),
-            new Video(
-                "Title2",
-                "Description2",
-                "Channel2",
-                "VideoId2",
-                "ThumbnailUrl2",
-                "ChannelTitle2"));
+            List.of(
+                    new Video(
+                            "Title1", "Description1", "Channel1", "VideoId1", "ThumbnailUrl1", "ChannelTitle1","2024-11-06T04:41:46Z"),
+                    new Video(
+                            "Title2",
+                            "Description2",
+                            "Channel2",
+                            "VideoId2",
+                            "ThumbnailUrl2",
+                            "ChannelTitle2",
+                            "2024-11-06T04:41:46Z")
+            );
     when(mockYouTubeService.searchVideos("test")).thenReturn(mockVideos);
 
     // Act
@@ -97,8 +99,8 @@ public class HomeControllerTest {
     // Assert
     assertEquals(OK, result.status());
     assertTrue(
-        contentAsString(result)
-            .contains("No results found")); // Assuming index page shows this text for empty results
+            contentAsString(result)
+                    .contains("No results found")); // Assuming index page shows this text for empty results
   }
 
   @Test
@@ -109,8 +111,8 @@ public class HomeControllerTest {
     // Assert
     assertEquals(OK, result.status());
     assertTrue(
-        contentAsString(result)
-            .contains("No results found")); // Assuming index page shows this text for empty results
+            contentAsString(result)
+                    .contains("No results found")); // Assuming index page shows this text for empty results
   }
 
   @Test
@@ -149,15 +151,15 @@ public class HomeControllerTest {
 
     // Fetching second entry
     when(mockYouTubeService.searchVideos("dog"))
-        .thenReturn(
-            List.of(
-                new Video(
-                    "DogVideoTitle1",
-                    "DogVideoDescription1",
-                    "DogVideoChannelId1",
-                    "DogVideoVideoId1",
-                    "DogVideoThumbnailUrl.jpg1",
-                    "DogVideoChannelTitle1")));
+            .thenReturn(
+                    List.of(
+                            new Video(
+                                    "DogVideoTitle1",
+                                    "DogVideoDescription1",
+                                    "DogVideoChannelId1",
+                                    "DogVideoVideoId1",
+                                    "DogVideoThumbnailUrl.jpg1",
+                                    "DogVideoChannelTitle1","2024-11-06T04:41:46Z")));
     homeController.index("dog").toCompletableFuture().join();
 
     // Adding first entry again

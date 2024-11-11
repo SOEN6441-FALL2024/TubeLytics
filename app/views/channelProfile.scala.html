@@ -1,0 +1,53 @@
+@(channelInfo: models.ChannelInfo, videos: List[models.Video])
+<!-- Aidassj -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>@if(channelInfo != null) { @channelInfo.getName() - Channel Profile } else { Channel Profile }</title>
+    <link rel="stylesheet" href='@routes.Assets.versioned("css/styles.css")' />
+</head>
+
+<body>
+
+<!-- Channel Profile Section -->
+<div class="channel-profile">
+    @if(channelInfo != null) {
+    <h1><strong>Channel Name : </strong>@channelInfo.getName()</h1>
+    <p><strong>Channel Description : </strong> @channelInfo.getDescription()</p>
+    <p class="channel-stats"><strong>Subscribers : </strong> @channelInfo.getSubscriberCount()</p>
+    <p class="channel-stats"><strong>Total Views : </strong> @channelInfo.getViewCount()</p>
+    <p class="channel-stats"><strong>Video Count : </strong> @channelInfo.getVideoCount()</p>
+    } else {
+    <p>No channel information available</p>
+    }
+</div>
+
+
+<!-- Last 10 Videos Section -->
+<div class="channel-videos">
+    <h2>Last 10 Videos</h2>
+    @if(videos != null && videos.nonEmpty) {
+    <ul>
+        @for(video <- videos) {
+        <li>
+            <div class="channelpage">
+                <p class="video-title"><strong>Title:</strong><a class="video-title" href="@video.getUrl()" target="_blank">@video.getTitle()</a></p>
+                <p class="video-description"><strong>Description:</strong>@video.getDescription()</p>
+                <p class="video-stats"><strong>Published on:</strong> @video.getPublishedDate()</p>
+            </div>
+            <img class="channelvideo" src="@video.getThumbnailUrl()" alt="Thumbnail for @video.getTitle()" width="120" height="90">
+        </li>
+        }
+    </ul>
+    } else {
+    <p>No videos available</p>
+    }
+</div>
+
+
+</body>
+
+</html>

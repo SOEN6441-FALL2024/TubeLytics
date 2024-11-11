@@ -1,5 +1,6 @@
 package controllers;
 
+import models.ChannelInfo;
 import models.Video;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -89,4 +90,34 @@ public class YouTubeController extends Controller {
 
     return ok(views.html.wordStats.render(sortedWordStats, query));
   }
+
+  /**
+   * @author Aidassj
+   * Method to display the channel profile with all available profile information and the last 10 videos of the channel.
+   */
+  public Result channelProfile(String channelId) {
+    System.out.println("Channel ID received: " + channelId);
+
+    try {
+      // Fetch channel information synchronously
+      ChannelInfo channelInfo = youTubeService.getChannelInfo(channelId);
+
+      // Check if channel information is null (error occurred)
+      if (channelInfo == null) {
+        return internalServerError("An error occurred while fetching channel data.");
+      }
+
+      // Fetch the last 10 videos for the channel synchronously
+      List<Video> videos = youTubeService.getLast10Videos(channelId);
+
+      // Return the rendered view with channel info and videos
+      return ok(views.html.channelProfile.render(channelInfo, videos));
+    } catch (RuntimeException ex) {
+      // Log error and return an internal server error response
+      System.err.println("Error fetching data: " + ex.getMessage());
+      return internalServerError("An error occurred while fetching channel data.");
+    }
+  }
+
+
 }

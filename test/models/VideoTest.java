@@ -1,11 +1,11 @@
 package models;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.Test;
 import play.Application;
 import play.inject.guice.GuiceApplicationBuilder;
 import play.test.WithApplication;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class VideoTest extends WithApplication {
 
@@ -24,7 +24,8 @@ public class VideoTest extends WithApplication {
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
-            "channelTitle");
+            "channelTitle",
+                "2024-11-06T04:41:46Z" );
 
     assertEquals("Sample Title", video.getTitle());
     assertEquals("Sample Description", video.getDescription());
@@ -32,6 +33,7 @@ public class VideoTest extends WithApplication {
     assertEquals("videoId123", video.getVideoId());
     assertEquals("thumbnailUrl.jpg", video.getThumbnailUrl());
     assertEquals("channelTitle", video.getChannelTitle());
+
   }
 
   @Test
@@ -43,7 +45,8 @@ public class VideoTest extends WithApplication {
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
-            "channelTitle");
+            "channelTitle",
+                "2024-11-06T04:41:46Z" );
     Video video2 =
         new Video(
             "Sample Title",
@@ -51,7 +54,8 @@ public class VideoTest extends WithApplication {
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
-            "channelTitle");
+            "channelTitle",
+                "2024-11-06T04:41:46Z" );
 
     assertEquals(video1, video2);
     assertTrue(video1.equals(video1));
@@ -66,7 +70,8 @@ public class VideoTest extends WithApplication {
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
-            "channelTitle");
+            "channelTitle",
+                "2024-11-06T04:41:46Z" );
     Video video2 =
         new Video(
             "Different Title",
@@ -74,7 +79,8 @@ public class VideoTest extends WithApplication {
             "channelId456",
             "videoId456",
             "differentThumbnailUrl.jpg",
-            "channelTitle");
+            "channelTitle",
+                "2024-11-06T04:41:46Z" );
 
     assertNotEquals(video1, video2);
   }
@@ -88,7 +94,8 @@ public class VideoTest extends WithApplication {
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
-            "channelTitle");
+            "channelTitle",
+                "2024-11-06T04:41:46Z");
     Video video2 =
         new Video(
             "Sample Title",
@@ -96,7 +103,8 @@ public class VideoTest extends WithApplication {
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
-            "channelTitle");
+            "channelTitle",
+                "2024-11-06T04:41:46Z" );
 
     assertEquals(video1.hashCode(), video2.hashCode());
   }
@@ -110,7 +118,8 @@ public class VideoTest extends WithApplication {
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
-            "channelTitle");
+            "channelTitle",
+                "2024-11-06T04:41:46Z" );
     Video video2 =
         new Video(
             "Different Title",
@@ -118,7 +127,8 @@ public class VideoTest extends WithApplication {
             "channelId456",
             "videoId456",
             "differentThumbnailUrl.jpg",
-            "channelTitle");
+            "channelTitle",
+                "2024-11-06T04:41:46Z" );
 
     assertNotEquals(video1.hashCode(), video2.hashCode());
   }
@@ -133,7 +143,8 @@ public class VideoTest extends WithApplication {
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
-            "channelTitle");
+            "channelTitle",
+                "2024-11-06T04:41:46Z" );
 
     assertNotEquals(video, null);
   }
@@ -141,7 +152,7 @@ public class VideoTest extends WithApplication {
   @Test
   public void testEquals_DifferentClass() {
     Video video1 =
-        new Video("Title", "Description", "ChannelId", "VideoId", "ThumbnailUrl", "ChannelTitle");
+        new Video("Title", "Description", "ChannelId", "VideoId", "ThumbnailUrl", "ChannelTitle","2024-11-06T04:41:46Z");
     String differentClassObject = "Not a Video Object";
     assertNotEquals(
         video1,
@@ -152,7 +163,7 @@ public class VideoTest extends WithApplication {
   @Test
   public void testEquals_DifferentProperties() {
     Video video1 =
-        new Video("Title", "Description", "ChannelId", "VideoId", "ThumbnailUrl", "ChannelTitle");
+        new Video("Title", "Description", "ChannelId", "VideoId", "ThumbnailUrl", "ChannelTitle","2024-11-06T04:41:46Z");
     Video video2 =
         new Video(
             "Different Title",
@@ -160,7 +171,8 @@ public class VideoTest extends WithApplication {
             "ChannelId",
             "VideoId",
             "ThumbnailUrl",
-            "ChannelTitle");
+            "ChannelTitle",
+                "2024-11-06T04:41:46Z" );
     assertNotEquals(video1, video2, "Two videos with different titles should not be equal");
 
     Video video3 =
@@ -170,7 +182,8 @@ public class VideoTest extends WithApplication {
             "ChannelId",
             "VideoId",
             "ThumbnailUrl",
-            "ChannelTitle");
+            "ChannelTitle",
+                "2024-11-06T04:41:46Z" );
     assertNotEquals(video1, video3, "Two videos with different descriptions should not be equal");
 
     Video video4 =
@@ -180,7 +193,8 @@ public class VideoTest extends WithApplication {
             "Different ChannelId",
             "VideoId",
             "ThumbnailUrl",
-            "ChannelTitle");
+            "ChannelTitle",
+                "2024-11-06T04:41:46Z" );
     assertNotEquals(video1, video4, "Two videos with different channel IDs should not be equal");
 
     Video video5 =
@@ -190,7 +204,8 @@ public class VideoTest extends WithApplication {
             "ChannelId",
             "Different VideoId",
             "ThumbnailUrl",
-            "ChannelTitle");
+            "ChannelTitle",
+                "2024-11-06T04:41:46Z" );
     assertNotEquals(video1, video5, "Two videos with different video IDs should not be equal");
 
     Video video6 =
@@ -200,7 +215,8 @@ public class VideoTest extends WithApplication {
             "ChannelId",
             "VideoId",
             "Different ThumbnailUrl",
-            "ChannelTitle");
+            "ChannelTitle",
+                "2024-11-06T04:41:46Z" );
     assertNotEquals(video1, video6, "Two videos with different thumbnail URLs should not be equal");
 
     Video video7 =
@@ -210,7 +226,8 @@ public class VideoTest extends WithApplication {
             "ChannelId",
             "VideoId",
             "ThumbnailUrl",
-            "Different ChannelTitle");
+            "Different ChannelTitle",
+                "2024-11-06T04:41:46Z" );
     assertNotEquals(video1, video7, "Two videos with different channel titles should not be equal");
   }
 
@@ -227,7 +244,8 @@ public class VideoTest extends WithApplication {
                     "channelId123",
                     "videoId123",
                     "thumbnailUrl.jpg",
-                    "channelTitle");
+                    "channelTitle",
+                    "2024-11-06T04:41:46Z" );
 
     assertEquals(4, video.getHappyWordCount());
     assertEquals(1, video.getSadWordCount());

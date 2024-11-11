@@ -1,15 +1,15 @@
 package models;
 
-import static org.junit.Assert.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**
  * This test class contains equivalence classes to test the SearchResult class. Please note that our
@@ -37,7 +37,8 @@ public class SearchResultTest {
             "CatVideoChannelId1",
             "CatVideoVideoId1",
             "CatVideoThumbnailUrl.jpg1",
-            "CatVideoChannelTitle1");
+            "CatVideoChannelTitle1",
+                "2024-11-06T04:41:46Z" );
     Video video2 =
         new Video(
             "CatVideoTitle2",
@@ -45,7 +46,8 @@ public class SearchResultTest {
             "CatVideoChannelId2",
             "CatVideoVideoId2",
             "CatVideoThumbnailUrl.jpg2",
-            "CatVideoChannelTitle2");
+            "CatVideoChannelTitle2",
+                "2024-11-06T04:41:46Z" );
     testVideos.add(video1);
     testVideos.add(video2);
 
@@ -67,7 +69,8 @@ public class SearchResultTest {
             "PandaVideoChannelId1",
             "PandaVideoVideoId1",
             "PandaVideoThumbnailUrl.jpg1",
-            "PandaVideoChannelTitle1");
+            "PandaVideoChannelTitle1",
+                "2024-11-06T04:41:46Z" );
     Video video2 =
         new Video(
             "PandaVideoTitle2",
@@ -75,7 +78,8 @@ public class SearchResultTest {
             "PandaVideoChannelId2",
             "PandaVideoVideoId2",
             "PandaVideoThumbnailUrl.jpg2",
-            "PandaVideoChannelTitle2");
+            "PandaVideoChannelTitle2",
+                "2024-11-06T04:41:46Z");
     testVideos.add(video1);
     testVideos.add(video2);
 
@@ -116,7 +120,8 @@ public class SearchResultTest {
             "DogVideoChannelId1",
             "DogVideoVideoId1",
             "DogVideoThumbnailUrl.jpg1",
-            "DogVideoChannelTitle1");
+            "DogVideoChannelTitle1",
+                "2024-11-06T04:41:46Z" );
     Video video2 =
         new Video(
             "DogVideoTitle2",
@@ -124,7 +129,8 @@ public class SearchResultTest {
             "DogVideoChannelId2",
             "DogVideoVideoId2",
             "DogVideoThumbnailUrl.jpg2",
-            "DogVideoChannelTitle2");
+            "DogVideoChannelTitle2",
+                "2024-11-06T04:41:46Z" );
     videos2.add(video1);
     videos2.add(video2);
 
@@ -164,7 +170,8 @@ public class SearchResultTest {
             "DogVideoChannelId1",
             "DogVideoVideoId1",
             "DogVideoThumbnailUrl.jpg1",
-            "DogVideoChannelTitle1");
+            "DogVideoChannelTitle1",
+                "2024-11-06T04:41:46Z" );
     Video video2 =
         new Video(
             "DogVideoTitle2",
@@ -172,7 +179,8 @@ public class SearchResultTest {
             "DogVideoChannelId2",
             "DogVideoVideoId2",
             "DogVideoThumbnailUrl.jpg2",
-            "DogVideoChannelTitle2");
+            "DogVideoChannelTitle2",
+                "2024-11-06T04:41:46Z" );
     videos2.add(video1);
     videos2.add(video2);
 
@@ -196,7 +204,8 @@ public class SearchResultTest {
                 "channelId123",
                 "videoId123",
                 "thumbnailUrl.jpg",
-                "channelTitle");
+                "channelTitle",
+                "2024-11-06T04:41:46Z");
       } else {
         video = new Video(
                 "Sad Sentiment",
@@ -204,7 +213,8 @@ public class SearchResultTest {
                 "channelId123",
                 "videoId123",
                 "thumbnailUrl.jpg",
-                "channelTitle");
+                "channelTitle",
+                "2024-11-06T04:41:46Z" );
       }
       testVideos.add(video);
     }
@@ -224,5 +234,24 @@ public class SearchResultTest {
     Assert.assertEquals("Unavailable", test.getOverallSentiment());
     SearchResult test1 = new SearchResult("test1", testVideos1);
     Assert.assertEquals("Unavailable", test1.getOverallSentiment());
+  }
+
+  //Aidaaaaaaaa
+  // Test for equals method when comparing with itself (should return true)
+  @Test
+  public void testSearchResultEqualsWithItself() {
+    assertEquals(searchResult, searchResult);
+  }
+
+  // Test for equals method when comparing with null (should return false)
+  @Test
+  public void testSearchResultEqualsWithNull() {
+    assertNotEquals(searchResult, null);
+  }
+
+  // Test for equals method when comparing with a different type (should return false)
+  @Test
+  public void testSearchResultEqualsWithDifferentType() {
+    assertNotEquals(searchResult, "a different type");
   }
 }

@@ -1,8 +1,9 @@
 package controllers;
 
-import org.junit.Test;
+import models.ChannelInfo;
 import models.Video;
 import org.junit.Before;
+import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -14,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static com.gargoylesoftware.htmlunit.WebResponse.INTERNAL_SERVER_ERROR;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -44,7 +46,7 @@ public class YouTubeControllerTest {
             "channelId123",
             "videoId123",
             "http://mockurl.com",
-            "Mock Channel");
+            "Mock Channel","2024-11-06T04:41:46Z");
     List<Video> mockVideoList = Collections.singletonList(mockVideo);
 
     // Set up the YouTubeService to return the mock video list
@@ -138,7 +140,7 @@ public class YouTubeControllerTest {
     @Test
     public void testWordStatsWithSpecialCharacters() {
         // Arrange: Set up videos with special characters in titles and descriptions
-        Video video = new Video("Hello, World!", "Special & character test.", "channelId3", "videoId3", "http://mockurl3.com", "Channel Special");
+        Video video = new Video("Hello, World!", "Special & character test.", "channelId3", "videoId3", "http://mockurl3.com", "Channel Special","2024-11-06T04:41:46Z");
         List<Video> mockVideos = Collections.singletonList(video);
 
         // Act: Mock YouTubeService to return the list of videos
@@ -172,8 +174,8 @@ public class YouTubeControllerTest {
     @Test
     public void testWordStatsWithFrequencyCount() {
         // Arrange: Set up videos with repetitive words
-        Video video1 = new Video("Java Java", "Java programming", "channelId1", "videoId1", "http://mockurl1.com", "Channel Java");
-        Video video2 = new Video("Java Basics", "Basics of Java programming", "channelId2", "videoId2", "http://mockurl2.com", "Channel Basics");
+        Video video1 = new Video("Java Java", "Java programming", "channelId1", "videoId1", "http://mockurl1.com", "Channel Java","2024-11-06T04:41:46Z");
+        Video video2 = new Video("Java Basics", "Basics of Java programming", "channelId2", "videoId2", "http://mockurl2.com", "Channel Basics","2024-11-06T04:41:46Z");
         List<Video> mockVideos = Arrays.asList(video1, video2);
 
         // Act: Mock YouTubeService to return the list of videos
@@ -194,5 +196,54 @@ public class YouTubeControllerTest {
         assertTrue(content.contains("programming"));
         assertTrue(content.contains("2"));    // Check for 'programming' frequency
     }
-}
 
+
+    @Test
+    public void testChannelProfileWithValidData() {
+        // Arrange: Mock ChannelInfo and List<Video> for a valid channel
+        ChannelInfo mockChannelInfo = new ChannelInfo("Mock Channel Name", "Mock Channel Description", 1000, 50000, 200);
+        Video mockVideo = new Video("Mock Video Title", "Mock Video Description", "channelId123", "videoId123", "http://mockthumbnail.com", "Mock Channel", "2024-01-01");
+        List<Video> mockVideoList = List.of(mockVideo);
+
+        // Mock the service methods to return the mock data
+        when(youTubeService.getChannelInfo("channelId123")).thenReturn(mockChannelInfo);
+        when(youTubeService.getLast10Videos("channelId123")).thenReturn(mockVideoList);
+
+        // Act: Call the channelProfile method
+        Result result = youTubeController.channelProfile("channelId123");
+
+        // Assert: Check status and verify content
+        assertEquals(OK, result.status());
+        assertTrue(contentAsString(result).contains("Mock Channel Name"));
+        assertTrue(contentAsString(result).contains("Mock Video Title"));
+        assertTrue(contentAsString(result).contains("Mock Channel Description"));
+    }
+
+    @Test
+    public void testChannelProfileWithNonExistentChannel() {
+        // Arrange: Simulate non-existent channel by returning null values
+        when(youTubeService.getChannelInfo("invalidChannelId")).thenReturn(null);
+        when(youTubeService.getLast10Videos("invalidChannelId")).thenReturn(Collections.emptyList());
+
+        // Act: Call the channelProfile method
+        Result result = youTubeController.channelProfile("invalidChannelId");
+
+        // Assert: Check if the response contains error or no data found message
+        assertEquals(INTERNAL_SERVER_ERROR, result.status());
+        assertTrue(contentAsString(result).contains("An error occurred while fetching channel data."));
+    }
+
+    @Test
+    public void testChannelProfileWithErrorInFetchingData() {
+        // Arrange: Simulate an exception in service methods
+        doThrow(new RuntimeException("API failure")).when(youTubeService).getChannelInfo(anyString());
+        doThrow(new RuntimeException("API failure")).when(youTubeService).getLast10Videos(anyString());
+
+        // Act: Call the channelProfile method to trigger the exception
+        Result result = youTubeController.channelProfile("errorChannel");
+
+        // Assert: Check if the response contains error message
+        assertEquals(INTERNAL_SERVER_ERROR, result.status());
+        assertTrue(contentAsString(result).contains("An error occurred while fetching channel data."));
+    }
+}

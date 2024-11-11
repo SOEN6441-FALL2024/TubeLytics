@@ -40,7 +40,7 @@
         <li class="video-item">
             <div class="video-details">
                 <p class="video-title">@{index + 1}. <strong>Title:</strong> <a href="https://www.youtube.com/watch?v=@video.getVideoId()" target="_blank">@video.getTitle()</a></p>
-                <p class="channel-link"><strong>Channel:</strong> <a href="https://www.youtube.com/channel/@video.getChannelId()" target="_blank">@video.getChannelTitle()</a></p>
+                <p class="channel-link"><strong>Channel:</strong> <a href="/channel/@video.getChannelId()" target="_blank">@video.getChannelTitle()</a></p>
                 <p class="video-description"><strong>Description:</strong> @video.getDescription().take(150) + "..."</p>
                 <p class="video-stats">Flesch-Kincaid Grade Level = @video.getFleschKincaidGradeLevel(), Flesch Reading Ease Score = @video.getFleschReadingEaseScore() . <a href="#" class="more-stats-link">Tags</a></p>
                 <a href="@routes.YouTubeController.wordStats(searchResult.getQuery())" class="more-stats-link">More Word Stats</a>

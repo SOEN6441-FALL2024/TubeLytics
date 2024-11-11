@@ -79,7 +79,7 @@ public class YouTubeService {
             return new ChannelInfo(name, description, subscriberCount, viewCount, videoCount);
 
         } catch (Exception e) {
-            e.printStackTrace();
+
             return null;
         }
     }
@@ -108,14 +108,13 @@ public class YouTubeService {
 
                     videos.add(new Video(title, description, channelId, videoId, thumbnail, channelTitle, publishedDate));
                 } catch (Exception e) {
-                    e.printStackTrace();
+
                 }
             });
 
             return videos;
 
         } catch (Exception e) {
-            e.printStackTrace();
             return new ArrayList<>();
         }
     }

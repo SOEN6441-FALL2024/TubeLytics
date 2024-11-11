@@ -1,6 +1,8 @@
 package models;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.Collections;
 import utils.Helpers;
 
 public class Video {
@@ -9,31 +11,46 @@ public class Video {
   private final String channelId;
   private final String videoId;
   private final String thumbnailUrl;
-  private final String channelTitle; // New field
+  private final String channelTitle;
   private final double fleschKincaidGradeLevel;
   private final double fleschReadingEaseScore;
   private final String submissionSentiment;
   private final double happyWordCount;
   private final double sadWordCount;
+  private final List<String> tags;
 
+  // سازنده اصلی که tags را به عنوان ورودی می‌گیرد
   public Video(
-      String title,
-      String description,
-      String channelId,
-      String videoId,
-      String thumbnailUrl,
-      String channelTitle) {
+          String title,
+          String description,
+          String channelId,
+          String videoId,
+          String thumbnailUrl,
+          String channelTitle,
+          List<String> tags) {
     this.title = title;
     this.description = description;
     this.channelId = channelId;
     this.videoId = videoId;
     this.thumbnailUrl = thumbnailUrl;
-    this.channelTitle = channelTitle; // Initialize the new field
+    this.channelTitle = channelTitle;
     this.fleschKincaidGradeLevel = Helpers.calculateFleschKincaidGradeLevel(description);
     this.fleschReadingEaseScore = Helpers.calculateFleschReadingEaseScore(description);
     this.happyWordCount = Helpers.calculateHappyWordCount(description);
     this.sadWordCount = Helpers.calculateSadWordCount(description);
     this.submissionSentiment = Helpers.calculateSentiment(happyWordCount, sadWordCount);
+    this.tags = tags;
+  }
+
+  // سازنده جدید بدون پارامتر tags
+  public Video(
+          String title,
+          String description,
+          String channelId,
+          String videoId,
+          String thumbnailUrl,
+          String channelTitle) {
+    this(title, description, channelId, videoId, thumbnailUrl, channelTitle, Collections.emptyList());
   }
 
   public String getTitle() {
@@ -56,7 +73,7 @@ public class Video {
     return thumbnailUrl;
   }
 
-  public String getChannelTitle() { // Getter for the new field
+  public String getChannelTitle() {
     return channelTitle;
   }
 
@@ -74,22 +91,26 @@ public class Video {
 
   public String getSubmissionSentiment() { return submissionSentiment; }
 
-  // Override equals() and hashCode() to include channelTitle
+  public List<String> getTags() {
+    return tags;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     Video video = (Video) o;
     return Objects.equals(title, video.title)
-        && Objects.equals(description, video.description)
-        && Objects.equals(channelId, video.channelId)
-        && Objects.equals(videoId, video.videoId)
-        && Objects.equals(thumbnailUrl, video.thumbnailUrl)
-        && Objects.equals(channelTitle, video.channelTitle);
+            && Objects.equals(description, video.description)
+            && Objects.equals(channelId, video.channelId)
+            && Objects.equals(videoId, video.videoId)
+            && Objects.equals(thumbnailUrl, video.thumbnailUrl)
+            && Objects.equals(channelTitle, video.channelTitle)
+            && Objects.equals(tags, video.tags);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(title, description, channelId, videoId, thumbnailUrl, channelTitle);
+    return Objects.hash(title, description, channelId, videoId, thumbnailUrl, channelTitle, tags);
   }
 }

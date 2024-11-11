@@ -1,13 +1,13 @@
-@(videos: List[models.Video],query: String)
+@(videos: List[models.Video], queryOrTag: String)
 
 @main("YouTube Search Results") {
-<h1>YouTube Search Results</h1>
+<h1>YouTube Search Results for "@queryOrTag"</h1>
 <p>
-    Search terms:
-    <a href="@routes.YouTubeController.wordStats(query)">@query</a> <!-- Hyperlinking to word stats page -->
+    Search term or Tag:
+    <a href="@routes.YouTubeController.wordStats(queryOrTag)">@queryOrTag</a>
 </p>
 @if(videos.isEmpty) {
-<p>No results found for "@query"</p>
+<p>No results found for "@queryOrTag"</p>
 } else {
 <ul>
     @for(video <- videos) {
@@ -15,10 +15,16 @@
         <img src="@video.getThumbnailUrl()" alt="Thumbnail">
         <h2><a href="https://www.youtube.com/watch?v=@video.getVideoId()">@video.getTitle()</a></h2>
         <p>@video.getDescription()</p>
-        <p><a href="https://www.youtube.com/channel/@video.getChannelId()">Channel</a></p>
+        <p><a href="https://www.youtube.com/channel/@video.getChannelId()">Channel: @video.getChannelTitle()</a></p>
+
+        <!--tag section -->
+        <p>Tags:
+            @for(tag <- video.getTags()) {
+            <a href="@routes.YouTubeController.getVideosByTag(tag)">@tag</a>
+            }
+        </p>
     </li>
     }
 </ul>
 }
 }
-

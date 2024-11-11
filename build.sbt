@@ -11,6 +11,7 @@ libraryDependencies ++= Seq(
   ws,
   "org.playframework" %% "play-json" % "3.0.4",
   "org.junit.jupiter" % "junit-jupiter-api" % "5.10.2" % Test,
+  "com.typesafe.play" %% "play-test" % "2.8.8" % Test,
   "org.junit.jupiter" % "junit-jupiter-engine" % "5.10.2" % Test,
   "org.mockito" % "mockito-core" % "5.12.0" % Test
 )

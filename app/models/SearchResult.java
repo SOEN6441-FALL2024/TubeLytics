@@ -1,8 +1,10 @@
 package models;
 
-import java.util.*;
-
 import utils.Helpers;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * This SearchResult class is created to help us store the information for each search query in
@@ -113,7 +115,7 @@ public class SearchResult {
   /**
    * Get the average Flesch Reading Ease Score of the videos in the search result.
    *
-   * @param videos the list of videos to calculate the average Flesch Reading Ease Score
+   * video the list of videos to calculate the average Flesch Reading Ease Score
    * @return the average Flesch Reading Ease Score
    * @author Deniz Dinchdonmez
    */

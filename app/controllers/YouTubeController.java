@@ -47,7 +47,7 @@ public class YouTubeController extends Controller {
    * into words, counts their occurrences, and sorts the result in descending order of frequency.
    * The statistics are displayed in a view with a table format.</p>
    *
-   * @param query the search query used to fetch YouTube videos.
+   * the search query used to fetch YouTube videos.
    * @return a Result containing the rendered word statistics page with word frequency data.
    * @author Aynaz Javanivayeghan
    */

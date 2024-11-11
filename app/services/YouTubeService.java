@@ -60,8 +60,8 @@ public class YouTubeService {
      * This includes details such as the channel's name, description, subscriber count,
      * view count, and video count.
      *
-     * @param channelId the unique ID of the YouTube channel
-     * @return a {@link ChannelInfo} object containing the channel's information,
+     * channelid the unique ID of the YouTube channel
+     * @return a object containing the channel's information,
      *         or {@code null} if an error occurs during the API request
      * @author Aidassj
      */
@@ -97,8 +97,8 @@ public class YouTubeService {
      * Each video includes details such as the title, description, video ID,
      * thumbnail URL, channel title, and publication date.
      *
-     * @param channelId the unique ID of the YouTube channel
-     * @return a list of {@link Video} objects representing the latest 10 videos
+     * channelid the unique ID of the YouTube channel
+     * @return a list of video objects representing the latest 10 videos
      *         from the channel, or an empty list if an error occurs during the API request
      *         @author Aidassj
      */

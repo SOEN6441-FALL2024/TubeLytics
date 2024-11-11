@@ -7,6 +7,9 @@ import play.Application;
 import play.inject.guice.GuiceApplicationBuilder;
 import play.test.WithApplication;
 
+import java.util.Collections;
+import java.util.List;
+
 public class VideoTest extends WithApplication {
 
   @Override
@@ -18,13 +21,13 @@ public class VideoTest extends WithApplication {
   @Test
   public void testVideoCreation() {
     Video video =
-        new Video(
-            "Sample Title",
-            "Sample Description",
-            "channelId123",
-            "videoId123",
-            "thumbnailUrl.jpg",
-            "channelTitle");
+            new Video(
+                    "Sample Title",
+                    "Sample Description",
+                    "channelId123",
+                    "videoId123",
+                    "thumbnailUrl.jpg",
+                    "channelTitle");
 
     assertEquals("Sample Title", video.getTitle());
     assertEquals("Sample Description", video.getDescription());
@@ -32,26 +35,27 @@ public class VideoTest extends WithApplication {
     assertEquals("videoId123", video.getVideoId());
     assertEquals("thumbnailUrl.jpg", video.getThumbnailUrl());
     assertEquals("channelTitle", video.getChannelTitle());
+    assertEquals(Collections.emptyList(), video.getTags());
   }
 
   @Test
   public void testVideoEquality() {
     Video video1 =
-        new Video(
-            "Sample Title",
-            "Sample Description",
-            "channelId123",
-            "videoId123",
-            "thumbnailUrl.jpg",
-            "channelTitle");
+            new Video(
+                    "Sample Title",
+                    "Sample Description",
+                    "channelId123",
+                    "videoId123",
+                    "thumbnailUrl.jpg",
+                    "channelTitle");
     Video video2 =
-        new Video(
-            "Sample Title",
-            "Sample Description",
-            "channelId123",
-            "videoId123",
-            "thumbnailUrl.jpg",
-            "channelTitle");
+            new Video(
+                    "Sample Title",
+                    "Sample Description",
+                    "channelId123",
+                    "videoId123",
+                    "thumbnailUrl.jpg",
+                    "channelTitle");
 
     assertEquals(video1, video2);
     assertTrue(video1.equals(video1));
@@ -60,21 +64,21 @@ public class VideoTest extends WithApplication {
   @Test
   public void testVideoInequality() {
     Video video1 =
-        new Video(
-            "Sample Title",
-            "Sample Description",
-            "channelId123",
-            "videoId123",
-            "thumbnailUrl.jpg",
-            "channelTitle");
+            new Video(
+                    "Sample Title",
+                    "Sample Description",
+                    "channelId123",
+                    "videoId123",
+                    "thumbnailUrl.jpg",
+                    "channelTitle");
     Video video2 =
-        new Video(
-            "Different Title",
-            "Different Description",
-            "channelId456",
-            "videoId456",
-            "differentThumbnailUrl.jpg",
-            "channelTitle");
+            new Video(
+                    "Different Title",
+                    "Different Description",
+                    "channelId456",
+                    "videoId456",
+                    "differentThumbnailUrl.jpg",
+                    "channelTitle");
 
     assertNotEquals(video1, video2);
   }
@@ -82,21 +86,21 @@ public class VideoTest extends WithApplication {
   @Test
   public void testVideoHashCode() {
     Video video1 =
-        new Video(
-            "Sample Title",
-            "Sample Description",
-            "channelId123",
-            "videoId123",
-            "thumbnailUrl.jpg",
-            "channelTitle");
+            new Video(
+                    "Sample Title",
+                    "Sample Description",
+                    "channelId123",
+                    "videoId123",
+                    "thumbnailUrl.jpg",
+                    "channelTitle");
     Video video2 =
-        new Video(
-            "Sample Title",
-            "Sample Description",
-            "channelId123",
-            "videoId123",
-            "thumbnailUrl.jpg",
-            "channelTitle");
+            new Video(
+                    "Sample Title",
+                    "Sample Description",
+                    "channelId123",
+                    "videoId123",
+                    "thumbnailUrl.jpg",
+                    "channelTitle");
 
     assertEquals(video1.hashCode(), video2.hashCode());
   }
@@ -104,36 +108,35 @@ public class VideoTest extends WithApplication {
   @Test
   public void testVideoHashCodeInequality() {
     Video video1 =
-        new Video(
-            "Sample Title",
-            "Sample Description",
-            "channelId123",
-            "videoId123",
-            "thumbnailUrl.jpg",
-            "channelTitle");
+            new Video(
+                    "Sample Title",
+                    "Sample Description",
+                    "channelId123",
+                    "videoId123",
+                    "thumbnailUrl.jpg",
+                    "channelTitle");
     Video video2 =
-        new Video(
-            "Different Title",
-            "Different Description",
-            "channelId456",
-            "videoId456",
-            "differentThumbnailUrl.jpg",
-            "channelTitle");
+            new Video(
+                    "Different Title",
+                    "Different Description",
+                    "channelId456",
+                    "videoId456",
+                    "differentThumbnailUrl.jpg",
+                    "channelTitle");
 
     assertNotEquals(video1.hashCode(), video2.hashCode());
   }
 
   @Test
   public void testNullEquality() {
-
     Video video =
-        new Video(
-            "Sample Title",
-            "Sample Description",
-            "channelId123",
-            "videoId123",
-            "thumbnailUrl.jpg",
-            "channelTitle");
+            new Video(
+                    "Sample Title",
+                    "Sample Description",
+                    "channelId123",
+                    "videoId123",
+                    "thumbnailUrl.jpg",
+                    "channelTitle");
 
     assertNotEquals(video, null);
   }
@@ -141,82 +144,81 @@ public class VideoTest extends WithApplication {
   @Test
   public void testEquals_DifferentClass() {
     Video video1 =
-        new Video("Title", "Description", "ChannelId", "VideoId", "ThumbnailUrl", "ChannelTitle");
+            new Video("Title", "Description", "ChannelId", "VideoId", "ThumbnailUrl", "ChannelTitle");
     String differentClassObject = "Not a Video Object";
     assertNotEquals(
-        video1,
-        differentClassObject,
-        "A video should not be equal to an object of a different class");
+            video1,
+            differentClassObject,
+            "A video should not be equal to an object of a different class");
   }
 
   @Test
   public void testEquals_DifferentProperties() {
     Video video1 =
-        new Video("Title", "Description", "ChannelId", "VideoId", "ThumbnailUrl", "ChannelTitle");
+            new Video("Title", "Description", "ChannelId", "VideoId", "ThumbnailUrl", "ChannelTitle");
     Video video2 =
-        new Video(
-            "Different Title",
-            "Description",
-            "ChannelId",
-            "VideoId",
-            "ThumbnailUrl",
-            "ChannelTitle");
+            new Video(
+                    "Different Title",
+                    "Description",
+                    "ChannelId",
+                    "VideoId",
+                    "ThumbnailUrl",
+                    "ChannelTitle");
     assertNotEquals(video1, video2, "Two videos with different titles should not be equal");
 
     Video video3 =
-        new Video(
-            "Title",
-            "Different Description",
-            "ChannelId",
-            "VideoId",
-            "ThumbnailUrl",
-            "ChannelTitle");
+            new Video(
+                    "Title",
+                    "Different Description",
+                    "ChannelId",
+                    "VideoId",
+                    "ThumbnailUrl",
+                    "ChannelTitle");
     assertNotEquals(video1, video3, "Two videos with different descriptions should not be equal");
 
     Video video4 =
-        new Video(
-            "Title",
-            "Description",
-            "Different ChannelId",
-            "VideoId",
-            "ThumbnailUrl",
-            "ChannelTitle");
+            new Video(
+                    "Title",
+                    "Description",
+                    "Different ChannelId",
+                    "VideoId",
+                    "ThumbnailUrl",
+                    "ChannelTitle");
     assertNotEquals(video1, video4, "Two videos with different channel IDs should not be equal");
 
     Video video5 =
-        new Video(
-            "Title",
-            "Description",
-            "ChannelId",
-            "Different VideoId",
-            "ThumbnailUrl",
-            "ChannelTitle");
+            new Video(
+                    "Title",
+                    "Description",
+                    "ChannelId",
+                    "Different VideoId",
+                    "ThumbnailUrl",
+                    "ChannelTitle");
     assertNotEquals(video1, video5, "Two videos with different video IDs should not be equal");
 
     Video video6 =
-        new Video(
-            "Title",
-            "Description",
-            "ChannelId",
-            "VideoId",
-            "Different ThumbnailUrl",
-            "ChannelTitle");
+            new Video(
+                    "Title",
+                    "Description",
+                    "ChannelId",
+                    "VideoId",
+                    "Different ThumbnailUrl",
+                    "ChannelTitle");
     assertNotEquals(video1, video6, "Two videos with different thumbnail URLs should not be equal");
 
     Video video7 =
-        new Video(
-            "Title",
-            "Description",
-            "ChannelId",
-            "VideoId",
-            "ThumbnailUrl",
-            "Different ChannelTitle");
+            new Video(
+                    "Title",
+                    "Description",
+                    "ChannelId",
+                    "VideoId",
+                    "ThumbnailUrl",
+                    "Different ChannelTitle");
     assertNotEquals(video1, video7, "Two videos with different channel titles should not be equal");
   }
 
   /**
    * Tests sentiment analysis for individual Video.
-   * @author Jessica Chen
    */
   @Test
   public void getSubmissionSentimentTest() {
@@ -232,5 +234,42 @@ public class VideoTest extends WithApplication {
     assertEquals(4, video.getHappyWordCount());
     assertEquals(1, video.getSadWordCount());
     assertEquals(":-)", video.getSubmissionSentiment());
+  }
+
+  /**
+   * Tests the Flesch-Kincaid grade level and reading ease score.
+   */
+  @Test
+  public void testFleschKincaidScores() {
+    Video video =
+            new Video(
+                    "Sample Title",
+                    "This is a simple sentence for testing readability.",
+                    "channelId123",
+                    "videoId123",
+                    "thumbnailUrl.jpg",
+                    "channelTitle");
+
+    assertTrue(video.getFleschKincaidGradeLevel() > 0);
+    assertTrue(video.getFleschReadingEaseScore() > 0);
+  }
+
+  /**
+   * Tests the tags attribute.
+   */
+  @Test
+  public void testTags() {
+    List<String> tags = List.of("education", "tutorial", "java");
+    Video video =
+            new Video(
+                    "Sample Title",
+                    "Sample Description",
+                    "channelId123",
+                    "videoId123",
+                    "thumbnailUrl.jpg",
+                    "channelTitle",
+                    tags);
+
+    assertEquals(tags, video.getTags());
   }
 }

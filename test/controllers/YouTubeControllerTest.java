@@ -39,17 +39,13 @@ public class YouTubeControllerTest {
 
     @Test
     public void testSearchWithValidData() {
-        // Mock valid video data
         Video mockVideo = new Video("Mock Title", "Mock Description", "channelId123", "videoId123", "http://mockurl.com", "Mock Channel");
         List<Video> mockVideoList = Collections.singletonList(mockVideo);
 
-        // Set up the YouTubeService to return the mock video list
         when(youTubeService.searchVideos("test")).thenReturn(mockVideoList);
 
-        // Perform the search with a valid query
         Result result = youTubeController.search("test");
 
-        // Assert status is OK and content contains "Mock Title"
         assertEquals(OK, result.status());
         assertTrue(contentAsString(result).contains("Mock Title"));
         assertTrue(contentAsString(result).contains("Mock Description"));
@@ -58,56 +54,44 @@ public class YouTubeControllerTest {
 
     @Test
     public void testSearchWithEmptyResult() {
-        // Set up the YouTubeService to return an empty list
         when(youTubeService.searchVideos("empty")).thenReturn(Collections.emptyList());
 
-        // Perform the search with a query that yields no results
         Result result = youTubeController.search("empty");
 
-        // Assert status is OK and content indicates no results found
         assertEquals(OK, result.status());
         assertTrue(contentAsString(result).contains("No results found"));
     }
 
     @Test
     public void testSearchWithError() {
-        // Set up the YouTubeService to throw an exception
         when(youTubeService.searchVideos(anyString())).thenThrow(new RuntimeException("API failure"));
 
-        // Perform the search to trigger the exception
         Result result = youTubeController.search("error");
 
-        // Assert that the status is INTERNAL_SERVER_ERROR
         assertEquals(500, result.status());
         assertTrue(contentAsString(result).contains("An error occurred while processing your request."));
     }
 
     @Test
     public void testSearchWithEmptyQuery() {
-        // Perform search with an empty query
         Result result = youTubeController.search("");
 
-        // Assert that the status is BAD_REQUEST and message prompts to enter search term
         assertEquals(BAD_REQUEST, result.status());
         assertTrue(contentAsString(result).contains("Please enter a search term"));
     }
 
     @Test
     public void testSearchWithNullQuery() {
-        // Perform search with a null query
         Result result = youTubeController.search(null);
 
-        // Assert that the status is BAD_REQUEST and message prompts to enter search term
         assertEquals(BAD_REQUEST, result.status());
         assertTrue(contentAsString(result).contains("Please enter a search term"));
     }
 
     @Test
     public void testWordStatsWithNullQuery() {
-        // Act: Perform the word stats search with a null query
         Result result = youTubeController.wordStats(null);
 
-        // Assert: Check that the response status is BAD_REQUEST
         assertEquals(BAD_REQUEST, result.status());
         assertTrue(contentAsString(result).contains("Please enter a search term."));
     }

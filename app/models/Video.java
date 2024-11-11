@@ -82,12 +82,12 @@ public class Video {
     return publishedDate;
   }
 
-  // Method to generate YouTube video URL aidaaaaaaaaaaaaa
+
   public String getUrl() {
     return "https://www.youtube.com/watch?v=" + videoId;
   }
 
-  // Override equals() and hashCode() to include channelTitle
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

@@ -1,4 +1,10 @@
 /**
+ * Represents information about a YouTube channel, including its name, description,
+ * subscriber count, view count, and video count.
+ * <p>
+ * This class is immutable and holds data related to a specific channel.
+ * </p>
+ *
  * @author Aidassj
  */
 package models;

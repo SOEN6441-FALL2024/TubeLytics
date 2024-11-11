@@ -95,6 +95,13 @@ public class YouTubeServiceTest extends WithApplication {
     assertEquals("2024-11-06T04:41:46Z", videos.get(0).getPublishedDate());
   }
 
+  /**
+   * Tests the getChannelInfo method of YouTubeService by mocking a valid JSON response.
+   * Verifies that the returned ChannelInfo object contains the expected channel details.
+   *
+   * @throws Exception if an error occurs during the test setup or execution
+   * @author Aidassj
+   */
   @Test
   public void testGetChannelInfo() throws Exception {
     // Mocking response JSON data
@@ -121,6 +128,13 @@ public class YouTubeServiceTest extends WithApplication {
     assertEquals(5000, channelInfo.getViewCount());
     assertEquals(10, channelInfo.getVideoCount());
   }
+  /**
+   * Tests the getLast10Videos method of YouTubeService by mocking a valid JSON response for 10 videos.
+   * Verifies that the returned list contains exactly 10 Video objects with the expected details.
+   *
+   * @throws Exception if an error occurs during the test setup or execution
+   * @author Aidassj
+   */
   @Test
   public void testGetLast10Videos() throws Exception {
     // Mocking response JSON data for 10 videos

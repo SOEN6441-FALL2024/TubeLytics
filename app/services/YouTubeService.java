@@ -55,7 +55,16 @@ public class YouTubeService {
 
         return (List<Video>) futureResult.toCompletableFuture().join();
     }
-
+    /**
+     * Retrieves information about a YouTube channel based on the given channel ID.
+     * This includes details such as the channel's name, description, subscriber count,
+     * view count, and video count.
+     *
+     * @param channelId the unique ID of the YouTube channel
+     * @return a {@link ChannelInfo} object containing the channel's information,
+     *         or {@code null} if an error occurs during the API request
+     * @author Aidassj
+     */
     public ChannelInfo getChannelInfo(String channelId) {
         String url = String.format("https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=%s&key=%s", channelId, apiKey);
 
@@ -83,7 +92,16 @@ public class YouTubeService {
             return null;
         }
     }
-
+    /**
+     * Retrieves the latest 10 videos from a specified YouTube channel.
+     * Each video includes details such as the title, description, video ID,
+     * thumbnail URL, channel title, and publication date.
+     *
+     * @param channelId the unique ID of the YouTube channel
+     * @return a list of {@link Video} objects representing the latest 10 videos
+     *         from the channel, or an empty list if an error occurs during the API request
+     *         @author Aidassj
+     */
     public List<Video> getLast10Videos(String channelId) {
         String url = String.format("https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=%s&maxResults=10&order=date&type=video&key=%s", channelId, apiKey);
 

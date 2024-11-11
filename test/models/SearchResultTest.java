@@ -236,20 +236,32 @@ public class SearchResultTest {
     Assert.assertEquals("Unavailable", test1.getOverallSentiment());
   }
 
-  //Aidaaaaaaaa
-  // Test for equals method when comparing with itself (should return true)
+  /**
+   * Tests the equals method by comparing the SearchResult object with itself.
+   * Expects the result to be true.
+   *  @author Aidassj
+   */
   @Test
   public void testSearchResultEqualsWithItself() {
     assertEquals(searchResult, searchResult);
   }
 
-  // Test for equals method when comparing with null (should return false)
+  /**
+   * Tests the equals method by comparing the SearchResult object with null.
+   * Expects the result to be false.
+   * @author Aidassj
+   */
   @Test
   public void testSearchResultEqualsWithNull() {
     assertNotEquals(searchResult, null);
   }
 
-  // Test for equals method when comparing with a different type (should return false)
+  /**
+   * Tests the equals method by comparing the SearchResult object with an object of a different type.
+   * Expects the result to be false.
+   * @author Aidassj
+
+   */
   @Test
   public void testSearchResultEqualsWithDifferentType() {
     assertNotEquals(searchResult, "a different type");

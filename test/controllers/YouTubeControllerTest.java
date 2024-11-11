@@ -196,7 +196,11 @@ public class YouTubeControllerTest {
         assertTrue(content.contains("programming"));
         assertTrue(content.contains("2"));    // Check for 'programming' frequency
     }
-
+    /**
+     * Tests the channelProfile method with valid channel data.
+     * Verifies that the response contains the expected channel and video information.
+     * @author Aidassj
+     */
 
     @Test
     public void testChannelProfileWithValidData() {
@@ -218,7 +222,11 @@ public class YouTubeControllerTest {
         assertTrue(contentAsString(result).contains("Mock Video Title"));
         assertTrue(contentAsString(result).contains("Mock Channel Description"));
     }
-
+    /**
+     * Tests the channelProfile method with a non-existent channel ID.
+     * Expects an error response indicating no data found.
+     * @author Aidassj
+     */
     @Test
     public void testChannelProfileWithNonExistentChannel() {
         // Arrange: Simulate non-existent channel by returning null values
@@ -232,7 +240,11 @@ public class YouTubeControllerTest {
         assertEquals(INTERNAL_SERVER_ERROR, result.status());
         assertTrue(contentAsString(result).contains("An error occurred while fetching channel data."));
     }
-
+    /**
+     * Tests the channelProfile method when an exception occurs in data fetching.
+     * Expects an error response with an appropriate error message.
+     * @author Aidassj
+     */
     @Test
     public void testChannelProfileWithErrorInFetchingData() {
         // Arrange: Simulate an exception in service methods

@@ -22,35 +22,38 @@ public class YouTubeService {
         this.apiKey = "";  //your API key
     }
 
+    // Helper method to build YouTube search URL
+    private String buildYouTubeSearchUrl(String query, int limit) {
+        String youtubeUrl = "https://www.googleapis.com/youtube/v3/search";
+        return String.format("%s?part=snippet&q=%s&type=video&maxResults=%d&key=%s", youtubeUrl, query, limit, apiKey);
+    }
+
+    // Helper method to parse video data from JSON
+    private List<Video> parseVideos(JsonNode items) {
+        return items.findValues("snippet").stream()
+                .map(snippet -> {
+                    String title = snippet.get("title").asText();
+                    String description = snippet.get("description").asText();
+                    String channelId = snippet.get("channelId").asText();
+                    String channelTitle = snippet.get("channelTitle").asText();
+                    String thumbnail = snippet.get("thumbnails").get("default").get("url").asText();
+                    return new Video(title, description, channelId, "", thumbnail, channelTitle);
+                })
+                .collect(Collectors.toList());
+    }
+
     public List<Video> searchVideos(String query) {
         return this.searchVideos(query, 10);
     }
 
     public List<Video> searchVideos(String query, int limit) {
-        String youtubeUrl = "https://www.googleapis.com/youtube/v3/search";
-        String url = String.format(
-                "%s?part=snippet&q=%s&type=video&maxResults=%d&key=%s", youtubeUrl, query, limit, apiKey);
-        var futureResult =
-                ws.url(url)
-                        .get()
-                        .thenApply(
-                                response -> {
-                                    JsonNode items = response.asJson().get("items");
-                                    return items.findValues("snippet").stream()
-                                            .map(
-                                                    snippet -> {
-                                                        String title = snippet.get("title").asText();
-                                                        String description = snippet.get("description").asText();
-                                                        String channelId = snippet.get("channelId").asText();
-                                                        String channelTitle =
-                                                                snippet.get("channelTitle").asText();
-                                                        String thumbnail =
-                                                                snippet.get("thumbnails").get("default").get("url").asText();
-                                                        return new Video(
-                                                                title, description, channelId, "", thumbnail, channelTitle);
-                                                    })
-                                            .collect(Collectors.toList());
-                                });
+        String url = buildYouTubeSearchUrl(query, limit);
+        var futureResult = ws.url(url)
+                .get()
+                .thenApply(response -> {
+                    JsonNode items = response.asJson().get("items");
+                    return parseVideos(items);
+                });
 
         return futureResult.toCompletableFuture().join();
     }
@@ -63,24 +66,12 @@ public class YouTubeService {
      * @return A CompletionStage containing a list of videos matching the tag.
      */
     public CompletionStage<List<Video>> fetchVideosByTag(String tag, int maxResults) {
-        String youtubeUrl = "https://www.googleapis.com/youtube/v3/search";
-        String url = String.format(
-                "%s?part=snippet&q=%s&type=video&maxResults=%d&key=%s", youtubeUrl, tag, maxResults, apiKey);
-
+        String url = buildYouTubeSearchUrl(tag, maxResults);
         return ws.url(url)
                 .get()
                 .thenApply(response -> {
                     JsonNode items = response.asJson().get("items");
-                    return items.findValues("snippet").stream()
-                            .map(snippet -> {
-                                String title = snippet.get("title").asText();
-                                String description = snippet.get("description").asText();
-                                String channelId = snippet.get("channelId").asText();
-                                String channelTitle = snippet.get("channelTitle").asText();
-                                String thumbnail = snippet.get("thumbnails").get("default").get("url").asText();
-                                return new Video(title, description, channelId, "", thumbnail, channelTitle);
-                            })
-                            .collect(Collectors.toList());
+                    return parseVideos(items);
                 });
     }
 }

@@ -2,17 +2,34 @@
 
 @main("YouTube Search Results") {
 <h1>YouTube Search Results for "@query"</h1>
+
+<!-- Link to Word Stats Page -->
+<div class="search-stats">
+    <p>Search term:
+        <strong>
+            <a href="@routes.YouTubeController.wordStats(query)" target="_blank">
+                @query
+            </a>
+        </strong>
+    </p>
+</div>
+
+<!-- List of Videos -->
 <ul>
     @for(video <- videos) {
     <li>
-        <img src="@video.getThumbnailUrl()" alt="Thumbnail">
-        <h2><a href="https://www.youtube.com/watch?v=@video.getVideoId()">@video.getTitle()</a></h2>
-        <p>@video.getDescription()</p>
-        <p>
-            <a href="@routes.YouTubeController.channelProfile(video.getChannelId())">
-                @video.getChannelTitle()
-            </a>
-        </p>
+        <div class="video-thumbnail">
+            <img src="@video.getThumbnailUrl()" alt="Thumbnail">
+        </div>
+        <div class="video-details">
+            <h2><a href="https://www.youtube.com/watch?v=@video.getVideoId()" target="_blank">@video.getTitle()</a></h2>
+            <p>@video.getDescription()</p>
+            <p>
+                <a href="@routes.YouTubeController.channelProfile(video.getChannelId())" target="_blank">
+                    @video.getChannelTitle()
+                </a>
+            </p>
+        </div>
     </li>
     }
 </ul>

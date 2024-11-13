@@ -27,7 +27,7 @@
     <div class="search-stats">
         <p>Search term:
             <strong>
-                <a href="@routes.YouTubeController.wordStats(searchResult.getQuery())">@searchResult.getQuery()</a>
+                <a href="@routes.YouTubeController.wordStats(searchResult.getQuery())" target="_blank">@searchResult.getQuery()</a>
             </strong>
         </p>
         <p>Search terms: <strong>@searchResult.getQuery() @searchResult.getOverallSentiment()</strong> (Flesch-Kincaid Grade Level Avg.= @searchResult.getAverageFleschKincaidGradeLevel(), Flesch Reading Ease Score Avg.= @searchResult.getAverageFleschReadingEaseScore())</p>

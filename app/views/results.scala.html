@@ -2,18 +2,38 @@
 
 @main("YouTube Search Results") {
 <h1>YouTube Search Results for "@query"</h1>
-<ul>
+<div class="video-list">
     @for(video <- videos) {
-    <li>
-        <img src="@video.getThumbnailUrl()" alt="Thumbnail">
-        <h2><a href="https://www.youtube.com/watch?v=@video.getVideoId()">@video.getTitle()</a></h2>
-        <p>@video.getDescription()</p>
-        <p>
-            <a href="@routes.YouTubeController.channelProfile(video.getChannelId())">
-                @video.getChannelTitle()
-            </a>
-        </p>
-    </li>
+    <div class="video-item">
+        <div class="video-thumbnail">
+            <img src="@video.getThumbnailUrl()" alt="Thumbnail">
+        </div>
+        <div class="video-details">
+            <h2>
+                <a href="https://www.youtube.com/watch?v=@video.getVideoId()" target="_blank">
+                    @Html(video.getTitle())
+                </a>
+            </h2>
+            <p>
+                <strong>Channel:</strong>
+                <a href="@routes.YouTubeController.channelProfile(video.getChannelId())">
+                    @Html(video.getChannelTitle())
+                </a>
+            </p>
+            <p><strong>Description:</strong> @Html(video.getDescription())</p>
+            <p class="video-tags"><strong>Tags:</strong>
+                @if(video.getTags() != null && !video.getTags().isEmpty()) {
+                @for(tag <- video.getTags()) {
+                <a href="@routes.YouTubeController.tagVideos(tag)">@tag</a>
+                @if(tag != video.getTags().last) {, }
+                }
+                } else {
+                No tags available
+                }
+            </p>
+        </div>
+    </div>
     }
-</ul>
+</div>
 }
+

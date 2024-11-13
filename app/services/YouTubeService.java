@@ -9,6 +9,8 @@ import play.libs.ws.WSClient;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 public class YouTubeService {
 
@@ -18,19 +20,17 @@ public class YouTubeService {
     @Inject
     public YouTubeService(WSClient ws, Config config) {
         this.ws = ws;
-        this.apiKey = "";
+        this.apiKey = "AIzaSyAeSvvGH1fA3f57nH-W2HI-ZUYebsYq-KA"; // کلید API را اینجا اضافه کنید.
     }
-
 
     public List<Video> searchVideos(String query) {
-        return this.searchVideos(query,10);
+        return this.searchVideos(query, 10);
     }
 
-
-    public List<Video> searchVideos(String query,int limit) {
+    public List<Video> searchVideos(String query, int limit) {
         String youtubeUrl = "https://www.googleapis.com/youtube/v3/search";
         String url = String.format(
-                "%s?part=snippet&q=%s&type=video&maxResults=%d&key=%s", youtubeUrl, query, limit,apiKey);
+                "%s?part=snippet&q=%s&type=video&maxResults=%d&key=%s", youtubeUrl, query, limit, apiKey);
 
         var futureResult = ws.url(url)
                 .get()
@@ -48,23 +48,22 @@ public class YouTubeService {
                         String publishedDate = snippet.get("publishedAt").asText();
                         String videoId = item.get("id").get("videoId").asText();
 
-                        videos.add(new Video(title, description, channelId, videoId, thumbnail, channelTitle, publishedDate));
+                        // واکشی تگ‌ها (در صورت موجود بودن)
+                        List<String> tags = new ArrayList<>();
+                        if (snippet.has("tags")) {
+                            snippet.get("tags").forEach(tagNode -> {
+                                tags.add(tagNode.asText());
+                            });
+                        }
+
+                        videos.add(new Video(title, description, channelId, videoId, thumbnail, channelTitle, publishedDate, tags));
                     });
                     return videos;
                 });
 
         return (List<Video>) futureResult.toCompletableFuture().join();
     }
-    /**
-     * Retrieves information about a YouTube channel based on the given channel ID.
-     * This includes details such as the channel's name, description, subscriber count,
-     * view count, and video count.
-     *
-     * channelid the unique ID of the YouTube channel
-     * @return a object containing the channel's information,
-     *         or {@code null} if an error occurs during the API request
-     * @author Aidassj
-     */
+
     public ChannelInfo getChannelInfo(String channelId) {
         String url = String.format("https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=%s&key=%s", channelId, apiKey);
 
@@ -88,20 +87,10 @@ public class YouTubeService {
             return new ChannelInfo(name, description, subscriberCount, viewCount, videoCount);
 
         } catch (Exception e) {
-
             return null;
         }
     }
-    /**
-     * Retrieves the latest 10 videos from a specified YouTube channel.
-     * Each video includes details such as the title, description, video ID,
-     * thumbnail URL, channel title, and publication date.
-     *
-     * channelid the unique ID of the YouTube channel
-     * @return a list of video objects representing the latest 10 videos
-     *         from the channel, or an empty list if an error occurs during the API request
-     *         @author Aidassj
-     */
+
     public List<Video> getLast10Videos(String channelId) {
         String url = String.format("https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=%s&maxResults=10&order=date&type=video&key=%s", channelId, apiKey);
 
@@ -124,9 +113,16 @@ public class YouTubeService {
                     String channelTitle = snippet.get("channelTitle").asText();
                     String publishedDate = snippet.get("publishedAt").asText();
 
-                    videos.add(new Video(title, description, channelId, videoId, thumbnail, channelTitle, publishedDate));
-                } catch (Exception e) {
+                    // واکشی تگ‌ها (در صورت موجود بودن)
+                    List<String> tags = new ArrayList<>();
+                    if (snippet.has("tags")) {
+                        snippet.get("tags").forEach(tagNode -> {
+                            tags.add(tagNode.asText());
+                        });
+                    }
 
+                    videos.add(new Video(title, description, channelId, videoId, thumbnail, channelTitle, publishedDate, tags));
+                } catch (Exception e) {
                 }
             });
 
@@ -135,5 +131,38 @@ public class YouTubeService {
         } catch (Exception e) {
             return new ArrayList<>();
         }
+    }
+
+    public CompletionStage<List<Video>> getVideosByTag(String tag) {
+        String url = String.format("https://www.googleapis.com/youtube/v3/search?part=snippet&q=%s&type=video&maxResults=10&key=%s", tag, apiKey);
+
+        return ws.url(url)
+                .get()
+                .thenApply(response -> {
+                    JsonNode items = response.asJson().get("items");
+
+                    List<Video> videos = new ArrayList<>();
+                    items.forEach(item -> {
+                        JsonNode snippet = item.get("snippet");
+                        String title = snippet.get("title").asText();
+                        String description = snippet.get("description").asText();
+                        String channelId = snippet.get("channelId").asText();
+                        String channelTitle = snippet.get("channelTitle").asText();
+                        String thumbnail = snippet.get("thumbnails").get("default").get("url").asText();
+                        String publishedDate = snippet.get("publishedAt").asText();
+                        String videoId = item.get("id").get("videoId").asText();
+
+                        List<String> tags = new ArrayList<>();
+                        if (snippet.has("tags")) {
+                            snippet.get("tags").forEach(tagNode -> {
+                                tags.add(tagNode.asText());
+                            });
+                        }
+
+                        videos.add(new Video(title, description, channelId, videoId, thumbnail, channelTitle, publishedDate, tags));
+                    });
+
+                    return videos;
+                });
     }
 }

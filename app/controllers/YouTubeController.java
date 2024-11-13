@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 /** Controller to handle YouTube video search requests and display results. */
@@ -49,19 +50,15 @@ public class YouTubeController extends Controller {
    *
    * the search query used to fetch YouTube videos.
    * @return a Result containing the rendered word statistics page with word frequency data.
-   * @author Aynaz Javanivayeghan
    */
 
-
-
   public Result wordStats(String query) {
-
     if (query == null || query.trim().isEmpty()) {
       return badRequest("Please enter a search term.");
     }
 
     // Get the search results for the query (limit to the latest 50 videos)
-    List<Video> videos = youTubeService.searchVideos(query,50).stream()
+    List<Video> videos = youTubeService.searchVideos(query, 50).stream()
             .limit(50)
             .collect(Collectors.toList());
 
@@ -92,7 +89,6 @@ public class YouTubeController extends Controller {
   }
 
   /**
-   * @author Aidassj
    * Method to display the channel profile with all available profile information and the last 10 videos of the channel.
    */
   public Result channelProfile(String channelId) {
@@ -119,7 +115,12 @@ public class YouTubeController extends Controller {
     }
   }
 
-
+  /**
+   * Asynchronous action to fetch and display the latest 10 videos tagged with the specified tag.
+   */
+  public CompletionStage<Result> tagVideos(String tag) {
+    return youTubeService.getVideosByTag(tag).thenApply(videos -> {
+      return ok(views.html.results.render(videos, tag));
+    });
+  }
 }
-
-

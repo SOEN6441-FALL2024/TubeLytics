@@ -10,6 +10,7 @@ import play.mvc.Result;
 import services.YouTubeService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -50,7 +51,8 @@ public class HomeControllerTest {
                     "CatVideoVideoId1",
                     "CatVideoThumbnailUrl.jpg1",
                     "CatVideoChannelTitle1",
-                    "2024-11-06T04:41:46Z");
+                    "2024-11-06T04:41:46Z",
+                    Arrays.asList("tag1", "tag2")); // اضافه کردن tags
     Video video2 =
             new Video(
                     "CatVideoTitle2",
@@ -59,7 +61,8 @@ public class HomeControllerTest {
                     "CatVideoVideoId2",
                     "CatVideoThumbnailUrl.jpg2",
                     "CatVideoChannelTitle2",
-                    "2024-11-06T04:41:46Z");
+                    "2024-11-06T04:41:46Z",
+                    Arrays.asList("tag3", "tag4")); // اضافه کردن tags
     videos.add(video1);
     videos.add(video2);
   }
@@ -70,7 +73,7 @@ public class HomeControllerTest {
     List<Video> mockVideos =
             List.of(
                     new Video(
-                            "Title1", "Description1", "Channel1", "VideoId1", "ThumbnailUrl1", "ChannelTitle1","2024-11-06T04:41:46Z"),
+                            "Title1", "Description1", "Channel1", "VideoId1", "ThumbnailUrl1", "ChannelTitle1","2024-11-06T04:41:46Z", Arrays.asList("tag1", "tag2")), // اضافه کردن tags
                     new Video(
                             "Title2",
                             "Description2",
@@ -78,7 +81,8 @@ public class HomeControllerTest {
                             "VideoId2",
                             "ThumbnailUrl2",
                             "ChannelTitle2",
-                            "2024-11-06T04:41:46Z")
+                            "2024-11-06T04:41:46Z",
+                            Arrays.asList("tag3", "tag4")) // اضافه کردن tags
             );
     when(mockYouTubeService.searchVideos("test")).thenReturn(mockVideos);
 
@@ -159,7 +163,7 @@ public class HomeControllerTest {
                                     "DogVideoChannelId1",
                                     "DogVideoVideoId1",
                                     "DogVideoThumbnailUrl.jpg1",
-                                    "DogVideoChannelTitle1","2024-11-06T04:41:46Z")));
+                                    "DogVideoChannelTitle1","2024-11-06T04:41:46Z", Arrays.asList("tag5", "tag6")))); // اضافه کردن tags
     homeController.index("dog").toCompletableFuture().join();
 
     // Adding first entry again

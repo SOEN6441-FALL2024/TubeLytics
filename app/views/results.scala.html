@@ -22,7 +22,11 @@
             <img src="@video.getThumbnailUrl()" alt="Thumbnail">
         </div>
         <div class="video-details">
-            <h2><a href="https://www.youtube.com/watch?v=@video.getVideoId()" target="_blank">@video.getTitle()</a></h2>
+            <h2>
+                <a href="https://www.youtube.com/watch?v=@video.getVideoId()" target="_blank">
+                    @video.getTitle()
+                </a>
+            </h2>
             <p><strong>Channel:</strong> <a href="@routes.YouTubeController.channelProfile(video.getChannelId())">@video.getChannelTitle()</a></p>
             <p><strong>Description:</strong> @video.getDescription()</p>
             <p class="video-tags"><strong>Tags:</strong>

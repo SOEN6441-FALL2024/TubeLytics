@@ -2,6 +2,19 @@
 
 @main("YouTube Search Results") {
 <h1>YouTube Search Results for "@query"</h1>
+
+<!-- Link to Word Stats Page -->
+<div class="search-stats">
+    <p>Search term:
+        <strong>
+            <a href="@routes.YouTubeController.wordStats(query)" target="_blank">
+                @query
+            </a>
+        </strong>
+    </p>
+</div>
+
+<!-- List of Videos -->
 <div class="video-list">
     @for(video <- videos) {
     <div class="video-item">
@@ -9,18 +22,9 @@
             <img src="@video.getThumbnailUrl()" alt="Thumbnail">
         </div>
         <div class="video-details">
-            <h2>
-                <a href="https://www.youtube.com/watch?v=@video.getVideoId()" target="_blank">
-                    @Html(video.getTitle())
-                </a>
-            </h2>
-            <p>
-                <strong>Channel:</strong>
-                <a href="@routes.YouTubeController.channelProfile(video.getChannelId())">
-                    @Html(video.getChannelTitle())
-                </a>
-            </p>
-            <p><strong>Description:</strong> @Html(video.getDescription())</p>
+            <h2><a href="https://www.youtube.com/watch?v=@video.getVideoId()" target="_blank">@video.getTitle()</a></h2>
+            <p><strong>Channel:</strong> <a href="@routes.YouTubeController.channelProfile(video.getChannelId())">@video.getChannelTitle()</a></p>
+            <p><strong>Description:</strong> @video.getDescription()</p>
             <p class="video-tags"><strong>Tags:</strong>
                 @if(video.getTags() != null && !video.getTags().isEmpty()) {
                 @for(tag <- video.getTags()) {
@@ -36,4 +40,3 @@
     }
 </div>
 }
-

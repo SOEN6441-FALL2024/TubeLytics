@@ -14,6 +14,8 @@ import services.YouTubeService;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 
 import static com.gargoylesoftware.htmlunit.WebResponse.INTERNAL_SERVER_ERROR;
 import static org.junit.Assert.assertEquals;
@@ -258,4 +260,36 @@ public class YouTubeControllerTest {
         assertEquals(INTERNAL_SERVER_ERROR, result.status());
         assertTrue(contentAsString(result).contains("An error occurred while fetching channel data."));
     }
+    @Test
+    public void testShowTagsWithValidData() {
+        // Arrange: Mock a valid video with tags
+        List<String> mockTags = Arrays.asList("Tag1", "Tag2", "Tag3");
+        Video mockVideo = new Video(
+                "Mock Title",
+                "Mock Description",
+                "channelId123",
+                "videoId123",
+                "http://mockurl.com",
+                "Mock Channel",
+                "2024-11-06T04:41:46Z"
+        );
+        mockVideo.setTags(mockTags);
+
+        // Mock the YouTubeService to return a completed future with the mock video
+        when(youTubeService.getVideoDetails("videoId123"))
+                .thenReturn(CompletableFuture.completedFuture(mockVideo));
+
+        // Act: Call the showTags method
+        Result result = youTubeController.showTags("videoId123").toCompletableFuture().join();
+
+
+        // Assert: Check if the response status is OK and tags are displayed
+        assertEquals(OK, result.status());
+        String content = contentAsString(result);
+        assertTrue(content.contains("Mock Title"));
+        assertTrue(content.contains("Tag1"));
+        assertTrue(content.contains("Tag2"));
+        assertTrue(content.contains("Tag3"));
+    }
+
 }

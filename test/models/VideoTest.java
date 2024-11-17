@@ -493,5 +493,89 @@ public class VideoTest extends WithApplication {
     video7.setTags(Arrays.asList("AnotherTag1", "AnotherTag2"));
     assertFalse(video1.equals(video7));
   }
+  @Test
+  public void testGetTagsWithNullTags() {
+    // Arrange
+    Video video = new Video("Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+
+    // Act & Assert
+    assertNotNull(video.getTags());
+    assertTrue(video.getTags().isEmpty(), "Tags should return an empty list when tags is null");
+  }
+
+  @Test
+  public void testGetTagsWithNonEmptyTags() {
+    // Arrange
+    Video video = new Video("Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+    List<String> tags = Arrays.asList("Tag1", "Tag2", "Tag3");
+    video.setTags(tags);
+
+    // Act
+    List<String> retrievedTags = video.getTags();
+
+    // Assert
+    assertNotNull(retrievedTags);
+    assertEquals(tags.size(), retrievedTags.size());
+    assertTrue(retrievedTags.contains("Tag1"));
+    assertTrue(retrievedTags.contains("Tag2"));
+    assertTrue(retrievedTags.contains("Tag3"));
+  }
+
+  @Test
+  public void testSetTagsWithNullValue() {
+    // Arrange
+    Video video = new Video("Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+
+    // Act
+    video.setTags(null);
+
+    // Assert
+    assertNotNull(video.getTags());
+    assertTrue(video.getTags().isEmpty(), "Tags should be an empty list when set to null");
+  }
+
+  @Test
+  public void testEqualsMethod() {
+    // Arrange
+    Video video1 = new Video("Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+    video1.setTags(Arrays.asList("Tag1", "Tag2"));
+
+    // Case 1: Self-comparison
+    assertTrue(video1.equals(video1), "A video should be equal to itself");
+
+    // Case 2: Comparison with null
+    assertFalse(video1.equals(null), "A video should not be equal to null");
+
+    // Case 3: Comparison with object of different class
+    assertFalse(video1.equals("String Object"), "A video should not be equal to an object of different class");
+
+    // Case 4: Comparison with identical object
+    Video video2 = new Video("Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+    video2.setTags(Arrays.asList("Tag1", "Tag2"));
+    assertTrue(video1.equals(video2), "Identical videos should be equal");
+
+    // Case 5: Comparison with different object
+    Video video3 = new Video("Different Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+    video3.setTags(Arrays.asList("Tag1", "Tag2"));
+    assertFalse(video1.equals(video3), "Videos with different titles should not be equal");
+
+    // Case 6: Comparison with different tags
+    Video video4 = new Video("Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+    video4.setTags(Arrays.asList("DifferentTag1", "DifferentTag2"));
+    assertFalse(video1.equals(video4), "Videos with different tags should not be equal");
+  }
+
+  @Test
+  public void testHashCode() {
+    // Arrange
+    Video video1 = new Video("Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+    video1.setTags(Arrays.asList("Tag1", "Tag2"));
+
+    Video video2 = new Video("Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+    video2.setTags(Arrays.asList("Tag1", "Tag2"));
+
+    // Act & Assert
+    assertEquals(video1.hashCode(), video2.hashCode(), "Hash codes of identical videos should be equal");
+  }
 
 }

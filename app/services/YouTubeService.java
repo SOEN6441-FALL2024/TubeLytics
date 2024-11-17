@@ -22,7 +22,7 @@ public class YouTubeService {
     @Inject
     public YouTubeService(WSClient ws, Config config) {
         this.ws = ws;
-        this.apiKey = "AIzaSyAeSvvGH1fA3f57nH-W2HI-ZUYebsYq-KA";
+        this.apiKey = "";
     }
 
 

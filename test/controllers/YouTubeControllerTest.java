@@ -10,10 +10,15 @@ import org.mockito.MockitoAnnotations;
 import play.mvc.Result;
 import scala.concurrent.ExecutionContext;
 import services.YouTubeService;
+import java.util.ArrayList;
+import java.util.List;
+
+
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 
 import static com.gargoylesoftware.htmlunit.WebResponse.INTERNAL_SERVER_ERROR;
 import static org.junit.Assert.assertEquals;
@@ -258,4 +263,80 @@ public class YouTubeControllerTest {
         assertEquals(INTERNAL_SERVER_ERROR, result.status());
         assertTrue(contentAsString(result).contains("An error occurred while fetching channel data."));
     }
+    @Test
+    public void testShowTagsWithValidData() {
+        // Arrange: Mock a valid video with tags
+        List<String> mockTags = Arrays.asList("Tag1", "Tag2", "Tag3");
+        Video mockVideo = new Video(
+                "Mock Title",
+                "Mock Description",
+                "channelId123",
+                "videoId123",
+                "http://mockurl.com",
+                "Mock Channel",
+                "2024-11-06T04:41:46Z"
+        );
+        mockVideo.setTags(mockTags);
+
+        // Mock the YouTubeService to return a completed future with the mock video
+        when(youTubeService.getVideoDetails("videoId123"))
+                .thenReturn(CompletableFuture.completedFuture(mockVideo));
+
+        // Act: Call the showTags method
+        Result result = youTubeController.showTags("videoId123").toCompletableFuture().join();
+
+
+        // Assert: Check if the response status is OK and tags are displayed
+        assertEquals(OK, result.status());
+        String content = contentAsString(result);
+        assertTrue(content.contains("Mock Title"));
+        assertTrue(content.contains("Tag1"));
+        assertTrue(content.contains("Tag2"));
+        assertTrue(content.contains("Tag3"));
+    }
+    @Test
+    public void testSearchByTagWithResults() {
+        // Arrange: Mock a list of videos with a specific tag
+        String testTag = "testTag";
+        List<Video> mockVideos = Arrays.asList(
+                new Video("Test Video 1", "Description 1", "channelId1", "videoId1", "http://thumbnail1.com", "Channel 1", "2024-11-06T04:41:46Z"),
+                new Video("Test Video 2", "Description 2", "channelId2", "videoId2", "http://thumbnail2.com", "Channel 2", "2024-11-06T04:41:46Z")
+        );
+
+        // Mock the YouTubeService to return the list of videos
+        when(youTubeService.searchVideosByTag(testTag))
+                .thenReturn(CompletableFuture.completedFuture(mockVideos));
+
+        // Act: Call the searchByTag method
+        Result result = youTubeController.searchByTag(testTag).toCompletableFuture().join();
+
+        // Assert: Check if the response status is OK and content contains video details
+        assertEquals(OK, result.status());
+        String content = contentAsString(result);
+        assertTrue(content.contains("Videos with tag: " + testTag));
+        assertTrue(content.contains("Test Video 1"));
+        assertTrue(content.contains("Test Video 2"));
+        assertTrue(content.contains("Description 1"));
+        assertTrue(content.contains("Description 2"));
+    }
+
+    @Test
+    public void testSearchByTagWithNoResults() {
+        // Arrange: Mock an empty list for a tag with no videos
+        String testTag = "emptyTag";
+        List<Video> emptyVideos = Collections.emptyList();
+
+        // Mock the YouTubeService to return an empty list
+        when(youTubeService.searchVideosByTag(testTag))
+                .thenReturn(CompletableFuture.completedFuture(emptyVideos));
+
+        // Act: Call the searchByTag method
+        Result result = youTubeController.searchByTag(testTag).toCompletableFuture().join();
+
+        // Assert: Check if the response status is NOT_FOUND and error message is displayed
+        assertEquals(404, result.status());
+        String content = contentAsString(result);
+        assertTrue(content.contains("No videos found for tag: " + testTag));
+    }
+
 }

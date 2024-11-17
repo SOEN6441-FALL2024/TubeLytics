@@ -15,4 +15,9 @@ POST    /search                 controllers.YouTubeController.search(query: Stri
 GET    /word-stats         controllers.YouTubeController.wordStats(query: String)
 GET     /channel/:channelId       controllers.YouTubeController.channelProfile(channelId:String)
 
+#     Showing tags for  video
+GET     /tags/:videoId                   controllers.YouTubeController.showTags(videoId: String)
+
+#     searching a special tag
+GET     /search/tag/:tag                 controllers.YouTubeController.searchByTag(tag: String)
 

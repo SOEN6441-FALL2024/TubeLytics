@@ -12,7 +12,10 @@ libraryDependencies ++= Seq(
   "org.playframework" %% "play-json" % "3.0.4",
   "org.junit.jupiter" % "junit-jupiter-api" % "5.10.2" % Test,
   "org.junit.jupiter" % "junit-jupiter-engine" % "5.10.2" % Test,
-  "org.mockito" % "mockito-core" % "5.12.0" % Test
+  "org.mockito" % "mockito-core" % "5.12.0" % Test,
+ // "com.typesafe.play" %% "play-test" % playVersion % Test
+
+
 )
 
 Test / testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")

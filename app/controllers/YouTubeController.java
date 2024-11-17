@@ -12,6 +12,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import play.libs.ws.WSClient;
+import java.util.concurrent.CompletionStage;
+
 
 /** Controller to handle YouTube video search requests and display results. */
 public class YouTubeController extends Controller {
@@ -118,6 +121,23 @@ public class YouTubeController extends Controller {
       return internalServerError("An error occurred while fetching channel data.");
     }
   }
+  public CompletionStage<Result> showTags(String videoId) {
+    return youTubeService.getVideoDetails(videoId).thenApply(video -> {
+      if (video == null) {
+        return notFound("Video not found.");
+      }
+      return ok(views.html.tags.render(video));
+    });
+  }
+  public CompletionStage<Result> searchByTag(String tag) {
+    return youTubeService.searchVideosByTag(tag).thenApply(videos -> {
+      if (videos.isEmpty()) {
+        return notFound("No videos found for tag: " + tag);
+      }
+      return ok(views.html.results.render(videos, "Videos with tag: " + tag));
+    });
+  }
+
 
 
 }

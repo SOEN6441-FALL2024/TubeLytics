@@ -9,6 +9,10 @@ import play.libs.ws.WSClient;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletionStage;
+import java.util.Collections;
+
+
 
 public class YouTubeService {
 
@@ -136,4 +140,76 @@ public class YouTubeService {
             return new ArrayList<>();
         }
     }
+    public CompletionStage<Video> getVideoDetails(String videoId) {
+        String url = "https://www.googleapis.com/youtube/v3/videos"
+                + "?part=snippet"
+                + "&id=" + videoId
+                + "&key=" + apiKey;
+
+        return ws.url(url).get().thenApply(response -> {
+            JsonNode json = response.asJson();
+            JsonNode items = json.get("items");
+
+            if (items != null && items.size() > 0) {
+                JsonNode snippet = items.get(0).get("snippet");
+
+                String title = snippet.get("title").asText();
+                String description = snippet.get("description").asText();
+                JsonNode tagsNode = snippet.get("tags");
+                List<String> tags = new ArrayList<>();
+
+                if (tagsNode != null) {
+                    tagsNode.forEach(tag -> tags.add(tag.asText()));
+                }
+
+                String channelId = snippet.get("channelId").asText();
+                String channelTitle = snippet.get("channelTitle").asText();
+                String thumbnailUrl = snippet.get("thumbnails").get("default").get("url").asText();
+
+                String publishedDate = snippet.has("publishedAt") ? snippet.get("publishedAt").asText() : null;
+
+                Video video = new Video(title, description, channelId, videoId, thumbnailUrl, channelTitle, publishedDate);
+                video.setTags(tags);
+                return video;
+
+            }
+            return null;
+        });
+    }
+    public CompletionStage<List<Video>> searchVideosByTag(String tag) {
+        String url = "https://www.googleapis.com/youtube/v3/search"
+                + "?part=snippet"
+                + "&maxResults=10"
+                + "&q=" + tag
+                + "&type=video"
+                + "&key=" + apiKey;
+
+        return ws.url(url).get().thenApply(response -> {
+            JsonNode json = response.asJson();
+            List<Video> videos = new ArrayList<>();
+            JsonNode items = json.get("items");
+
+            if (items != null) {
+                items.forEach(item -> {
+                    JsonNode snippet = item.get("snippet");
+                    String videoId = item.get("id").get("videoId").asText();
+                    String title = snippet.get("title").asText();
+                    String description = snippet.get("description").asText();
+                    String channelId = snippet.get("channelId").asText();
+                    String channelTitle = snippet.get("channelTitle").asText();
+                    String thumbnailUrl = snippet.get("thumbnails").get("default").get("url").asText();
+
+                    String publishedDate = snippet.has("publishedAt") ? snippet.get("publishedAt").asText() : null;
+
+                    Video video = new Video(title, description, channelId, videoId, thumbnailUrl, channelTitle, publishedDate);
+                    // video.setTags(Collections.emptyList());
+                    videos.add(video); // adding video to list
+
+                });
+            }
+
+            return videos;
+        });
+    }
+
 }

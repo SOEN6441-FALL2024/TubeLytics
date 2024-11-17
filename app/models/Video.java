@@ -2,6 +2,8 @@ package models;
 
 import utils.Helpers;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 public class Video {
@@ -17,6 +19,9 @@ public class Video {
   private final double happyWordCount;
   private final double sadWordCount;
   private final String publishedDate;
+
+  // New field for tags
+  private List<String> tags;
 
   public Video(
           String title,
@@ -38,6 +43,7 @@ public class Video {
     this.sadWordCount = Helpers.calculateSadWordCount(description);
     this.submissionSentiment = Helpers.calculateSentiment(happyWordCount, sadWordCount);
     this.publishedDate = publishedDate;
+    this.tags = Collections.emptyList(); // Initialize tags as an empty list
   }
 
   public String getTitle() {
@@ -72,21 +78,34 @@ public class Video {
     return fleschReadingEaseScore;
   }
 
-  public double getHappyWordCount() { return happyWordCount; }
+  public double getHappyWordCount() {
+    return happyWordCount;
+  }
 
-  public double getSadWordCount() { return sadWordCount; }
+  public double getSadWordCount() {
+    return sadWordCount;
+  }
 
-  public String getSubmissionSentiment() { return submissionSentiment; }
+  public String getSubmissionSentiment() {
+    return submissionSentiment;
+  }
 
   public String getPublishedDate() {
     return publishedDate;
   }
 
-
   public String getUrl() {
     return "https://www.youtube.com/watch?v=" + videoId;
   }
 
+  // Getter and Setter for tags
+  public List<String> getTags() {
+    return tags == null ? Collections.emptyList() : tags; // Ensure a non-null list is returned
+  }
+
+  public void setTags(List<String> tags) {
+    this.tags = tags == null ? Collections.emptyList() : tags; // Convert null to an empty list
+  }
 
   @Override
   public boolean equals(Object o) {
@@ -99,11 +118,12 @@ public class Video {
             && Objects.equals(videoId, video.videoId)
             && Objects.equals(thumbnailUrl, video.thumbnailUrl)
             && Objects.equals(channelTitle, video.channelTitle)
-            && Objects.equals(publishedDate, video.publishedDate);
+            && Objects.equals(publishedDate, video.publishedDate)
+            && Objects.equals(tags, video.tags); // Include tags in equality
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(title, description, channelId, videoId, thumbnailUrl, channelTitle,publishedDate);
+    return Objects.hash(title, description, channelId, videoId, thumbnailUrl, channelTitle, publishedDate, tags);
   }
 }

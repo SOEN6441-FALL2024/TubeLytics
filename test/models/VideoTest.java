@@ -194,4 +194,73 @@ public class VideoTest extends WithApplication {
     assertNotEquals(video1, video2);
     assertNotEquals(video1.hashCode(), video2.hashCode());
   }
+  @Test
+  public void testGetTags() {
+    Video videoWithoutTags = new Video("Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+
+    List<String> tags = videoWithoutTags.getTags();
+
+    assertNotNull(tags);
+    assertTrue(tags.isEmpty());
+
+    Video videoWithTags = new Video("Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+    List<String> mockTags = Arrays.asList("Tag1", "Tag2", "Tag3");
+    videoWithTags.setTags(mockTags);
+
+    List<String> retrievedTags = videoWithTags.getTags();
+
+    assertNotNull(retrievedTags);
+    assertEquals(3, retrievedTags.size());
+    assertTrue(retrievedTags.contains("Tag1"));
+    assertTrue(retrievedTags.contains("Tag2"));
+    assertTrue(retrievedTags.contains("Tag3"));
+  }
+  @Test
+  public void testVideoEqualsEdgeCases() {
+    Video video = new Video(
+            "Sample Title",
+            "Sample Description",
+            "channelId123",
+            "videoId123",
+            "thumbnailUrl.jpg",
+            "channelTitle",
+            "2024-11-06T04:41:46Z"
+    );
+    video.setTags(Arrays.asList("Tag1", "Tag2"));
+
+    // Case 1: مقایسه با null
+    assertNotEquals(video, null);
+
+    assertNotEquals(video, "String Object");
+
+    assertEquals(video, video);
+
+    Video identicalVideo = new Video(
+            "Sample Title",
+            "Sample Description",
+            "channelId123",
+            "videoId123",
+            "thumbnailUrl.jpg",
+            "channelTitle",
+            "2024-11-06T04:41:46Z"
+    );
+    identicalVideo.setTags(Arrays.asList("Tag1", "Tag2"));
+
+    assertEquals(video, identicalVideo);
+    assertEquals(video.hashCode(), identicalVideo.hashCode());
+
+    Video differentVideo = new Video(
+            "Different Title",
+            "Sample Description",
+            "channelId123",
+            "videoId123",
+            "thumbnailUrl.jpg",
+            "channelTitle",
+            "2024-11-06T04:41:46Z"
+    );
+    differentVideo.setTags(Arrays.asList("Tag1", "Tag2"));
+
+    assertNotEquals(video, differentVideo);
+  }
+
 }

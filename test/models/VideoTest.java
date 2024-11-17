@@ -651,8 +651,7 @@ public class VideoTest extends WithApplication {
     assertNotEquals(baseVideo, videoWithDifferentChannelTitle);
   }
   @Test
-  public void testGetTagsWhenTagsIsNull() {
-    // Arrange: ایجاد یک نمونه از کلاس Video بدون مقداردهی به tags
+  public void testGetTagsNull() {
     Video video = new Video(
             "Sample Title",
             "Sample Description",
@@ -663,10 +662,27 @@ public class VideoTest extends WithApplication {
             "2024-11-06T04:41:46Z"
     );
 
+    // Case 1: When tags is null
+    try {
+      Field tagsField = Video.class.getDeclaredField("tags");
+      tagsField.setAccessible(true);
+      tagsField.set(video, null); // Set the tags field to null
+    } catch (NoSuchFieldException | IllegalAccessException e) {
+      fail("Failed to set tags field to null: " + e.getMessage());
+    }
     List<String> tags = video.getTags();
+    assertNotNull(tags, "The returned tags list should not be null");
+    assertTrue(tags.isEmpty(), "The returned tags list should be empty when tags is null");
 
-    assertNotNull(tags);
-    assertTrue(tags.isEmpty(), "When tags is null, getTags should return an empty list.");
+    // Case 2: When tags has values
+    List<String> mockTags = Arrays.asList("Tag1", "Tag2", "Tag3");
+    video.setTags(mockTags); // Use setter to set tags
+    tags = video.getTags();
+    assertNotNull(tags, "The returned tags list should not be null");
+    assertEquals(3, tags.size(), "The size of the returned tags list should match the input");
+    assertTrue(tags.contains("Tag1"));
+    assertTrue(tags.contains("Tag2"));
+    assertTrue(tags.contains("Tag3"));
   }
 
 }

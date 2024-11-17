@@ -577,5 +577,78 @@ public class VideoTest extends WithApplication {
     // Act & Assert
     assertEquals(video1.hashCode(), video2.hashCode(), "Hash codes of identical videos should be equal");
   }
+  @Test
+  public void testVideoEqualityWithDifferentAttributes() {
+    // Arrange: Create a base video
+    Video baseVideo = new Video(
+            "Sample Title",
+            "Sample Description",
+            "channelId123",
+            "videoId123",
+            "thumbnailUrl.jpg",
+            "channelTitle",
+            "2024-11-06T04:41:46Z"
+    );
+
+    // Case 1: Different description
+    Video videoWithDifferentDescription = new Video(
+            "Sample Title",
+            "Different Description",
+            "channelId123",
+            "videoId123",
+            "thumbnailUrl.jpg",
+            "channelTitle",
+            "2024-11-06T04:41:46Z"
+    );
+    assertNotEquals(baseVideo, videoWithDifferentDescription);
+
+    // Case 2: Different channelId
+    Video videoWithDifferentChannelId = new Video(
+            "Sample Title",
+            "Sample Description",
+            "differentChannelId",
+            "videoId123",
+            "thumbnailUrl.jpg",
+            "channelTitle",
+            "2024-11-06T04:41:46Z"
+    );
+    assertNotEquals(baseVideo, videoWithDifferentChannelId);
+
+    // Case 3: Different videoId
+    Video videoWithDifferentVideoId = new Video(
+            "Sample Title",
+            "Sample Description",
+            "channelId123",
+            "differentVideoId",
+            "thumbnailUrl.jpg",
+            "channelTitle",
+            "2024-11-06T04:41:46Z"
+    );
+    assertNotEquals(baseVideo, videoWithDifferentVideoId);
+
+    // Case 4: Different thumbnailUrl
+    Video videoWithDifferentThumbnailUrl = new Video(
+            "Sample Title",
+            "Sample Description",
+            "channelId123",
+            "videoId123",
+            "differentThumbnailUrl.jpg",
+            "channelTitle",
+            "2024-11-06T04:41:46Z"
+    );
+    assertNotEquals(baseVideo, videoWithDifferentThumbnailUrl);
+
+    // Case 5: Different channelTitle
+    Video videoWithDifferentChannelTitle = new Video(
+            "Sample Title",
+            "Sample Description",
+            "channelId123",
+            "videoId123",
+            "thumbnailUrl.jpg",
+            "differentChannelTitle",
+            "2024-11-06T04:41:46Z"
+    );
+    assertNotEquals(baseVideo, videoWithDifferentChannelTitle);
+  }
 
 }

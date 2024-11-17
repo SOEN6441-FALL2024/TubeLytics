@@ -650,5 +650,23 @@ public class VideoTest extends WithApplication {
     );
     assertNotEquals(baseVideo, videoWithDifferentChannelTitle);
   }
+  @Test
+  public void testGetTagsWhenTagsIsNull() {
+    // Arrange: ایجاد یک نمونه از کلاس Video بدون مقداردهی به tags
+    Video video = new Video(
+            "Sample Title",
+            "Sample Description",
+            "channelId123",
+            "videoId123",
+            "thumbnailUrl.jpg",
+            "channelTitle",
+            "2024-11-06T04:41:46Z"
+    );
+
+    List<String> tags = video.getTags();
+
+    assertNotNull(tags);
+    assertTrue(tags.isEmpty(), "When tags is null, getTags should return an empty list.");
+  }
 
 }

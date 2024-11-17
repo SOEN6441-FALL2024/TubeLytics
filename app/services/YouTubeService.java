@@ -166,7 +166,9 @@ public class YouTubeService {
                 String channelTitle = snippet.get("channelTitle").asText();
                 String thumbnailUrl = snippet.get("thumbnails").get("default").get("url").asText();
 
-                Video video = new Video(title, description, channelId, videoId, thumbnailUrl, channelTitle, "unknown");
+                String publishedDate = snippet.has("publishedAt") ? snippet.get("publishedAt").asText() : null;
+
+                Video video = new Video(title, description, channelId, videoId, thumbnailUrl, channelTitle, publishedDate);
                 video.setTags(tags);
                 return video;
 
@@ -197,8 +199,10 @@ public class YouTubeService {
                     String channelTitle = snippet.get("channelTitle").asText();
                     String thumbnailUrl = snippet.get("thumbnails").get("default").get("url").asText();
 
-                    Video video = new Video(title, description, channelId, videoId, thumbnailUrl, channelTitle, "Unknown"); // مقدار پیش‌فرض برای publishedDate
-                   // video.setTags(Collections.emptyList());
+                    String publishedDate = snippet.has("publishedAt") ? snippet.get("publishedAt").asText() : null;
+
+                    Video video = new Video(title, description, channelId, videoId, thumbnailUrl, channelTitle, publishedDate);
+                    // video.setTags(Collections.emptyList());
                     videos.add(video); // adding video to list
 
                 });

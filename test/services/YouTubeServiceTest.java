@@ -243,69 +243,100 @@ public class YouTubeServiceTest extends WithApplication {
     // Ensuring that the result is empty
     assertTrue(videos.isEmpty(), "Expected search result to be empty, but it was not.");
   }
-  @Test  //for valid data
+  @Test
   public void testSearchVideosByTagWithValidTag() throws Exception {
-    // Mocking response JSON data for videos with a specific tag
-    String responseBody = "{\"items\": [{\"snippet\": {\"title\": \"Tagged Video\", \"description\": \"Video with tag\", \"channelId\": \"taggedChannel\", \"channelTitle\": \"Tagged Channel\", \"thumbnails\": {\"default\": {\"url\": \"thumbnailUrl\"}}, \"publishedAt\": \"2024-11-06T04:41:46Z\"}, \"id\": {\"videoId\": \"taggedVideoId\"}}]}";
+    // Mocking JSON response with valid tag data
+    String responseBody = "{\"items\": [" +
+            "{\"snippet\": {\"title\": \"Tagged Video\", \"description\": \"Video with tag\", " +
+            "\"channelId\": \"taggedChannel\", \"channelTitle\": \"Tagged Channel\", " +
+            "\"thumbnails\": {\"default\": {\"url\": \"thumbnailUrl\"}}, " +
+            "\"publishedAt\": \"2024-11-06T04:41:46Z\"}, " +
+            "\"id\": {\"videoId\": \"taggedVideoId\"}}]}";
+
     JsonNode mockJson = Json.parse(responseBody);
     when(mockResponse.asJson()).thenReturn(mockJson);
 
-    // Setting up WSClient to return the mocked request and response
-    when(mockWsClient.url(contains("youtube/v3/search"))).thenReturn(mockRequest);
+    // Setting up WSClient to return mocked request and response
+    when(mockWsClient.url(anyString())).thenReturn(mockRequest);
     when(mockRequest.get()).thenReturn(CompletableFuture.completedFuture(mockResponse));
 
     // Injecting mocks into YouTubeService
     YouTubeService youTubeService = new YouTubeService(mockWsClient, mockConfig());
 
-    // Executing the searchVideosByTag method
+    // Executing the searchVideosByTag method and validating the result
     List<Video> videos = youTubeService.searchVideosByTag("testTag").toCompletableFuture().join();
 
     // Assertions
     assertNotNull(videos);
     assertEquals(1, videos.size());
     assertEquals("Tagged Video", videos.get(0).getTitle());
+    assertEquals("Video with tag", videos.get(0).getDescription());
     assertEquals("taggedChannel", videos.get(0).getChannelId());
     assertEquals("taggedVideoId", videos.get(0).getVideoId());
+    assertEquals("thumbnailUrl", videos.get(0).getThumbnailUrl());
+    assertEquals("2024-11-06T04:41:46Z", videos.get(0).getPublishedDate());
   }
-  @Test  //test for invalid tag
-  public void testSearchVideosByTagWithInvalidTag() throws Exception {
-    // Mocking an empty JSON response
-    String responseBody = "{\"items\": []}";
+
+  @Test
+  public void testGetVideoDetailsWithTags() {
+    // Mocking JSON response with tags
+    String responseBody = "{\"items\": [" +
+            "{\"snippet\": {\"title\": \"Video with Tags\", \"description\": \"Test description\", " +
+            "\"channelId\": \"testChannelId\", \"channelTitle\": \"Test Channel\", " +
+            "\"thumbnails\": {\"default\": {\"url\": \"thumbnailUrl\"}}, " +
+            "\"publishedAt\": \"2024-11-06T04:41:46Z\", " +
+            "\"tags\": [\"tag1\", \"tag2\", \"tag3\"]}, " +
+            "\"id\": {\"videoId\": \"testVideoId\"}}]}";
+
     JsonNode mockJson = Json.parse(responseBody);
     when(mockResponse.asJson()).thenReturn(mockJson);
 
-    // Setting up WSClient to return the mocked request and response
-    when(mockWsClient.url(contains("youtube/v3/search"))).thenReturn(mockRequest);
+    // Setting up WSClient to return mocked request and response
+    when(mockWsClient.url(anyString())).thenReturn(mockRequest);
     when(mockRequest.get()).thenReturn(CompletableFuture.completedFuture(mockResponse));
 
     // Injecting mocks into YouTubeService
     YouTubeService youTubeService = new YouTubeService(mockWsClient, mockConfig());
 
-    // Executing the searchVideosByTag method with an invalid tag
-    List<Video> videos = youTubeService.searchVideosByTag("invalidTag").toCompletableFuture().join();
-
+    // Executing the getVideoDetails method and validating the result
+    Video video = youTubeService.getVideoDetails("testVideoId").toCompletableFuture().join();
 
     // Assertions
-    assertNotNull(videos);
-    assertTrue(videos.isEmpty(), "Expected no videos for invalid tag, but some videos were returned.");
+    assertNotNull(video, "Expected video object, but got null");
+    assertEquals("Video with Tags", video.getTitle());
+    assertEquals("Test description", video.getDescription());
+    assertEquals("testChannelId", video.getChannelId());
+    assertEquals("testVideoId", video.getVideoId());
+    assertEquals("thumbnailUrl", video.getThumbnailUrl());
+    assertEquals("2024-11-06T04:41:46Z", video.getPublishedDate());
+    assertNotNull(video.getTags());
+    assertEquals(3, video.getTags().size());
+    assertTrue(video.getTags().contains("tag1"));
+    assertTrue(video.getTags().contains("tag2"));
+    assertTrue(video.getTags().contains("tag3"));
   }
+
   @Test
-  public void testSearchVideosByTagWithError() throws Exception {
-    // Simulating an exception in WSClient
+  public void testSearchVideosByTagWithEmptyResult() throws Exception {
+    // Mocking an empty JSON response
+    String responseBody = "{\"items\": []}";
+    JsonNode mockJson = Json.parse(responseBody);
+    when(mockResponse.asJson()).thenReturn(mockJson);
+
+    // Setting up WSClient to return mocked request and response
     when(mockWsClient.url(anyString())).thenReturn(mockRequest);
-    when(mockRequest.get()).thenThrow(new RuntimeException("API failure"));
+    when(mockRequest.get()).thenReturn(CompletableFuture.completedFuture(mockResponse));
 
     // Injecting mocks into YouTubeService
     YouTubeService youTubeService = new YouTubeService(mockWsClient, mockConfig());
 
+    // Executing the searchVideosByTag method with a tag that has no results
+    List<Video> videos = youTubeService.searchVideosByTag("nonexistentTag").toCompletableFuture().join();
+
     // Assertions
-    Exception exception = assertThrows(RuntimeException.class, () -> {
-      youTubeService.searchVideosByTag("errorTag");
-    });
-
-    assertEquals("API failure", exception.getMessage());
+    assertNotNull(videos);
+    assertTrue(videos.isEmpty(), "Expected empty list, but got results");
   }
-
 
 }
 

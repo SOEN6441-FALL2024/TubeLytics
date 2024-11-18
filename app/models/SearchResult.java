@@ -1,10 +1,9 @@
 package models;
 
-import utils.Helpers;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import utils.Helpers;
 
 /**
  * This SearchResult class is created to help us store the information for each search query in
@@ -109,13 +108,18 @@ public class SearchResult {
     if (Optional.ofNullable(videos).isEmpty() || videos.isEmpty()) {
       return 0;
     }
-    return videos.stream().mapToDouble(Video::getFleschKincaidGradeLevel).limit(50).average().orElse(0);
+    return videos.stream()
+        .mapToDouble(Video::getFleschKincaidGradeLevel)
+        .limit(50)
+        .average()
+        .orElse(0);
   }
 
   /**
    * Get the average Flesch Reading Ease Score of the videos in the search result.
    *
-   * video the list of videos to calculate the average Flesch Reading Ease Score
+   * <p>video the list of videos to calculate the average Flesch Reading Ease Score
+   *
    * @return the average Flesch Reading Ease Score
    * @author Deniz Dinchdonmez
    */
@@ -123,13 +127,18 @@ public class SearchResult {
     if (Optional.ofNullable(videos).isEmpty() || videos.isEmpty()) {
       return 0;
     }
-    return videos.stream().mapToDouble(Video::getFleschReadingEaseScore).limit(50).average().orElse(0);
+    return videos.stream()
+        .mapToDouble(Video::getFleschReadingEaseScore)
+        .limit(50)
+        .average()
+        .orElse(0);
   }
 
   /**
    * Get overall sentiment of all video results
    *
-   * @return an emoji face that correlates to the overall % of happy vs sad words in each video descriptions
+   * @return an emoji face that correlates to the overall % of happy vs sad words in each video
+   *     descriptions
    * @author Jessica Chen
    */
   public String getOverallSentiment() {
@@ -137,7 +146,9 @@ public class SearchResult {
   }
 
   /**
-   * Evaluates the overall sentiment based on sentiments of each video in the list of video results from a query
+   * Evaluates the overall sentiment based on sentiments of each video in the list of video results
+   * from a query
+   *
    * @param videos list of videos from a query entered by the users
    * @return an emoji indicating whether the overall sentiment is happy, sad or neutral
    * @author Jessica Chen
@@ -146,7 +157,8 @@ public class SearchResult {
     if (videos == null || videos.isEmpty()) {
       return "Unavailable";
     }
-    double totalHappyWordCount = videos.stream().limit(50).mapToDouble(Video::getHappyWordCount).sum();
+    double totalHappyWordCount =
+        videos.stream().limit(50).mapToDouble(Video::getHappyWordCount).sum();
     double totalSadWordCount = videos.stream().limit(50).mapToDouble(Video::getSadWordCount).sum();
 
     return Helpers.calculateSentiment(totalHappyWordCount, totalSadWordCount);

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -28,6 +29,8 @@ public class YouTubeServiceTest extends WithApplication {
 
   private WSResponse mockResponse;
 
+  YouTubeService ys;
+
   @Before
   public void setUp() {
     MockitoAnnotations.openMocks(this);
@@ -35,6 +38,8 @@ public class YouTubeServiceTest extends WithApplication {
     mockRequest = mock(WSRequest.class);
     mockWsClient = mock(WSClient.class);
     mockResponse = mock(WSResponse.class);
+
+    ys = new YouTubeService(mockWsClient, mockConfig());
 
     when(mockWsClient.url(anyString())).thenReturn(mockRequest);
     when(mockRequest.get()).thenReturn(CompletableFuture.completedFuture(mockResponse));
@@ -134,6 +139,7 @@ public class YouTubeServiceTest extends WithApplication {
     assertEquals(5000, channelInfo.getViewCount());
     assertEquals(10, channelInfo.getVideoCount());
   }
+
   /**
    * Tests the getLast10Videos method of YouTubeService by mocking a valid JSON response for 10
    * videos. Verifies that the returned list contains exactly 10 Video objects with the expected
@@ -348,5 +354,71 @@ public class YouTubeServiceTest extends WithApplication {
     // Assertions
     assertNotNull(videos);
     assertTrue(videos.isEmpty(), "Expected empty list, but got results");
+  }
+
+  /**
+   * Tests the getChannelInfo method of YouTubeService by mocking an exception during the API
+   * request. Verifies that the method returns null when an exception occurs.
+   *
+   * @author: Deniz Dinchdonmez
+   */
+  @Test
+  public void testGetChannelInfo_ExceptionHandling() {
+    // Mocking a scenario where an exception is thrown during API request
+    when(mockWsClient.url(anyString())).thenReturn(mock(play.libs.ws.WSRequest.class));
+    when(mockWsClient.url(anyString()).get()).thenThrow(new RuntimeException("API request failed"));
+
+    YouTubeService ys = new YouTubeService(mockWsClient, mockConfig());
+    // Calling the method
+    ChannelInfo channelInfo = ys.getChannelInfo("someChannelId");
+
+    // Asserting that null is returned in case of an exception
+    assertNull(channelInfo);
+  }
+
+  /**
+   * Tests the getLast10Videos method of YouTubeService by mocking an exception during the API
+   * request. Verifies that the method returns an empty list when an exception occurs.
+   *
+   * @author: Deniz Dinchdonmez
+   */
+  @Test
+  public void testGetLast10Videos_ExceptionHandling() {
+    // Mocking a scenario where an exception is thrown during API request
+    when(mockWsClient.url(anyString())).thenReturn(mock(play.libs.ws.WSRequest.class));
+    when(mockWsClient.url(anyString()).get()).thenThrow(new RuntimeException("API request failed"));
+
+    // Calling the method
+    List<Video> videos = ys.getLast10Videos("someChannelId");
+
+    // Asserting that an empty list is returned in case of an exception
+    assertNotNull(videos);
+    assertTrue(videos.isEmpty());
+  }
+
+  /**
+   * Tests the getChannelInfo method of YouTubeService by mocking a valid response but with missing
+   * fields. Verifies that the method returns null when parsing errors occur.
+   *
+   * @author: Deniz Dinchdonmez
+   */
+  @Test
+  public void testGetLast10Videos_ParsingErrorHandling() {
+    // Mocking a valid response but with missing fields to cause parsing errors
+    when(mockWsClient.url(anyString())).thenReturn(mock(play.libs.ws.WSRequest.class));
+    when(mockWsClient.url(anyString()).get())
+        .thenReturn(CompletableFuture.completedFuture(mockResponse));
+
+    // Mocking the response as an empty JSON object, which will cause parsing issues
+    ObjectMapper objectMapper = new ObjectMapper();
+    JsonNode emptyJson = objectMapper.createObjectNode();
+    when(mockResponse.asJson()).thenReturn(emptyJson);
+
+    // Calling the method
+    List<Video> videos = ys.getLast10Videos("someChannelId");
+
+    // Asserting that an empty list is returned in case of parsing errors
+    assertNotNull(videos);
+    assertTrue(videos.isEmpty());
   }
 }

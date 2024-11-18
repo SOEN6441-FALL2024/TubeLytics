@@ -371,6 +371,7 @@ public class HomeControllerTest {
     assertTrue(content.contains("2")); // Check for 'programming' frequency
   }
 
+
   @Test
   public void testSearch_NullQuery() {
     Result result = homeController.search(null);
@@ -383,18 +384,27 @@ public class HomeControllerTest {
     assertEquals("Please enter a search term.", contentAsString(result));
   }
 
+  /** Tests the {@code wordStats} method with a query that yields no videos.
+   * @author: Deniz Dinchdonmez
+   * */
   @Test
   public void testWordStats_NullQuery() {
     Result result = homeController.wordStats(null);
     assertEquals("Please enter a search term.", contentAsString(result));
   }
 
+  /** Tests the {@code wordStats} method with a query that yields no videos.
+   * @author: Deniz Dinchdonmez
+   * */
   @Test
   public void testWordStats_EmptyQuery() {
     Result result = homeController.wordStats("");
     assertEquals("Please enter a search term.", contentAsString(result));
   }
 
+  /** Tests the {@code wordStats} method with a query that yields no videos.
+   * @author: Deniz Dinchdonmez
+   * */
   @Test
   public void testWordStats_NoVideos() {
     // Mock the YouTube service to return an empty list for the given query
@@ -403,12 +413,9 @@ public class HomeControllerTest {
     // Call the wordStats method with a valid query that returns no videos
     Result result = homeController.wordStats("test-query");
 
-    // Assert that the response status is OK
-
     // Check that the response content is "No words found"
     assertEquals("No words found", contentAsString(result));
   }
-
 
   /**
    * Tests the channelProfile method with valid channel data. Verifies that the response contains

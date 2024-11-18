@@ -378,6 +378,31 @@ public class HomeControllerTest {
     assertTrue(content.contains("2")); // Check for 'programming' frequency
   }
 
+
+  @Test
+  public void testSearch_NullQuery() {
+    Result result = homeController.search(null);
+    assertEquals("Please enter a search term.", contentAsString(result));
+  }
+
+  @Test
+  public void testSearch_EmptyQuery() {
+    Result result = homeController.search(" ");
+    assertEquals("Please enter a search term.", contentAsString(result));
+  }
+
+  @Test
+  public void testWordStats_NullQuery() {
+    Result result = homeController.wordStats(null);
+    assertEquals("Please enter a search term.", contentAsString(result));
+  }
+
+  @Test
+  public void testWordStats_EmptyQuery() {
+    Result result = homeController.wordStats("");
+    assertEquals("Please enter a search term.", contentAsString(result));
+  }
+
   /**
    * Tests the channelProfile method with valid channel data. Verifies that the response contains
    * the expected channel and video information.
@@ -424,7 +449,8 @@ public class HomeControllerTest {
   public void testChannelProfileWithNonExistentChannel() {
     // Arrange: Simulate non-existent channel by returning null values
     when(mockYouTubeService.getChannelInfo("invalidChannelId")).thenReturn(null);
-    when(mockYouTubeService.getLast10Videos("invalidChannelId")).thenReturn(Collections.emptyList());
+    when(mockYouTubeService.getLast10Videos("invalidChannelId"))
+        .thenReturn(Collections.emptyList());
 
     // Act: Call the channelProfile method
     Result result = homeController.channelProfile("invalidChannelId");
@@ -443,8 +469,12 @@ public class HomeControllerTest {
   @Test
   public void testChannelProfileWithErrorInFetchingData() {
     // Arrange: Simulate an exception in service methods
-    doThrow(new RuntimeException("API failure")).when(mockYouTubeService).getChannelInfo(anyString());
-    doThrow(new RuntimeException("API failure")).when(mockYouTubeService).getLast10Videos(anyString());
+    doThrow(new RuntimeException("API failure"))
+        .when(mockYouTubeService)
+        .getChannelInfo(anyString());
+    doThrow(new RuntimeException("API failure"))
+        .when(mockYouTubeService)
+        .getLast10Videos(anyString());
 
     // Act: Call the channelProfile method to trigger the exception
     Result result = homeController.channelProfile("errorChannel");

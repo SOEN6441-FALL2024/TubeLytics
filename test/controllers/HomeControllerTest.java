@@ -211,7 +211,6 @@ public class HomeControllerTest {
     assertEquals(OK, result.status());
     assertTrue(contentAsString(result).contains("Mock Title"));
     assertTrue(contentAsString(result).contains("Mock Description"));
-    // assertTrue(contentAsString(result).contains("Mock Channel"));
   }
 
   @Test
@@ -222,8 +221,6 @@ public class HomeControllerTest {
     // Perform the search with a query that yields no results
     Result result = homeController.search("empty");
 
-    // Assert status is OK and content indicates no results found
-    // assertEquals(OK, status(result));
     assertTrue(contentAsString(result).contains("No results found"));
   }
 
@@ -235,8 +232,6 @@ public class HomeControllerTest {
     // Perform the search to trigger the exception
     Result result = homeController.search("error");
 
-    // Assert that the status is INTERNAL_SERVER_ERROR
-    // assertEquals(INTERNAL_SERVER_ERROR, status(result));
     assertTrue(
         contentAsString(result).contains("An error occurred while processing your request."));
   }
@@ -246,8 +241,6 @@ public class HomeControllerTest {
     // Perform search with an empty query
     Result result = homeController.search("");
 
-    // Assert that the status is BAD_REQUEST and message prompts to enter search term
-    // (BAD_REQUEST, status(result));
     assertTrue(contentAsString(result).contains("Please enter a search term"));
   }
 
@@ -378,7 +371,6 @@ public class HomeControllerTest {
     assertTrue(content.contains("2")); // Check for 'programming' frequency
   }
 
-
   @Test
   public void testSearch_NullQuery() {
     Result result = homeController.search(null);
@@ -402,6 +394,21 @@ public class HomeControllerTest {
     Result result = homeController.wordStats("");
     assertEquals("Please enter a search term.", contentAsString(result));
   }
+
+  @Test
+  public void testWordStats_NoVideos() {
+    // Mock the YouTube service to return an empty list for the given query
+    when(mockYouTubeService.searchVideos("test-query", 50)).thenReturn(Collections.emptyList());
+
+    // Call the wordStats method with a valid query that returns no videos
+    Result result = homeController.wordStats("test-query");
+
+    // Assert that the response status is OK
+
+    // Check that the response content is "No words found"
+    assertEquals("No words found", contentAsString(result));
+  }
+
 
   /**
    * Tests the channelProfile method with valid channel data. Verifies that the response contains

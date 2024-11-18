@@ -27,7 +27,7 @@
     <div class="search-stats">
         <p>Search term:
             <strong>
-                <a href="@routes.YouTubeController.wordStats(searchResult.getQuery())" target="_blank">@searchResult.getQuery()</a>
+                <a href="@routes.HomeController.wordStats(searchResult.getQuery())" target="_blank">@searchResult.getQuery()</a>
             </strong>
         </p>
         <p>Search terms: <strong>@searchResult.getQuery() @searchResult.getOverallSentiment()</strong> (Flesch-Kincaid Grade Level Avg.= @searchResult.getAverageFleschKincaidGradeLevel(), Flesch Reading Ease Score Avg.= @searchResult.getAverageFleschReadingEaseScore())</p>
@@ -47,11 +47,11 @@
                 <!-- لینک به تگ‌ها -->
                 <p>
                     <strong>Tags:</strong>
-                    <a href="@routes.YouTubeController.showTags(video.getVideoId())" target="_blank" class="tags-link">View Tags</a>
+                    <a href="@routes.HomeController.showTags(video.getVideoId())" target="_blank" class="tags-link">View Tags</a>
                 </p>
 
                 <!-- لینک به آمار کلمات -->
-                <a href="@routes.YouTubeController.wordStats(searchResult.getQuery())" class="more-stats-link">More Word Stats</a>
+                <a href="@routes.HomeController.wordStats(searchResult.getQuery())" class="more-stats-link">More Word Stats</a>
             </div>
             <div class="video-thumbnail">
                 <img src="@video.getThumbnailUrl()" alt="Thumbnail">

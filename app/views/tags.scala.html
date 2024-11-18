@@ -6,14 +6,14 @@
 <div class="video-details">
     <p><strong>Title:</strong> @video.getTitle()</p>
     <p><strong>Description:</strong> @video.getDescription()</p>
-    <p><strong>Channel:</strong> <a href="@routes.YouTubeController.channelProfile(video.getChannelId())" target="_blank">@video.getChannelTitle()</a></p>
+    <p><strong>Channel:</strong> <a href="@routes.HomeController.channelProfile(video.getChannelId())" target="_blank">@video.getChannelTitle()</a></p>
 </div>
 
 <h2>Tags</h2>
 <ul>
     @for(tag <- video.getTags()) {
     <li>
-        <a href="@routes.YouTubeController.searchByTag(tag)" target="_blank">@tag</a>
+        <a href="@routes.HomeController.searchByTag(tag)" target="_blank">@tag</a>
     </li>
     }
 </ul>

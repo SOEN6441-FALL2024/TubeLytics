@@ -1,15 +1,14 @@
 package models;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * This test class contains equivalence classes to test the SearchResult class. Please note that our
@@ -23,31 +22,29 @@ public class SearchResultTest {
   private List<Video> testVideos;
   private SearchResult searchResult;
 
-  /**
-   * Helps set up mock entries to create search result objects with.
-   */
+  /** Helps set up mock entries to create search result objects with. */
   @Before
   public void setUp() {
     query = "cat";
     testVideos = new ArrayList<>();
     Video video1 =
-            new Video(
-                    "CatVideoTitle1",
-                    "CatVideoDescription1",
-                    "CatVideoChannelId1",
-                    "CatVideoVideoId1",
-                    "CatVideoThumbnailUrl.jpg1",
-                    "CatVideoChannelTitle1",
-                    "2024-11-06T04:41:46Z" );
+        new Video(
+            "CatVideoTitle1",
+            "CatVideoDescription1",
+            "CatVideoChannelId1",
+            "CatVideoVideoId1",
+            "CatVideoThumbnailUrl.jpg1",
+            "CatVideoChannelTitle1",
+            "2024-11-06T04:41:46Z");
     Video video2 =
-            new Video(
-                    "CatVideoTitle2",
-                    "CatVideoDescription2",
-                    "CatVideoChannelId2",
-                    "CatVideoVideoId2",
-                    "CatVideoThumbnailUrl.jpg2",
-                    "CatVideoChannelTitle2",
-                    "2024-11-06T04:41:46Z" );
+        new Video(
+            "CatVideoTitle2",
+            "CatVideoDescription2",
+            "CatVideoChannelId2",
+            "CatVideoVideoId2",
+            "CatVideoThumbnailUrl.jpg2",
+            "CatVideoChannelTitle2",
+            "2024-11-06T04:41:46Z");
     testVideos.add(video1);
     testVideos.add(video2);
 
@@ -56,6 +53,7 @@ public class SearchResultTest {
 
   /**
    * Asserts search result object with valid parameters is created properly and that it is not null.
+   *
    * @author Jessica Chen
    */
   @Test
@@ -63,23 +61,23 @@ public class SearchResultTest {
     query = "Panda";
     testVideos = new ArrayList<>();
     Video video1 =
-            new Video(
-                    "PandaVideoTitle1",
-                    "PandaVideoDescription1",
-                    "PandaVideoChannelId1",
-                    "PandaVideoVideoId1",
-                    "PandaVideoThumbnailUrl.jpg1",
-                    "PandaVideoChannelTitle1",
-                    "2024-11-06T04:41:46Z" );
+        new Video(
+            "PandaVideoTitle1",
+            "PandaVideoDescription1",
+            "PandaVideoChannelId1",
+            "PandaVideoVideoId1",
+            "PandaVideoThumbnailUrl.jpg1",
+            "PandaVideoChannelTitle1",
+            "2024-11-06T04:41:46Z");
     Video video2 =
-            new Video(
-                    "PandaVideoTitle2",
-                    "PandaVideoDescription2",
-                    "PandaVideoChannelId2",
-                    "PandaVideoVideoId2",
-                    "PandaVideoThumbnailUrl.jpg2",
-                    "PandaVideoChannelTitle2",
-                    "2024-11-06T04:41:46Z");
+        new Video(
+            "PandaVideoTitle2",
+            "PandaVideoDescription2",
+            "PandaVideoChannelId2",
+            "PandaVideoVideoId2",
+            "PandaVideoThumbnailUrl.jpg2",
+            "PandaVideoChannelTitle2",
+            "2024-11-06T04:41:46Z");
     testVideos.add(video1);
     testVideos.add(video2);
 
@@ -92,6 +90,7 @@ public class SearchResultTest {
 
   /**
    * Asserts that two search result objects with the same parameters are equal
+   *
    * @author Jessica Chen
    */
   @Test
@@ -104,7 +103,8 @@ public class SearchResultTest {
   }
 
   /**
-   * Asserts that two search result objects with different parameters are not equal. Asserts false that search results with the same query but different list of videos are not equal.
+   * Asserts that two search result objects with different parameters are not equal. Asserts false
+   * that search results with the same query but different list of videos are not equal.
    *
    * @author Jessica Chen
    */
@@ -114,23 +114,23 @@ public class SearchResultTest {
     String query2 = "dog";
     List<Video> videos2 = new ArrayList<>();
     Video video1 =
-            new Video(
-                    "DogVideoTitle1",
-                    "DogVideoDescription1",
-                    "DogVideoChannelId1",
-                    "DogVideoVideoId1",
-                    "DogVideoThumbnailUrl.jpg1",
-                    "DogVideoChannelTitle1",
-                    "2024-11-06T04:41:46Z" );
+        new Video(
+            "DogVideoTitle1",
+            "DogVideoDescription1",
+            "DogVideoChannelId1",
+            "DogVideoVideoId1",
+            "DogVideoThumbnailUrl.jpg1",
+            "DogVideoChannelTitle1",
+            "2024-11-06T04:41:46Z");
     Video video2 =
-            new Video(
-                    "DogVideoTitle2",
-                    "DogVideoDescription2",
-                    "DogVideoChannelId2",
-                    "DogVideoVideoId2",
-                    "DogVideoThumbnailUrl.jpg2",
-                    "DogVideoChannelTitle2",
-                    "2024-11-06T04:41:46Z" );
+        new Video(
+            "DogVideoTitle2",
+            "DogVideoDescription2",
+            "DogVideoChannelId2",
+            "DogVideoVideoId2",
+            "DogVideoThumbnailUrl.jpg2",
+            "DogVideoChannelTitle2",
+            "2024-11-06T04:41:46Z");
     videos2.add(video1);
     videos2.add(video2);
 
@@ -144,6 +144,7 @@ public class SearchResultTest {
 
   /**
    * Asserts that two search result objects with the same parameters are equal in hashCode
+   *
    * @author Jessica Chen
    */
   @Test
@@ -155,6 +156,7 @@ public class SearchResultTest {
 
   /**
    * Asserts that two search result objects with different parameters are not equal in hashCode
+   *
    * @author Jessica Chen
    */
   @Test
@@ -164,23 +166,23 @@ public class SearchResultTest {
     String query2 = "dog";
     List<Video> videos2 = new ArrayList<>();
     Video video1 =
-            new Video(
-                    "DogVideoTitle1",
-                    "DogVideoDescription1",
-                    "DogVideoChannelId1",
-                    "DogVideoVideoId1",
-                    "DogVideoThumbnailUrl.jpg1",
-                    "DogVideoChannelTitle1",
-                    "2024-11-06T04:41:46Z" );
+        new Video(
+            "DogVideoTitle1",
+            "DogVideoDescription1",
+            "DogVideoChannelId1",
+            "DogVideoVideoId1",
+            "DogVideoThumbnailUrl.jpg1",
+            "DogVideoChannelTitle1",
+            "2024-11-06T04:41:46Z");
     Video video2 =
-            new Video(
-                    "DogVideoTitle2",
-                    "DogVideoDescription2",
-                    "DogVideoChannelId2",
-                    "DogVideoVideoId2",
-                    "DogVideoThumbnailUrl.jpg2",
-                    "DogVideoChannelTitle2",
-                    "2024-11-06T04:41:46Z" );
+        new Video(
+            "DogVideoTitle2",
+            "DogVideoDescription2",
+            "DogVideoChannelId2",
+            "DogVideoVideoId2",
+            "DogVideoThumbnailUrl.jpg2",
+            "DogVideoChannelTitle2",
+            "2024-11-06T04:41:46Z");
     videos2.add(video1);
     videos2.add(video2);
 
@@ -189,7 +191,9 @@ public class SearchResultTest {
   }
 
   /**
-   * Tests the sentiment overall for a list of videos (up to 50). Added 25 happy sentiment videos and then 27 sad sentiment. The limit is 50 and so the overall sentiment should be balanced out.
+   * Tests the sentiment overall for a list of videos (up to 50). Added 25 happy sentiment videos
+   * and then 27 sad sentiment. The limit is 50 and so the overall sentiment should be balanced out.
+   *
    * @author Jessica Chen
    */
   @Test
@@ -198,7 +202,8 @@ public class SearchResultTest {
     for (int i = 0; i < 52; i++) {
       Video video;
       if (i <= 25) {
-        video = new Video(
+        video =
+            new Video(
                 "Happy Sentiment",
                 "Today is a great day with amazing weather. I am very happy and not sad at all. This is a happy sentence.",
                 "channelId123",
@@ -207,14 +212,15 @@ public class SearchResultTest {
                 "channelTitle",
                 "2024-11-06T04:41:46Z");
       } else {
-        video = new Video(
+        video =
+            new Video(
                 "Sad Sentiment",
                 "Today is a terrible day with awful weather. I am angry and not happy. This is a sad sentence.",
                 "channelId123",
                 "videoId123",
                 "thumbnailUrl.jpg",
                 "channelTitle",
-                "2024-11-06T04:41:46Z" );
+                "2024-11-06T04:41:46Z");
       }
       testVideos.add(video);
     }
@@ -224,6 +230,7 @@ public class SearchResultTest {
 
   /**
    * Tests the sentiment overall when dealing with the list of videos is null or empty.
+   *
    * @author Jessica Chen
    */
   @Test
@@ -237,9 +244,10 @@ public class SearchResultTest {
   }
 
   /**
-   * Tests the equals method by comparing the SearchResult object with itself.
-   * Expects the result to be true.
-   *  @author Aidassj
+   * Tests the equals method by comparing the SearchResult object with itself. Expects the result to
+   * be true.
+   *
+   * @author Aidassj
    */
   @Test
   public void testSearchResultEqualsWithItself() {
@@ -247,8 +255,9 @@ public class SearchResultTest {
   }
 
   /**
-   * Tests the equals method by comparing the SearchResult object with null.
-   * Expects the result to be false.
+   * Tests the equals method by comparing the SearchResult object with null. Expects the result to
+   * be false.
+   *
    * @author Aidassj
    */
   @Test
@@ -257,10 +266,10 @@ public class SearchResultTest {
   }
 
   /**
-   * Tests the equals method by comparing the SearchResult object with an object of a different type.
-   * Expects the result to be false.
+   * Tests the equals method by comparing the SearchResult object with an object of a different
+   * type. Expects the result to be false.
+   *
    * @author Aidassj
-
    */
   @Test
   public void testSearchResultEqualsWithDifferentType() {

@@ -7,7 +7,7 @@
 <div class="search-stats">
     <p>Search term:
         <strong>
-            <a href="@routes.YouTubeController.wordStats(query)" target="_blank">
+            <a href="@routes.HomeController.wordStats(query)" target="_blank">
                 @query
             </a>
         </strong>
@@ -25,10 +25,10 @@
             <h2><a href="https://www.youtube.com/watch?v=@video.getVideoId()" target="_blank">@video.getTitle()</a></h2>
             <p>@video.getDescription()</p>
             <p>
-                <a href="@routes.YouTubeController.channelProfile(video.getChannelId())" target="_blank">
+                <a href="@routes.HomeController.channelProfile(video.getChannelId())" target="_blank">
                     @video.getChannelTitle()
                 </a>
-                <a href="@routes.YouTubeController.showTags(video.getVideoId())" class="tags-link">Tags</a>
+                <a href="@routes.HomeController.showTags(video.getVideoId())" class="tags-link">Tags</a>
 
             </p>
         </div>

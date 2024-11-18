@@ -1,16 +1,15 @@
 package models;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.junit.Test;
 import play.Application;
 import play.inject.guice.GuiceApplicationBuilder;
 import play.test.WithApplication;
-
-import java.util.List;
-import java.util.Arrays;
-import java.util.Collections;
-import java.lang.reflect.Field;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class VideoTest extends WithApplication {
 
@@ -21,15 +20,15 @@ public class VideoTest extends WithApplication {
 
   @Test
   public void testVideoCreation() {
-    Video video = new Video(
+    Video video =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
 
     assertEquals("Sample Title", video.getTitle());
     assertEquals("Sample Description", video.getDescription());
@@ -41,24 +40,24 @@ public class VideoTest extends WithApplication {
 
   @Test
   public void testVideoEquality() {
-    Video video1 = new Video(
+    Video video1 =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
-    Video video2 = new Video(
+            "2024-11-06T04:41:46Z");
+    Video video2 =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
 
     assertEquals(video1, video2);
     assertTrue(video1.equals(video1));
@@ -66,63 +65,63 @@ public class VideoTest extends WithApplication {
 
   @Test
   public void testVideoInequality() {
-    Video video1 = new Video(
+    Video video1 =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
-    Video video2 = new Video(
+            "2024-11-06T04:41:46Z");
+    Video video2 =
+        new Video(
             "Different Title",
             "Different Description",
             "channelId456",
             "videoId456",
             "differentThumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
 
     assertNotEquals(video1, video2);
   }
 
   @Test
   public void testVideoHashCode() {
-    Video video1 = new Video(
+    Video video1 =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
-    Video video2 = new Video(
+            "2024-11-06T04:41:46Z");
+    Video video2 =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
 
     assertEquals(video1.hashCode(), video2.hashCode());
   }
 
   @Test
   public void testSetAndGetTags() {
-    Video video = new Video(
+    Video video =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
 
     // Case 1: Setting null tags
     video.setTags(null);
@@ -142,26 +141,26 @@ public class VideoTest extends WithApplication {
 
   @Test
   public void testVideoEqualityWithTags() {
-    Video video1 = new Video(
+    Video video1 =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
     video1.setTags(Arrays.asList("Tag1", "Tag2"));
 
-    Video video2 = new Video(
+    Video video2 =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
     video2.setTags(Arrays.asList("Tag1", "Tag2"));
 
     assertEquals(video1, video2);
@@ -170,42 +169,43 @@ public class VideoTest extends WithApplication {
 
   @Test
   public void testVideoInequalityWithDifferentTags() {
-    Video video1 = new Video(
+    Video video1 =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
     video1.setTags(Arrays.asList("Tag1", "Tag2"));
 
-    Video video2 = new Video(
+    Video video2 =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
     video2.setTags(Arrays.asList("DifferentTag1", "DifferentTag2"));
 
     assertNotEquals(video1, video2);
     assertNotEquals(video1.hashCode(), video2.hashCode());
   }
+
   @Test
   public void testVideoEqualsEdgeCases() {
-    Video video = new Video(
+    Video video =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
     video.setTags(Arrays.asList("Tag1", "Tag2"));
 
     assertNotEquals(video, null);
@@ -214,46 +214,47 @@ public class VideoTest extends WithApplication {
 
     assertEquals(video, video);
 
-    Video identicalVideo = new Video(
+    Video identicalVideo =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
     identicalVideo.setTags(Arrays.asList("Tag1", "Tag2"));
 
     assertEquals(video, identicalVideo);
     assertEquals(video.hashCode(), identicalVideo.hashCode());
 
-    Video differentVideo = new Video(
+    Video differentVideo =
+        new Video(
             "Different Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
     differentVideo.setTags(Arrays.asList("Tag1", "Tag2"));
 
     assertNotEquals(video, differentVideo);
   }
+
   @Test
   public void testGetSubmissionSentiment() {
     // Arrange: Create a video object with a mock sentiment
     String expectedSentiment = "Positive";
-    Video video = new Video(
+    Video video =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
 
     // Use reflection to set the private field (if no setter is available)
     try {
@@ -270,24 +271,50 @@ public class VideoTest extends WithApplication {
     // Assert: Verify that the retrieved sentiment matches the expected value
     assertEquals(expectedSentiment, actualSentiment);
   }
+
   @Test
   public void testGetTags() {
     // Case 1: When tags is null
-    Video videoWithNullTags = new Video("Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+    Video videoWithNullTags =
+        new Video(
+            "Title",
+            "Description",
+            "channelId",
+            "videoId",
+            "thumbnailUrl",
+            "channelTitle",
+            "2024-11-06T04:41:46Z");
     videoWithNullTags.setTags(null); // Assuming setTags(null) simulates a null tags value
     List<String> tags = videoWithNullTags.getTags();
     assertNotNull(tags, "Tags should not be null");
     assertTrue(tags.isEmpty(), "Tags should be an empty list when tags is null");
 
     // Case 2: When tags is an empty list
-    Video videoWithEmptyTags = new Video("Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+    Video videoWithEmptyTags =
+        new Video(
+            "Title",
+            "Description",
+            "channelId",
+            "videoId",
+            "thumbnailUrl",
+            "channelTitle",
+            "2024-11-06T04:41:46Z");
     videoWithEmptyTags.setTags(Collections.emptyList());
     List<String> emptyTags = videoWithEmptyTags.getTags();
     assertNotNull(emptyTags, "Tags should not be null");
-    assertTrue(emptyTags.isEmpty(), "Tags should remain empty when explicitly set to an empty list");
+    assertTrue(
+        emptyTags.isEmpty(), "Tags should remain empty when explicitly set to an empty list");
 
     // Case 3: When tags is a non-empty list
-    Video videoWithTags = new Video("Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+    Video videoWithTags =
+        new Video(
+            "Title",
+            "Description",
+            "channelId",
+            "videoId",
+            "thumbnailUrl",
+            "channelTitle",
+            "2024-11-06T04:41:46Z");
     List<String> mockTags = Arrays.asList("Tag1", "Tag2", "Tag3");
     videoWithTags.setTags(mockTags);
     List<String> retrievedTags = videoWithTags.getTags();
@@ -297,17 +324,18 @@ public class VideoTest extends WithApplication {
     assertTrue(retrievedTags.contains("Tag2"), "Tags should contain 'Tag2'");
     assertTrue(retrievedTags.contains("Tag3"), "Tags should contain 'Tag3'");
   }
+
   @Test
   public void testVideoEquals() {
-    Video video1 = new Video(
+    Video video1 =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
     video1.setTags(Arrays.asList("Tag1", "Tag2"));
 
     // Case 1: Comparing the same object (this == o)
@@ -320,69 +348,80 @@ public class VideoTest extends WithApplication {
     assertNotEquals(video1, "Some String");
 
     // Case 4: Comparing with another Video object with identical fields
-    Video identicalVideo = new Video(
+    Video identicalVideo =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
     identicalVideo.setTags(Arrays.asList("Tag1", "Tag2"));
     assertEquals(video1, identicalVideo);
     assertEquals(video1.hashCode(), identicalVideo.hashCode());
 
     // Case 5: Comparing with a Video object with a different title
-    Video differentTitleVideo = new Video(
+    Video differentTitleVideo =
+        new Video(
             "Different Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
     differentTitleVideo.setTags(Arrays.asList("Tag1", "Tag2"));
     assertNotEquals(video1, differentTitleVideo);
 
     // Case 6: Comparing with a Video object with different tags
-    Video differentTagsVideo = new Video(
+    Video differentTagsVideo =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
     differentTagsVideo.setTags(Arrays.asList("DifferentTag1", "DifferentTag2"));
     assertNotEquals(video1, differentTagsVideo);
 
     // Case 7: Comparing with a Video object with a different published date
-    Video differentDateVideo = new Video(
+    Video differentDateVideo =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2025-01-01T00:00:00Z"
-    );
+            "2025-01-01T00:00:00Z");
     differentDateVideo.setTags(Arrays.asList("Tag1", "Tag2"));
     assertNotEquals(video1, differentDateVideo);
   }
+
   @Test
   public void testGetTagsCoverage() {
     // Case 1: When tags are null
-    Video videoWithoutTags = new Video("Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+    Video videoWithoutTags =
+        new Video(
+            "Title",
+            "Description",
+            "channelId",
+            "videoId",
+            "thumbnailUrl",
+            "channelTitle",
+            "2024-11-06T04:41:46Z");
     assertNotNull(videoWithoutTags.getTags());
     assertTrue(videoWithoutTags.getTags().isEmpty(), "Expected an empty list when tags are null");
 
     // Case 2: When tags are an empty list
     videoWithoutTags.setTags(Collections.emptyList());
     assertNotNull(videoWithoutTags.getTags());
-    assertTrue(videoWithoutTags.getTags().isEmpty(), "Expected an empty list when tags are explicitly set to an empty list");
+    assertTrue(
+        videoWithoutTags.getTags().isEmpty(),
+        "Expected an empty list when tags are explicitly set to an empty list");
 
     // Case 3: When tags contain elements
     List<String> mockTags = Arrays.asList("Tag1", "Tag2", "Tag3");
@@ -393,18 +432,19 @@ public class VideoTest extends WithApplication {
     assertTrue(videoWithoutTags.getTags().contains("Tag2"));
     assertTrue(videoWithoutTags.getTags().contains("Tag3"));
   }
+
   @Test
   public void testEqualsCoverage() {
     // Case 1: Same object (should be equal)
-    Video video1 = new Video(
+    Video video1 =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
     video1.setTags(Arrays.asList("Tag1", "Tag2"));
     assertTrue(video1.equals(video1)); // Same object
 
@@ -415,60 +455,61 @@ public class VideoTest extends WithApplication {
     assertFalse(video1.equals("Some String"));
 
     // Case 4: Equal objects with same fields
-    Video video2 = new Video(
+    Video video2 =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
     video2.setTags(Arrays.asList("Tag1", "Tag2"));
     assertTrue(video1.equals(video2));
     assertEquals(video1.hashCode(), video2.hashCode());
 
     // Case 5: Different title (should not be equal)
-    Video video3 = new Video(
+    Video video3 =
+        new Video(
             "Different Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
     video3.setTags(Arrays.asList("Tag1", "Tag2"));
     assertFalse(video1.equals(video3));
 
     // Case 6: Different tags (should not be equal)
-    Video video4 = new Video(
+    Video video4 =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
     video4.setTags(Arrays.asList("DifferentTag1", "DifferentTag2"));
     assertFalse(video1.equals(video4));
 
     // Case 7: Null tags in one video (should not be equal)
-    Video video5 = new Video(
+    Video video5 =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
     video5.setTags(null); // Null tags
     assertFalse(video1.equals(video5));
 
     // Case 8: Null publishedDate in one video (should not be equal)
-    Video video6 = new Video(
+    Video video6 =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
@@ -476,27 +517,36 @@ public class VideoTest extends WithApplication {
             "thumbnailUrl.jpg",
             "channelTitle",
             null // Null publishedDate
-    );
+            );
     video6.setTags(Arrays.asList("Tag1", "Tag2"));
     assertFalse(video1.equals(video6));
 
     // Case 9: Completely different object
-    Video video7 = new Video(
+    Video video7 =
+        new Video(
             "Another Title",
             "Another Description",
             "differentChannelId",
             "differentVideoId",
             "differentThumbnailUrl.jpg",
             "differentChannelTitle",
-            "2023-10-15T10:15:30Z"
-    );
+            "2023-10-15T10:15:30Z");
     video7.setTags(Arrays.asList("AnotherTag1", "AnotherTag2"));
     assertFalse(video1.equals(video7));
   }
+
   @Test
   public void testGetTagsWithNullTags() {
     // Arrange
-    Video video = new Video("Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+    Video video =
+        new Video(
+            "Title",
+            "Description",
+            "channelId",
+            "videoId",
+            "thumbnailUrl",
+            "channelTitle",
+            "2024-11-06T04:41:46Z");
 
     // Act & Assert
     assertNotNull(video.getTags());
@@ -506,7 +556,15 @@ public class VideoTest extends WithApplication {
   @Test
   public void testGetTagsWithNonEmptyTags() {
     // Arrange
-    Video video = new Video("Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+    Video video =
+        new Video(
+            "Title",
+            "Description",
+            "channelId",
+            "videoId",
+            "thumbnailUrl",
+            "channelTitle",
+            "2024-11-06T04:41:46Z");
     List<String> tags = Arrays.asList("Tag1", "Tag2", "Tag3");
     video.setTags(tags);
 
@@ -524,7 +582,15 @@ public class VideoTest extends WithApplication {
   @Test
   public void testSetTagsWithNullValue() {
     // Arrange
-    Video video = new Video("Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+    Video video =
+        new Video(
+            "Title",
+            "Description",
+            "channelId",
+            "videoId",
+            "thumbnailUrl",
+            "channelTitle",
+            "2024-11-06T04:41:46Z");
 
     // Act
     video.setTags(null);
@@ -537,7 +603,15 @@ public class VideoTest extends WithApplication {
   @Test
   public void testEqualsMethod() {
     // Arrange
-    Video video1 = new Video("Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+    Video video1 =
+        new Video(
+            "Title",
+            "Description",
+            "channelId",
+            "videoId",
+            "thumbnailUrl",
+            "channelTitle",
+            "2024-11-06T04:41:46Z");
     video1.setTags(Arrays.asList("Tag1", "Tag2"));
 
     // Case 1: Self-comparison
@@ -547,20 +621,46 @@ public class VideoTest extends WithApplication {
     assertFalse(video1.equals(null), "A video should not be equal to null");
 
     // Case 3: Comparison with object of different class
-    assertFalse(video1.equals("String Object"), "A video should not be equal to an object of different class");
+    assertFalse(
+        video1.equals("String Object"),
+        "A video should not be equal to an object of different class");
 
     // Case 4: Comparison with identical object
-    Video video2 = new Video("Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+    Video video2 =
+        new Video(
+            "Title",
+            "Description",
+            "channelId",
+            "videoId",
+            "thumbnailUrl",
+            "channelTitle",
+            "2024-11-06T04:41:46Z");
     video2.setTags(Arrays.asList("Tag1", "Tag2"));
     assertTrue(video1.equals(video2), "Identical videos should be equal");
 
     // Case 5: Comparison with different object
-    Video video3 = new Video("Different Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+    Video video3 =
+        new Video(
+            "Different Title",
+            "Description",
+            "channelId",
+            "videoId",
+            "thumbnailUrl",
+            "channelTitle",
+            "2024-11-06T04:41:46Z");
     video3.setTags(Arrays.asList("Tag1", "Tag2"));
     assertFalse(video1.equals(video3), "Videos with different titles should not be equal");
 
     // Case 6: Comparison with different tags
-    Video video4 = new Video("Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+    Video video4 =
+        new Video(
+            "Title",
+            "Description",
+            "channelId",
+            "videoId",
+            "thumbnailUrl",
+            "channelTitle",
+            "2024-11-06T04:41:46Z");
     video4.setTags(Arrays.asList("DifferentTag1", "DifferentTag2"));
     assertFalse(video1.equals(video4), "Videos with different tags should not be equal");
   }
@@ -568,99 +668,118 @@ public class VideoTest extends WithApplication {
   @Test
   public void testHashCode() {
     // Arrange
-    Video video1 = new Video("Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+    Video video1 =
+        new Video(
+            "Title",
+            "Description",
+            "channelId",
+            "videoId",
+            "thumbnailUrl",
+            "channelTitle",
+            "2024-11-06T04:41:46Z");
     video1.setTags(Arrays.asList("Tag1", "Tag2"));
 
-    Video video2 = new Video("Title", "Description", "channelId", "videoId", "thumbnailUrl", "channelTitle", "2024-11-06T04:41:46Z");
+    Video video2 =
+        new Video(
+            "Title",
+            "Description",
+            "channelId",
+            "videoId",
+            "thumbnailUrl",
+            "channelTitle",
+            "2024-11-06T04:41:46Z");
     video2.setTags(Arrays.asList("Tag1", "Tag2"));
 
     // Act & Assert
-    assertEquals(video1.hashCode(), video2.hashCode(), "Hash codes of identical videos should be equal");
+    assertEquals(
+        video1.hashCode(), video2.hashCode(), "Hash codes of identical videos should be equal");
   }
+
   @Test
   public void testVideoEqualityWithDifferentAttributes() {
     // Arrange: Create a base video
-    Video baseVideo = new Video(
+    Video baseVideo =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
 
     // Case 1: Different description
-    Video videoWithDifferentDescription = new Video(
+    Video videoWithDifferentDescription =
+        new Video(
             "Sample Title",
             "Different Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
     assertNotEquals(baseVideo, videoWithDifferentDescription);
 
     // Case 2: Different channelId
-    Video videoWithDifferentChannelId = new Video(
+    Video videoWithDifferentChannelId =
+        new Video(
             "Sample Title",
             "Sample Description",
             "differentChannelId",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
     assertNotEquals(baseVideo, videoWithDifferentChannelId);
 
     // Case 3: Different videoId
-    Video videoWithDifferentVideoId = new Video(
+    Video videoWithDifferentVideoId =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "differentVideoId",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
     assertNotEquals(baseVideo, videoWithDifferentVideoId);
 
     // Case 4: Different thumbnailUrl
-    Video videoWithDifferentThumbnailUrl = new Video(
+    Video videoWithDifferentThumbnailUrl =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "differentThumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
     assertNotEquals(baseVideo, videoWithDifferentThumbnailUrl);
 
     // Case 5: Different channelTitle
-    Video videoWithDifferentChannelTitle = new Video(
+    Video videoWithDifferentChannelTitle =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "differentChannelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
     assertNotEquals(baseVideo, videoWithDifferentChannelTitle);
   }
+
   @Test
   public void testGetTagsNull() {
-    Video video = new Video(
+    Video video =
+        new Video(
             "Sample Title",
             "Sample Description",
             "channelId123",
             "videoId123",
             "thumbnailUrl.jpg",
             "channelTitle",
-            "2024-11-06T04:41:46Z"
-    );
+            "2024-11-06T04:41:46Z");
 
     // Case 1: When tags is null
     try {
@@ -684,5 +803,4 @@ public class VideoTest extends WithApplication {
     assertTrue(tags.contains("Tag2"));
     assertTrue(tags.contains("Tag3"));
   }
-
 }

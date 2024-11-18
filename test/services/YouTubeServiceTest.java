@@ -1,7 +1,13 @@
 package services;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import models.ChannelInfo;
 import models.Video;
 import org.junit.Before;
@@ -15,35 +21,29 @@ import play.libs.ws.WSRequest;
 import play.libs.ws.WSResponse;
 import play.test.WithApplication;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 public class YouTubeServiceTest extends WithApplication {
 
   private WSClient mockWsClient;
 
-
   private WSRequest mockRequest;
 
-
   private WSResponse mockResponse;
+
+  YouTubeService ys;
 
   @Before
   public void setUp() {
     MockitoAnnotations.openMocks(this);
 
-
     mockRequest = mock(WSRequest.class);
     mockWsClient = mock(WSClient.class);
     mockResponse = mock(WSResponse.class);
 
+    ys = new YouTubeService(mockWsClient, mockConfig());
+
     when(mockWsClient.url(anyString())).thenReturn(mockRequest);
     when(mockRequest.get()).thenReturn(CompletableFuture.completedFuture(mockResponse));
   }
-
 
   @Override
   protected Application provideApplication() {
@@ -53,7 +53,15 @@ public class YouTubeServiceTest extends WithApplication {
 
   @Test
   public void testVideoFields() {
-    Video video = new Video("Title", "Description", "ChannelId", "VideoId", "ThumbnailUrl","channelTitle", "2024-11-06T04:41:46Z");
+    Video video =
+        new Video(
+            "Title",
+            "Description",
+            "ChannelId",
+            "VideoId",
+            "ThumbnailUrl",
+            "channelTitle",
+            "2024-11-06T04:41:46Z");
 
     assertEquals("Title", video.getTitle());
     assertEquals("Description", video.getDescription());
@@ -63,6 +71,7 @@ public class YouTubeServiceTest extends WithApplication {
     assertEquals("channelTitle", video.getChannelTitle());
     assertEquals("2024-11-06T04:41:46Z", video.getPublishedDate());
   }
+
   @Test
   public void testSearchVideosWithMockResponse() throws Exception {
     // Mocking WSClient and WSResponse
@@ -71,7 +80,8 @@ public class YouTubeServiceTest extends WithApplication {
     WSResponse mockResponse = mock(WSResponse.class);
 
     // Mocking JSON response
-    String responseBody = "{\"items\": [{\"snippet\": {\"title\": \"Test Video\", \"description\": \"Test Description\", \"channelId\": \"testChannel\", \"channelTitle\": \"Test Channel\", \"thumbnails\": {\"default\": {\"url\": \"thumbnailUrl\"}}, \"publishedAt\": \"2024-11-06T04:41:46Z\"}, \"id\": {\"videoId\": \"videoId123\"}}]}";
+    String responseBody =
+        "{\"items\": [{\"snippet\": {\"title\": \"Test Video\", \"description\": \"Test Description\", \"channelId\": \"testChannel\", \"channelTitle\": \"Test Channel\", \"thumbnails\": {\"default\": {\"url\": \"thumbnailUrl\"}}, \"publishedAt\": \"2024-11-06T04:41:46Z\"}, \"id\": {\"videoId\": \"videoId123\"}}]}";
     JsonNode mockJson = Json.parse(responseBody);
     when(mockResponse.asJson()).thenReturn(mockJson);
 
@@ -96,8 +106,8 @@ public class YouTubeServiceTest extends WithApplication {
   }
 
   /**
-   * Tests the getChannelInfo method of YouTubeService by mocking a valid JSON response.
-   * Verifies that the returned ChannelInfo object contains the expected channel details.
+   * Tests the getChannelInfo method of YouTubeService by mocking a valid JSON response. Verifies
+   * that the returned ChannelInfo object contains the expected channel details.
    *
    * @throws Exception if an error occurs during the test setup or execution
    * @author Aidassj
@@ -105,7 +115,8 @@ public class YouTubeServiceTest extends WithApplication {
   @Test
   public void testGetChannelInfo() throws Exception {
     // Mocking response JSON data
-    String responseBody = "{\"items\": [{\"snippet\": {\"title\": \"Test Channel\", \"description\": \"Test Channel Description\"}, \"statistics\": {\"subscriberCount\": \"1000\", \"viewCount\": \"5000\", \"videoCount\": \"10\"}}]}";
+    String responseBody =
+        "{\"items\": [{\"snippet\": {\"title\": \"Test Channel\", \"description\": \"Test Channel Description\"}, \"statistics\": {\"subscriberCount\": \"1000\", \"viewCount\": \"5000\", \"videoCount\": \"10\"}}]}";
     JsonNode mockJson = Json.parse(responseBody);
     mockResponse = mock(WSResponse.class);
     when(mockResponse.asJson()).thenReturn(mockJson);
@@ -128,9 +139,11 @@ public class YouTubeServiceTest extends WithApplication {
     assertEquals(5000, channelInfo.getViewCount());
     assertEquals(10, channelInfo.getVideoCount());
   }
+
   /**
-   * Tests the getLast10Videos method of YouTubeService by mocking a valid JSON response for 10 videos.
-   * Verifies that the returned list contains exactly 10 Video objects with the expected details.
+   * Tests the getLast10Videos method of YouTubeService by mocking a valid JSON response for 10
+   * videos. Verifies that the returned list contains exactly 10 Video objects with the expected
+   * details.
    *
    * @throws Exception if an error occurs during the test setup or execution
    * @author Aidassj
@@ -140,15 +153,18 @@ public class YouTubeServiceTest extends WithApplication {
     // Mocking response JSON data for 10 videos
     StringBuilder responseBody = new StringBuilder("{\"items\": [");
     for (int i = 1; i <= 10; i++) {
-      responseBody.append("{\"snippet\": {\"title\": \"Video ")
-              .append(i)
-              .append("\", \"description\": \"Description ")
-              .append(i)
-              .append("\", \"channelId\": \"testChannelId\", \"channelTitle\": \"ChannelTitle\", \"thumbnails\": {\"default\": {\"url\": \"thumbnailUrl")
-              .append(i)
-              .append("\"}}, \"publishedAt\": \"2024-11-06T04:41:46Z\"}, \"id\": {\"videoId\": \"videoId")
-              .append(i)
-              .append("\"}},");
+      responseBody
+          .append("{\"snippet\": {\"title\": \"Video ")
+          .append(i)
+          .append("\", \"description\": \"Description ")
+          .append(i)
+          .append(
+              "\", \"channelId\": \"testChannelId\", \"channelTitle\": \"ChannelTitle\", \"thumbnails\": {\"default\": {\"url\": \"thumbnailUrl")
+          .append(i)
+          .append(
+              "\"}}, \"publishedAt\": \"2024-11-06T04:41:46Z\"}, \"id\": {\"videoId\": \"videoId")
+          .append(i)
+          .append("\"}},");
     }
     responseBody.deleteCharAt(responseBody.length() - 1); // Remove last comma
     responseBody.append("]}");
@@ -183,7 +199,6 @@ public class YouTubeServiceTest extends WithApplication {
     }
   }
 
-
   @Test
   public void testSearchVideos() throws Exception {
     // Mocking WSClient and WSResponse
@@ -194,7 +209,7 @@ public class YouTubeServiceTest extends WithApplication {
     // Creating a mock JSON response
     JsonNode mockJson = mock(JsonNode.class);
     when(mockResponse.asJson()).thenReturn(mockJson);
-    when(mockJson.get("items")).thenReturn(mock(JsonNode.class));  // Mocking item list
+    when(mockJson.get("items")).thenReturn(mock(JsonNode.class)); // Mocking item list
 
     // Setting up WSClient to return mocked request and response
     when(mockWsClient.url(anyString())).thenReturn(mockRequest);
@@ -211,7 +226,6 @@ public class YouTubeServiceTest extends WithApplication {
 
     // Further assertions can go here
   }
-
 
   // Mock configuration for testing
   private Config mockConfig() {
@@ -243,15 +257,17 @@ public class YouTubeServiceTest extends WithApplication {
     // Ensuring that the result is empty
     assertTrue(videos.isEmpty(), "Expected search result to be empty, but it was not.");
   }
+
   @Test
   public void testSearchVideosByTagWithValidTag() throws Exception {
     // Mocking JSON response with valid tag data
-    String responseBody = "{\"items\": [" +
-            "{\"snippet\": {\"title\": \"Tagged Video\", \"description\": \"Video with tag\", " +
-            "\"channelId\": \"taggedChannel\", \"channelTitle\": \"Tagged Channel\", " +
-            "\"thumbnails\": {\"default\": {\"url\": \"thumbnailUrl\"}}, " +
-            "\"publishedAt\": \"2024-11-06T04:41:46Z\"}, " +
-            "\"id\": {\"videoId\": \"taggedVideoId\"}}]}";
+    String responseBody =
+        "{\"items\": ["
+            + "{\"snippet\": {\"title\": \"Tagged Video\", \"description\": \"Video with tag\", "
+            + "\"channelId\": \"taggedChannel\", \"channelTitle\": \"Tagged Channel\", "
+            + "\"thumbnails\": {\"default\": {\"url\": \"thumbnailUrl\"}}, "
+            + "\"publishedAt\": \"2024-11-06T04:41:46Z\"}, "
+            + "\"id\": {\"videoId\": \"taggedVideoId\"}}]}";
 
     JsonNode mockJson = Json.parse(responseBody);
     when(mockResponse.asJson()).thenReturn(mockJson);
@@ -280,13 +296,14 @@ public class YouTubeServiceTest extends WithApplication {
   @Test
   public void testGetVideoDetailsWithTags() {
     // Mocking JSON response with tags
-    String responseBody = "{\"items\": [" +
-            "{\"snippet\": {\"title\": \"Video with Tags\", \"description\": \"Test description\", " +
-            "\"channelId\": \"testChannelId\", \"channelTitle\": \"Test Channel\", " +
-            "\"thumbnails\": {\"default\": {\"url\": \"thumbnailUrl\"}}, " +
-            "\"publishedAt\": \"2024-11-06T04:41:46Z\", " +
-            "\"tags\": [\"tag1\", \"tag2\", \"tag3\"]}, " +
-            "\"id\": {\"videoId\": \"testVideoId\"}}]}";
+    String responseBody =
+        "{\"items\": ["
+            + "{\"snippet\": {\"title\": \"Video with Tags\", \"description\": \"Test description\", "
+            + "\"channelId\": \"testChannelId\", \"channelTitle\": \"Test Channel\", "
+            + "\"thumbnails\": {\"default\": {\"url\": \"thumbnailUrl\"}}, "
+            + "\"publishedAt\": \"2024-11-06T04:41:46Z\", "
+            + "\"tags\": [\"tag1\", \"tag2\", \"tag3\"]}, "
+            + "\"id\": {\"videoId\": \"testVideoId\"}}]}";
 
     JsonNode mockJson = Json.parse(responseBody);
     when(mockResponse.asJson()).thenReturn(mockJson);
@@ -331,12 +348,77 @@ public class YouTubeServiceTest extends WithApplication {
     YouTubeService youTubeService = new YouTubeService(mockWsClient, mockConfig());
 
     // Executing the searchVideosByTag method with a tag that has no results
-    List<Video> videos = youTubeService.searchVideosByTag("nonexistentTag").toCompletableFuture().join();
+    List<Video> videos =
+        youTubeService.searchVideosByTag("nonexistentTag").toCompletableFuture().join();
 
     // Assertions
     assertNotNull(videos);
     assertTrue(videos.isEmpty(), "Expected empty list, but got results");
   }
 
-}
+  /**
+   * Tests the getChannelInfo method of YouTubeService by mocking an exception during the API
+   * request. Verifies that the method returns null when an exception occurs.
+   *
+   * @author: Deniz Dinchdonmez
+   */
+  @Test
+  public void testGetChannelInfo_ExceptionHandling() {
+    // Mocking a scenario where an exception is thrown during API request
+    when(mockWsClient.url(anyString())).thenReturn(mock(play.libs.ws.WSRequest.class));
+    when(mockWsClient.url(anyString()).get()).thenThrow(new RuntimeException("API request failed"));
 
+    YouTubeService ys = new YouTubeService(mockWsClient, mockConfig());
+    // Calling the method
+    ChannelInfo channelInfo = ys.getChannelInfo("someChannelId");
+
+    // Asserting that null is returned in case of an exception
+    assertNull(channelInfo);
+  }
+
+  /**
+   * Tests the getLast10Videos method of YouTubeService by mocking an exception during the API
+   * request. Verifies that the method returns an empty list when an exception occurs.
+   *
+   * @author: Deniz Dinchdonmez
+   */
+  @Test
+  public void testGetLast10Videos_ExceptionHandling() {
+    // Mocking a scenario where an exception is thrown during API request
+    when(mockWsClient.url(anyString())).thenReturn(mock(play.libs.ws.WSRequest.class));
+    when(mockWsClient.url(anyString()).get()).thenThrow(new RuntimeException("API request failed"));
+
+    // Calling the method
+    List<Video> videos = ys.getLast10Videos("someChannelId");
+
+    // Asserting that an empty list is returned in case of an exception
+    assertNotNull(videos);
+    assertTrue(videos.isEmpty());
+  }
+
+  /**
+   * Tests the getChannelInfo method of YouTubeService by mocking a valid response but with missing
+   * fields. Verifies that the method returns null when parsing errors occur.
+   *
+   * @author: Deniz Dinchdonmez
+   */
+  @Test
+  public void testGetLast10Videos_ParsingErrorHandling() {
+    // Mocking a valid response but with missing fields to cause parsing errors
+    when(mockWsClient.url(anyString())).thenReturn(mock(play.libs.ws.WSRequest.class));
+    when(mockWsClient.url(anyString()).get())
+        .thenReturn(CompletableFuture.completedFuture(mockResponse));
+
+    // Mocking the response as an empty JSON object, which will cause parsing issues
+    ObjectMapper objectMapper = new ObjectMapper();
+    JsonNode emptyJson = objectMapper.createObjectNode();
+    when(mockResponse.asJson()).thenReturn(emptyJson);
+
+    // Calling the method
+    List<Video> videos = ys.getLast10Videos("someChannelId");
+
+    // Asserting that an empty list is returned in case of parsing errors
+    assertNotNull(videos);
+    assertTrue(videos.isEmpty());
+  }
+}

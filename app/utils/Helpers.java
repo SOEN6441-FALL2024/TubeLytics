@@ -6,19 +6,74 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
-/** Helper class to calculate readability scores for text and to calculate sentiment submission
+/**
+ * Helper class to calculate readability scores for text and to calculate sentiment submission
+ *
  * @author Deniz Dinchdonmez, Jessica Chen
- * */
+ */
 public class Helpers {
-  private static String[] happyList = {"happy", "wonderful", "great", "lovely", "excited", "yay", "amazing",
-          "benefits", "love", "excellent", "good", "laugh", "smile", "thankful", "thanks", "funny", "laugh-out-loud",
-          "hilarious", "sweet", ":)", "awesome", "cute", "best", "\uD83D\uDE00", "\uD83D\uDE06", "\uD83D\uDE42",
-          "\uD83D\uDE03", "\uD83D\uDE04", "\uD83D\uDE01", "\uD83D\uDE0A"};
+  private static String[] happyList = {
+    "happy",
+    "wonderful",
+    "great",
+    "lovely",
+    "excited",
+    "yay",
+    "amazing",
+    "benefits",
+    "love",
+    "excellent",
+    "good",
+    "laugh",
+    "smile",
+    "thankful",
+    "thanks",
+    "funny",
+    "laugh-out-loud",
+    "hilarious",
+    "sweet",
+    ":)",
+    "awesome",
+    "cute",
+    "best",
+    "\uD83D\uDE00",
+    "\uD83D\uDE06",
+    "\uD83D\uDE42",
+    "\uD83D\uDE03",
+    "\uD83D\uDE04",
+    "\uD83D\uDE01",
+    "\uD83D\uDE0A"
+  };
 
-  private static String[] sadList = {"sad", "disappointed", "depressed", "upset", "hate", "angry", "frustrated",
-          "gloomy", "terrible", "awful", "difficult", ":(", "cry", "death", "murder", "accident", "sickness", "illness", "disease",
-          "lost", "loss", "sick", ">:(", "\uD83D\uDE14", "\uD83D\uDE1E", "\uD83D\uDE29", "\uD83D\uDE41"};
-
+  private static String[] sadList = {
+    "sad",
+    "disappointed",
+    "depressed",
+    "upset",
+    "hate",
+    "angry",
+    "frustrated",
+    "gloomy",
+    "terrible",
+    "awful",
+    "difficult",
+    ":(",
+    "cry",
+    "death",
+    "murder",
+    "accident",
+    "sickness",
+    "illness",
+    "disease",
+    "lost",
+    "loss",
+    "sick",
+    ">:(",
+    "\uD83D\uDE14",
+    "\uD83D\uDE1E",
+    "\uD83D\uDE29",
+    "\uD83D\uDE41"
+  };
 
   /**
    * Private constructor to prevent instantiation of this class
@@ -153,6 +208,7 @@ public class Helpers {
 
   /**
    * Calculates happy word count in video description
+   *
    * @param videoDescription - description of video
    * @return number of matches between happy word list and video description
    * @author Jessica Chen
@@ -162,13 +218,17 @@ public class Helpers {
       return 0;
     }
     ArrayList<String> happyWordList = new ArrayList<>(Arrays.asList(happyList));
-    return Arrays.asList(videoDescription.replaceAll("[^a-zA-Z0-9\\s:()\\-_<>=*|\\p{So}]+",
-                    "").split("\\s+")).stream().map(String::toLowerCase)
-            .filter(happyWordList::contains).count();
+    return Arrays.asList(
+            videoDescription.replaceAll("[^a-zA-Z0-9\\s:()\\-_<>=*|\\p{So}]+", "").split("\\s+"))
+        .stream()
+        .map(String::toLowerCase)
+        .filter(happyWordList::contains)
+        .count();
   }
 
   /**
    * Calculates sad word count in video description
+   *
    * @param videoDescription - description of video
    * @return number of matches between sad word list and video description
    * @author Jessica Chen
@@ -178,13 +238,18 @@ public class Helpers {
       return 0;
     }
     ArrayList<String> sadWordList = new ArrayList<>(Arrays.asList(sadList));
-    return Arrays.asList(videoDescription.replaceAll("[^a-zA-Z0-9\\s:()\\-_<>=*|\\p{So}]+",
-                    "").split("\\s+")).stream().map(String::toLowerCase)
-            .filter(sadWordList::contains).count();
+    return Arrays.asList(
+            videoDescription.replaceAll("[^a-zA-Z0-9\\s:()\\-_<>=*|\\p{So}]+", "").split("\\s+"))
+        .stream()
+        .map(String::toLowerCase)
+        .filter(sadWordList::contains)
+        .count();
   }
 
   /**
-   * Compares happy word count versus sad word count for each video. Assess whether it is happier, sadder or neutral.
+   * Compares happy word count versus sad word count for each video. Assess whether it is happier,
+   * sadder or neutral.
+   *
    * @param happyWordCount - number of matches between video description and happy word list
    * @param sadWordCount - number of matches between video description and sad word list
    * @return happy, sad or neutral emoji
@@ -195,9 +260,9 @@ public class Helpers {
     String sentiment = ":-|";
     // calculate percentage of happy words versus sad words
     if (totalCount > 0) {
-      if (happyWordCount/totalCount >= 0.70) {
+      if (happyWordCount / totalCount >= 0.70) {
         sentiment = ":-)";
-      } else if (sadWordCount/totalCount >= 0.70) {
+      } else if (sadWordCount / totalCount >= 0.70) {
         sentiment = ":-(";
       }
     }

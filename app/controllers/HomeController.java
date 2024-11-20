@@ -8,10 +8,12 @@ import javax.inject.Inject;
 
 import actors.WebSocketActor;
 
+import actors.YouTubeServiceActor;
 import models.ChannelInfo;
 import models.SearchResult;
 import models.Video;
 
+import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.stream.Materializer;
 
@@ -65,8 +67,9 @@ public class HomeController extends Controller {
       String sessionId = request.session().get("sessionId").orElse(UUID.randomUUID().toString());
       // Adds sessionId in map if it doesn't already exist in it
       multipleQueryResults.putIfAbsent(sessionId, new LinkedHashMap<>());
+      ActorRef youTubeServiceActor = actorSystem.actorOf(YouTubeServiceActor.props(youTubeService));
       // Creates websocket actor and return flow to communicate with client
-      return ActorFlow.actorRef(out -> WebSocketActor.props(sessionId, out), actorSystem, materializer);
+      return ActorFlow.actorRef(out -> WebSocketActor.props(sessionId, youTubeServiceActor, out), actorSystem, materializer);
     });
   }
 

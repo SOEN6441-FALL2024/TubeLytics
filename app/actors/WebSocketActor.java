@@ -12,8 +12,8 @@ public class WebSocketActor extends AbstractActor {
     private final ActorRef youTubeServiceActor;
     private final ActorRef out;
 
-    public static Props props(String sessionId, ActorRef out) {
-        return Props.create(WebSocketActor.class, sessionId, out);
+    public static Props props(String sessionId, ActorRef youTubeServiceActor, ActorRef out) {
+        return Props.create(WebSocketActor.class, sessionId, youTubeServiceActor, out);
     }
 
     public WebSocketActor(String sessionId, ActorRef youTubeServiceActor, ActorRef out){
@@ -30,12 +30,8 @@ public class WebSocketActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(String.class, query -> {
-                    youTubeServiceActor.tell(query, getSelf());
-                    // need to fix below because getting List<Video> back right now
-                    // need to out.tell(display the videos)
-                    out.tell(query, getSelf());
-                })
+                .match(String.class, query -> youTubeServiceActor.tell(query, getSelf()))
+                .match(String.class, json -> out.tell(json, getSelf()))
                 .build();
     }
 }

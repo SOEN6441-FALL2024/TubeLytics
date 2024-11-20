@@ -1,4 +1,4 @@
-@(searchResults: List[SearchResult])
+@(message: String)
 
 <!DOCTYPE html>
 <html lang="en">
@@ -63,6 +63,26 @@
     }
     }
 </div>
+<script>
+    var url = "@routes.HomeController.ws()";
+    var ws = new WebSocket(ws://localhost:9000/);
+
+    ws.onopen = function(event) {
+        console.log("Connection success.");
+    };
+
+    ws.onmessage = function(event) {I
+        console.log("Message from server: " + event.data);
+    };
+
+    ws.onerror = function(error) {
+        console.error("Connection Error.")
+    };
+
+    ws.onclose = function(event) {
+        console.log("Disconnected.");
+    };
+</script>
 
 </body>
 </html>

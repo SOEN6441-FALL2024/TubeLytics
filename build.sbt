@@ -6,6 +6,8 @@ lazy val root = (project in file(".")).enablePlugins(PlayJava)
 
 scalaVersion := "2.13.15"
 
+val PekkoVersion = "1.1.2"
+
 libraryDependencies ++= Seq(
   guice,
   ws,
@@ -13,9 +15,9 @@ libraryDependencies ++= Seq(
   "org.junit.jupiter" % "junit-jupiter-api" % "5.10.2" % Test,
   "org.junit.jupiter" % "junit-jupiter-engine" % "5.10.2" % Test,
   "org.mockito" % "mockito-core" % "5.12.0" % Test,
+  "org.apache.pekko" %% "pekko-actor" % PekkoVersion,
+  "org.apache.pekko" %% "pekko-testkit" % PekkoVersion % Test
  // "com.typesafe.play" %% "play-test" % playVersion % Test
-
-
 )
 
 Test / testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")

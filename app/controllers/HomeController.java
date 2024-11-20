@@ -5,11 +5,20 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+
+import actors.WebSocketActor;
+
 import models.ChannelInfo;
 import models.SearchResult;
 import models.Video;
+
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.stream.Materializer;
+
+import play.libs.streams.ActorFlow;
 import play.mvc.Controller;
 import play.mvc.Result;
+import play.mvc.WebSocket;
 import services.YouTubeService;
 
 /**
@@ -19,15 +28,33 @@ import services.YouTubeService;
  * @author Deniz Dinchdonmez, Aynaz, Jessica Chen
  */
 public class HomeController extends Controller {
-
+  private final ActorSystem actorSystem;
+  private final Materializer materializer;
   private final YouTubeService youTubeService;
-  private final LinkedHashMap<String, List<Video>> multipleQueryResult;
+  private HashMap<String, LinkedHashMap<String, List<Video>>> queryResults = new HashMap<>();
+  private final LinkedHashMap<String, List<Video>> multipleQueryResult = new LinkedHashMap<>();
 
   @Inject
-  public HomeController(
-      YouTubeService youTubeService, LinkedHashMap<String, List<Video>> multipleQueryResult) {
+  public HomeController(ActorSystem actorSystem, Materializer materializer, YouTubeService youTubeService) {
+    this.actorSystem = actorSystem;
+    this.materializer = materializer;
     this.youTubeService = youTubeService;
-    this.multipleQueryResult = multipleQueryResult;
+  }
+
+  /**
+   * Creates web socket connections, ensures new user sessions and creates actors
+   * @return
+   * @author Jessica Chen
+   */
+  public WebSocket ws() {
+    return WebSocket.Text.accept(request -> {
+      // Obtains sessionId of user or generates new one
+      String sessionId = request.session().get("sessionId").orElse(UUID.randomUUID().toString());
+      // Adds sessionId in map if it doesn't already exist in it
+      queryResults.putIfAbsent(sessionId, new LinkedHashMap<>());
+      // Creates websocket actor and return flow to communicate with client
+      return ActorFlow.actorRef(out -> WebSocketActor.props(sessionId, out), actorSystem, materializer);
+    });
   }
 
   /**

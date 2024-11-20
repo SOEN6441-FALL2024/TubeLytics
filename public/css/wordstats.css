@@ -1,0 +1,68 @@
+/* General Styling for Word Stats Page */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    margin: 20px;
+    padding: 0;
+}
+
+/* Page Title Styling */
+h1 {
+    text-align: center;
+    color: #333;
+    font-size: 28px;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+/* Word Stats Table Styling */
+table {
+    width: 80%;
+    margin: 0 auto;
+    border-collapse: collapse;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+table th, table td {
+    padding: 12px 20px;
+    text-align: left;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+
+table th {
+    background-color: #007BFF;
+    color: white;
+    text-transform: uppercase;
+    font-size: 16px;
+}
+
+table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+table tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Back Link Styling */
+a {
+    display: inline-block;
+    margin: 20px auto;
+    text-align: center;
+    font-size: 16px;
+    color: #007BFF;
+    text-decoration: none;
+    border: 2px solid #007BFF;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: 0.3s ease;
+}
+
+a:hover {
+    background-color: #007BFF;
+    color: white;
+}

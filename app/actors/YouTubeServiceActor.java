@@ -1,8 +1,8 @@
 package actors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import models.Video;
 import org.apache.pekko.actor.AbstractActor;
-import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
 import services.YouTubeService;
 
@@ -15,7 +15,7 @@ public class YouTubeServiceActor extends AbstractActor {
         this.youTubeService = youTubeService;
     }
 
-    public static Props props(YouTubeService youTubeService, String sessionId, ActorRef out) {
+    public static Props props(YouTubeService youTubeService) {
         return Props.create(YouTubeServiceActor.class, youTubeService);
     }
 
@@ -29,7 +29,9 @@ public class YouTubeServiceActor extends AbstractActor {
         return receiveBuilder()
                 .match(String.class, query -> {
                     List<Video> videos = youTubeService.searchVideos(query);
-                    getSender().tell(videos, getSelf());
+                    ObjectMapper mapper = new ObjectMapper();
+                    String json = mapper.writeValueAsString(videos);
+                    getSender().tell(json, getSelf());
                 })
                 .build();
     }

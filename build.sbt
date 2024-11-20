@@ -16,7 +16,12 @@ libraryDependencies ++= Seq(
   "org.junit.jupiter" % "junit-jupiter-engine" % "5.10.2" % Test,
   "org.mockito" % "mockito-core" % "5.12.0" % Test,
   "org.apache.pekko" %% "pekko-actor" % PekkoVersion,
-  "org.apache.pekko" %% "pekko-testkit" % PekkoVersion % Test
+  "org.apache.pekko" %% "pekko-actor-typed" % PekkoVersion,
+  "org.apache.pekko" %% "pekko-protobuf-v3" % PekkoVersion,
+  "org.apache.pekko" %% "pekko-slf4j" % PekkoVersion,
+  "org.apache.pekko" %% "pekko-serialization-jackson" % PekkoVersion,
+  "org.apache.pekko" %% "pekko-stream" % PekkoVersion,
+  "org.apache.pekko" %% "pekko-actor-testkit-typed" % PekkoVersion % Test
  // "com.typesafe.play" %% "play-test" % playVersion % Test
 )
 

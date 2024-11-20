@@ -8,10 +8,12 @@ import javax.inject.Inject;
 
 import actors.WebSocketActor;
 
+import actors.YouTubeServiceActor;
 import models.ChannelInfo;
 import models.SearchResult;
 import models.Video;
 
+import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.stream.Materializer;
 
@@ -31,7 +33,7 @@ public class HomeController extends Controller {
   private final ActorSystem actorSystem;
   private final Materializer materializer;
   private final YouTubeService youTubeService;
-  private HashMap<String, LinkedHashMap<String, List<Video>>> queryResults = new HashMap<>();
+  private final HashMap<String, LinkedHashMap<String, List<Video>>> queryResults = new HashMap<>();
   private final LinkedHashMap<String, List<Video>> multipleQueryResult = new LinkedHashMap<>();
 
   @Inject
@@ -43,7 +45,6 @@ public class HomeController extends Controller {
 
   /**
    * Creates web socket connections, ensures new user sessions and creates actors
-   * @return
    * @author Jessica Chen
    */
   public WebSocket ws() {
@@ -51,9 +52,12 @@ public class HomeController extends Controller {
       // Obtains sessionId of user or generates new one
       String sessionId = request.session().get("sessionId").orElse(UUID.randomUUID().toString());
       // Adds sessionId in map if it doesn't already exist in it
-      queryResults.putIfAbsent(sessionId, new LinkedHashMap<>());
+      if (!queryResults.containsKey(sessionId)) {
+        queryResults.put(sessionId, new LinkedHashMap<>());
+      }
+      ActorRef youTubeServiceActor = actorSystem.actorOf(YouTubeServiceActor.props(youTubeService));
       // Creates websocket actor and return flow to communicate with client
-      return ActorFlow.actorRef(out -> WebSocketActor.props(sessionId, out), actorSystem, materializer);
+      return ActorFlow.actorRef(out -> WebSocketActor.props(sessionId, youTubeServiceActor, out), actorSystem, materializer);
     });
   }
 
@@ -100,7 +104,7 @@ public class HomeController extends Controller {
               Collections.reverse(searchResults);
 
               // Render the videos on the index page with passed in List of SearchResults
-              return ok(views.html.index.render(searchResults));
+              return ok(views.html.index.render(searchResults, "dummy string"));
             });
   }
 
@@ -147,7 +151,7 @@ public class HomeController extends Controller {
     List<Video> videos =
         youTubeService.searchVideos(query, 50).stream().limit(50).collect(Collectors.toList());
 
-    /// Count word frequencies in titles and descriptions
+    // Count word frequencies in titles and descriptions
     Map<String, Long> wordStats =
         videos.stream()
             .flatMap(

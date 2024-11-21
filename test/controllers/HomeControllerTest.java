@@ -18,6 +18,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import models.ChannelInfo;
 import models.Video;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.stream.Materializer;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -29,6 +32,7 @@ import play.libs.ws.WSClient;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.test.Helpers;
+import play.mvc.WebSocket;
 import services.YouTubeService;
 
 /**
@@ -41,7 +45,11 @@ public class HomeControllerTest {
   private HashMap<String, LinkedHashMap<String, List<Video>>> sessionQueryMap;
   private List<Video> videos;
   private String query;
+  private Materializer materializer;
+  private TestKit testKit;
+
   @Mock private YouTubeService mockYouTubeService;
+  @Mock private ActorSystem system;
 
   @Rule public ExpectedException thrown = ExpectedException.none();
 
@@ -58,6 +66,12 @@ public class HomeControllerTest {
     homeController =
         new HomeController(
             mockYouTubeService, queryResults, sessionQueryMap); // Pass initialized maps
+
+    system = ActorSystem.create();
+    materializer = Materializer.createMaterializer(system);
+    testKit = new TestKit(system);
+
+    homeController = new HomeController(system, materializer, mockYouTubeService);
 
     query = "cat";
 
@@ -83,6 +97,17 @@ public class HomeControllerTest {
             "2024-11-06T04:41:46Z");
     videos.add(video1);
     videos.add(video2);
+  }
+
+  @Test
+  public void testWs() {
+    String sessionId = UUID.randomUUID().toString();
+
+    WebSocket ws = homeController.ws();
+
+    assertNotNull(ws);
+    assertTrue(queryResults.containsKey(sessionId));
+    assertNotNull(queryResults.get(sessionId));
   }
 
   @Test

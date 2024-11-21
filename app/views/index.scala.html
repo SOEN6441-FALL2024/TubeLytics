@@ -1,4 +1,4 @@
-@(searchResults: List[SearchResult], message: String)
+@(searchResults: List[SearchResult])
 
 <!DOCTYPE html>
 <html lang="en">
@@ -63,84 +63,5 @@
     }
     }
 </div>
-
-<!-- script for WebSocket -->
-<script>
-    console.log('script is loading');
-    document.addEventListener("DOMContentLoaded", function() {
-        const ws = new WebSocket(`ws://localhost:9000/ws`);
-
-        ws.onopen = function(event) {
-            console.log("Connection success.");
-        };
-
-        ws.onmessage = function(event) {
-            const videos = JSON.parse(event.data);
-            displaySearchFunction(videos);
-        };
-
-        function displaySearchFunction(videos) {
-            document.getElementById(`results`).innerHTML = ``;
-
-            const searchTerm = `
-                <div class="search-stats">
-                    <p>Search term:
-                        <strong>
-                            <a href="/wordStats/${searchResult.query}" target="_blank">${searchResult.query}</a>
-                        </strong>
-                    </p>
-                    <p>Search terms:
-                        <strong>${searchResult.query} ${searchResult.overallSentiment}</strong>
-                        (Flesch-Kincaid Grade Level Avg.= ${searchResult.averageFleschKincaidGradeLevel},
-                        Flesch Reading Ease Score Avg.= ${searchResult.averageFleschReadingEaseScore})</p>
-                    <a href="#" class="more-stats-link">More stats</a>
-                </div>
-            `;
-
-            document.getElementById(`results`).innerHTML += searchTerm;
-
-            const ul = document.createElement(`ul`);
-
-            videos.forEach((video, index) => {
-                const li = document.createElement(`li`);
-                li.classList.add("video-item");
-
-                const videoInfo =`
-                    <div class="video-details">
-                        <p class="video-title">${index + 1}. <strong>Title:</strong>
-                            <a href="https://www.youtube.com/watch?v=${video.videoId}" target="_blank">${video.title}</a>
-                        </p>
-                        <p class="channel-link"><strong>Channel:</strong> <a href="/channel/${video.getChannelId}" target="_blank">${video.channelTitle}</a></p>
-                        <p class="video-description"><strong>Description:</strong> ${video.description.slice(0, 150)} + "..."</p>
-                        <p class="video-stats">Flesch-Kincaid Grade Level = ${video.fleschKincaidGradeLevel()},
-                            Flesch Reading Ease Score = ${video.fleschReadingEaseScore}</p>
-                        <p><strong>Tags:</strong>
-                           <a href="/tags/${video.videoId}" target="_blank" class="tags-link">View Tags</a>
-                        </p>
-                        <a href="/wordStats/${video.query}" class="more-stats-link">More Word Stats</a>
-                    </div>
-                    <div class="video-thumbnail">
-                        <img src="${video.thumbnailUrl}" alt="Thumbnail">
-                    </div>
-                `;
-
-                li.innerHTML = videoInfo;
-
-                ul.appendChild(li);
-            });
-
-            document.getElementById('results').appendChild(ul);
-        }
-
-        ws.onerror = function(error) {
-            console.error("Connection Error: ", error);
-        };
-
-        ws.onclose = function(event) {
-            console.log("Disconnected.");
-        };
-    });
-</script>
-
 </body>
 </html>

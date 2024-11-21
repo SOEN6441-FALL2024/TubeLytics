@@ -68,8 +68,8 @@ public class HomeController extends Controller {
       // Adds sessionId in map if it doesn't already exist in it
       multipleQueryResults.putIfAbsent(sessionId, new LinkedHashMap<>());
       ActorRef youTubeServiceActor = actorSystem.actorOf(YouTubeServiceActor.props(youTubeService));
-      // Creates websocket actor and return flow to communicate with client
-      return ActorFlow.actorRef(out -> WebSocketActor.props(sessionId, youTubeServiceActor, out), actorSystem, materializer);
+      ActorRef parentActor = actorSystem.actorOf(ParentActor.props(youTubeServiceActor));
+      return ActorFlow.actorRef(out -> WebSocketActor.props(sessionId, parentActor, out), actorSystem, materializer);
     });
   }
 

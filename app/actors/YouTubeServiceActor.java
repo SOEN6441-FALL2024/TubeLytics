@@ -8,6 +8,9 @@ import services.YouTubeService;
 
 import java.util.List;
 
+/**
+ * YouTubeServiceActor handles calls to the YoutubeApi based on given query and returns results to sender
+ */
 public class YouTubeServiceActor extends AbstractActor {
     private final YouTubeService youTubeService;
 
@@ -28,10 +31,14 @@ public class YouTubeServiceActor extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder()
                 .match(String.class, query -> {
-                    List<Video> videos = youTubeService.searchVideos(query);
-                    ObjectMapper mapper = new ObjectMapper();
-                    String json = mapper.writeValueAsString(videos);
-                    getSender().tell(json, getSelf());
+                    if (query == null || query.trim().isEmpty()) {
+                        getSender().tell("Invalid query.", getSelf());
+                    } else {
+                        List<Video> videos = youTubeService.searchVideos(query);
+                        ObjectMapper mapper = new ObjectMapper();
+                        String json = mapper.writeValueAsString(videos);
+                        getSender().tell(json, getSelf());
+                    }
                 })
                 .build();
     }

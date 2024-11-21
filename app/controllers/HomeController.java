@@ -6,6 +6,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 
+import actors.ParentActor;
 import actors.WebSocketActor;
 
 import actors.YouTubeServiceActor;
@@ -56,8 +57,8 @@ public class HomeController extends Controller {
         queryResults.put(sessionId, new LinkedHashMap<>());
       }
       ActorRef youTubeServiceActor = actorSystem.actorOf(YouTubeServiceActor.props(youTubeService));
-      // Creates websocket actor and return flow to communicate with client
-      return ActorFlow.actorRef(out -> WebSocketActor.props(sessionId, youTubeServiceActor, out), actorSystem, materializer);
+      ActorRef parentActor = actorSystem.actorOf(ParentActor.props(youTubeServiceActor));
+      return ActorFlow.actorRef(out -> WebSocketActor.props(sessionId, parentActor, out), actorSystem, materializer);
     });
   }
 
@@ -104,7 +105,7 @@ public class HomeController extends Controller {
               Collections.reverse(searchResults);
 
               // Render the videos on the index page with passed in List of SearchResults
-              return ok(views.html.index.render(searchResults, "dummy string"));
+              return ok(views.html.index.render(searchResults));
             });
   }
 

@@ -9,28 +9,28 @@ import org.apache.pekko.actor.Props;
  */
 public class WebSocketActor extends AbstractActor {
     private final String sessionId;
-    private final ActorRef youTubeServiceActor;
+    private final ActorRef parentActor;
     private final ActorRef out;
 
-    public static Props props(String sessionId, ActorRef youTubeServiceActor, ActorRef out) {
-        return Props.create(WebSocketActor.class, sessionId, youTubeServiceActor, out);
+    public static Props props(String sessionId, ActorRef parentActor, ActorRef out) {
+        return Props.create(WebSocketActor.class, sessionId, parentActor, out);
     }
 
-    public WebSocketActor(String sessionId, ActorRef youTubeServiceActor, ActorRef out){
+    public WebSocketActor(String sessionId, ActorRef parentActor, ActorRef out){
         this.sessionId = sessionId;
-        this.youTubeServiceActor = youTubeServiceActor;
+        this.parentActor = parentActor;
         this.out = out;
     }
 
     /**
-     * Receives query from ws() in HomeController, forwards query to other actors for processing.
+     * Receives query from ws() in HomeController, creates actors, forwards query to other actors for processing.
      * As well, outputs the result to the client.
      * @author Jessica Chen
      */
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(String.class, query -> youTubeServiceActor.tell(query, getSelf()))
+                .match(String.class, query -> parentActor.tell(query, getSelf()))
                 .match(String.class, json -> out.tell(json, getSelf()))
                 .build();
     }

@@ -12,20 +12,22 @@ import static play.mvc.Http.Status.BAD_REQUEST;
 import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.contentAsString;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+
+import actors.WebSocketActor;
 import models.ChannelInfo;
 import models.Video;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.stream.Materializer;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import play.mvc.Result;
+import play.mvc.WebSocket;
 import services.YouTubeService;
 
 /**
@@ -37,7 +39,11 @@ public class HomeControllerTest {
   private LinkedHashMap<String, List<Video>> queryResults;
   private List<Video> videos;
   private String query;
+  private Materializer materializer;
+  private TestKit testKit;
+
   @Mock private YouTubeService mockYouTubeService;
+  @Mock private ActorSystem system;
 
   @InjectMocks private HomeController homeController;
 
@@ -46,7 +52,12 @@ public class HomeControllerTest {
     MockitoAnnotations.openMocks(this);
     mockYouTubeService = mock(YouTubeService.class);
     queryResults = new LinkedHashMap<>();
-    homeController = new HomeController(mockYouTubeService, queryResults);
+
+    system = ActorSystem.create();
+    materializer = Materializer.createMaterializer(system);
+    testKit = new TestKit(system);
+
+    homeController = new HomeController(system, materializer, mockYouTubeService);
 
     query = "cat";
     // Adding mock entries into List<Video>
@@ -71,6 +82,17 @@ public class HomeControllerTest {
             "2024-11-06T04:41:46Z");
     videos.add(video1);
     videos.add(video2);
+  }
+
+  @Test
+  public void testWs() {
+    String sessionId = UUID.randomUUID().toString();
+
+    WebSocket ws = homeController.ws();
+
+    assertNotNull(ws);
+    assertTrue(queryResults.containsKey(sessionId));
+    assertNotNull(queryResults.get(sessionId));
   }
 
   @Test
@@ -151,7 +173,7 @@ public class HomeControllerTest {
     when(mockYouTubeService.searchVideos(query)).thenReturn(videos);
     homeController.index(query).toCompletableFuture().join();
 
-    assertTrue("There query should exist in Map", queryResults.containsKey(query));
+    assertTrue("The query should exist in Map", queryResults.containsKey(query));
     assertEquals(videos, queryResults.get(query));
     assertEquals(1, queryResults.size());
   }

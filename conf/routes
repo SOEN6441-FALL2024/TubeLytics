@@ -21,3 +21,6 @@ GET     /tags/:videoId                   controllers.YouTubeController.showTags(
 #     searching a special tag
 GET     /search/tag/:tag                 controllers.YouTubeController.searchByTag(tag: String)
 
+GET   /websocket           controllers.DummyController.websocket()
+GET     /wsDummyPage     controllers.DummyController.wsDummyPage
+

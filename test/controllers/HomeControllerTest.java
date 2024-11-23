@@ -12,6 +12,7 @@ import static play.mvc.Http.Status.BAD_REQUEST;
 import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.contentAsString;
 
+import com.typesafe.config.Config;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -24,6 +25,7 @@ import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import play.libs.ws.WSClient;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.test.Helpers;
@@ -41,9 +43,7 @@ public class HomeControllerTest {
   private String query;
   @Mock private YouTubeService mockYouTubeService;
 
-  @Rule
-  public ExpectedException thrown = ExpectedException.none();
-
+  @Rule public ExpectedException thrown = ExpectedException.none();
 
   @InjectMocks private HomeController homeController;
 
@@ -128,7 +128,6 @@ public class HomeControllerTest {
     new HomeController(null, new LinkedHashMap<>());
   }
 
-
   @Test
   public void testConstructorWithNullQueryResultMap() {
     // Expect the exception
@@ -136,9 +135,49 @@ public class HomeControllerTest {
     thrown.expectMessage("Query result map cannot be null");
 
     // Act: Attempt to initialize HomeController with a null multipleQueryResult
-    new HomeController(mock(YouTubeService.class), null);
+    new HomeController(new YouTubeService(mock(WSClient.class), mock(Config.class)), null);
   }
 
+  @Test(expected = NullPointerException.class)
+  public void testConstructorWithNullParameters() {
+    // Act: Attempt to initialize HomeController with both parameters null
+    new HomeController(null, null);
+  }
+
+  @Test
+  public void testConstructorWithValidParameters() {
+    // Arrange: Create mock dependencies
+    YouTubeService mockService = mock(YouTubeService.class);
+    LinkedHashMap<String, List<Video>> validQueryResult = new LinkedHashMap<>();
+
+    // Act: Initialize HomeController
+    HomeController controller = new HomeController(mockService, validQueryResult);
+
+    // Mock YouTubeService behavior
+    String query = "test";
+    List<Video> mockVideos =
+        List.of(
+            new Video(
+                "Title1",
+                "Description1",
+                "Channel1",
+                "VideoId1",
+                "ThumbnailUrl1",
+                "ChannelTitle1",
+                "2024-11-06T04:41:46Z"));
+    when(mockService.searchVideos(query, 10))
+        .thenReturn(CompletableFuture.completedFuture(mockVideos));
+
+    // Simulate behavior that depends on YouTubeService
+    Http.RequestBuilder requestBuilder =
+        Helpers.fakeRequest().cookie(Http.Cookie.builder("sessionId", "test-session-id").build());
+    Result result = controller.index(query, requestBuilder.build()).toCompletableFuture().join();
+
+    // Assert: Verify behavior
+    assertEquals("The response should be OK", OK, result.status());
+    assertTrue(
+        "The response should contain video title", contentAsString(result).contains("Title1"));
+  }
 
   @Test
   public void testIndexWithEmptyQuery() {

@@ -18,7 +18,9 @@ import java.util.concurrent.CompletionStage;
 import models.ChannelInfo;
 import models.Video;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -38,6 +40,10 @@ public class HomeControllerTest {
   private List<Video> videos;
   private String query;
   @Mock private YouTubeService mockYouTubeService;
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
+
 
   @InjectMocks private HomeController homeController;
 
@@ -111,6 +117,28 @@ public class HomeControllerTest {
     assertTrue(contentAsString(result).contains("Title1"));
     assertTrue(contentAsString(result).contains("Title2"));
   }
+
+  @Test
+  public void testConstructorWithNullYouTubeService() {
+    // Expect the exception
+    thrown.expect(NullPointerException.class);
+    thrown.expectMessage("YouTubeService cannot be null");
+
+    // Act: Attempt to initialize HomeController with a null YouTubeService
+    new HomeController(null, new LinkedHashMap<>());
+  }
+
+
+  @Test
+  public void testConstructorWithNullQueryResultMap() {
+    // Expect the exception
+    thrown.expect(NullPointerException.class);
+    thrown.expectMessage("Query result map cannot be null");
+
+    // Act: Attempt to initialize HomeController with a null multipleQueryResult
+    new HomeController(mock(YouTubeService.class), null);
+  }
+
 
   @Test
   public void testIndexWithEmptyQuery() {

@@ -34,45 +34,51 @@ public class HomeController extends Controller {
    * Given a query a list of videos are fetched from the youtubeAPI, processed and rendered
    *
    * @return completion stage result of the rendering of given query/queries
-   * @author Jessica Chen, Aynaz Javanivayeghan
+   * @author Jessica Chen, Aynaz Javanivayeghan, Deniz Dinchdonmez
    */
   public CompletionStage<Result> index(String query) {
     return CompletableFuture.supplyAsync(
             () -> {
-              // If query is new
               if (!multipleQueryResult.containsKey(query)) {
-                // If size of map is at 10 already, delete the oldest entry
+
                 if (multipleQueryResult.size() == 10) {
                   String eldestKey = multipleQueryResult.keySet().iterator().next();
                   multipleQueryResult.remove(eldestKey);
                 }
-                // Fetch videos or return an empty list if query is null
-                List<models.Video> videos =
-                    (query == null || query.isEmpty())
-                        ? List.of()
-                        : youTubeService.searchVideos(query);
 
-                // Add query entry to Map
-                multipleQueryResult.put(query, videos);
+                multipleQueryResult.put(query, List.of());
+
               } else {
                 List<Video> videos = multipleQueryResult.get(query);
                 multipleQueryResult.remove(query);
+                multipleQueryResult.put(query, videos);
+              }
+              return query;
+            })
+        .thenCompose(
+            queryToFetch -> {
+              if (queryToFetch == null || queryToFetch.isEmpty()) {
+                return CompletableFuture.completedFuture(List.of());
+              }
+              return youTubeService.searchVideos(queryToFetch, 10);
+            })
+        .thenApply(
+            videos -> {
+              if (query != null && !query.isEmpty()) {
                 multipleQueryResult.put(query, videos);
               }
               return multipleQueryResult;
             })
         .thenApply(
             multipleQueryResult -> {
-              // Create SearchResult objects to hold query and List<Video> based on Map
               List<SearchResult> searchResults =
                   multipleQueryResult.entrySet().stream()
                       .map(entry -> new SearchResult(entry.getKey(), entry.getValue()))
                       .collect(Collectors.toList());
 
-              // Reverse list order
               Collections.reverse(searchResults);
 
-              // Render the videos on the index page with passed in List of SearchResults
+              // Render the index page
               return ok(views.html.index.render(searchResults));
             });
   }
@@ -82,21 +88,33 @@ public class HomeController extends Controller {
    *
    * @param query the search query entered by the user
    * @return a Result containing the rendered search results page with video data or an error
-   *     message if no results are found or an error occurs.
+   *     message if no results are found or an error occurs. @Author Aynaz Javanivayeghan, Deniz
+   *     Dinchdonmez
    */
-  public Result search(String query) {
-    try {
-      if (query == null || query.trim().isEmpty()) {
-        return badRequest("Please enter a search term.");
-      }
-      List<Video> videos = youTubeService.searchVideos(query);
-      if (videos.isEmpty()) {
-        return ok("No results found");
-      }
-      return ok(views.html.results.render(videos, query));
-    } catch (RuntimeException e) {
-      return internalServerError("An error occurred while processing your request.");
+  public CompletionStage<Result> search(String query) {
+    // Validate the query and return a bad request response if invalid
+    if (query == null || query.trim().isEmpty()) {
+      return CompletableFuture.completedFuture(badRequest("Please enter a search term."));
     }
+
+    // Call the asynchronous searchVideos method
+    return youTubeService
+        .searchVideos(query, 10)
+        .thenApply(
+            videos -> {
+              // If no videos are found, return a response indicating no results
+              if (videos.isEmpty()) {
+                return ok("No results found");
+              }
+              // Render the results page with the videos and query
+              return ok(views.html.results.render(videos, query));
+            })
+        .exceptionally(
+            e -> {
+              // Handle exceptions and return an internal server error response
+              e.printStackTrace();
+              return internalServerError("An error occurred while processing your request.");
+            });
   }
 
   /**
@@ -110,43 +128,52 @@ public class HomeController extends Controller {
    * @return a Result containing the rendered word statistics page with word frequency data.
    * @author Aynaz Javanivayeghan
    */
-  public Result wordStats(String query) {
-
+  public CompletionStage<Result> wordStats(String query) {
     if (query == null || query.trim().isEmpty()) {
-      return badRequest("Please enter a search term.");
+      return CompletableFuture.completedFuture(badRequest("Please enter a search term."));
     }
 
-    // Get the search results for the query (limit to the latest 50 videos)
-    List<Video> videos =
-        youTubeService.searchVideos(query, 50).stream().limit(50).collect(Collectors.toList());
+    // Fetch the search results asynchronously
+    return youTubeService
+        .searchVideos(query, 50)
+        .thenApply(
+            videos -> {
+              // Check if the video list is empty and return a message if no results are found
+              if (videos.isEmpty()) {
+                return ok("No words found");
+              }
 
-    /// Count word frequencies in titles and descriptions
-    Map<String, Long> wordStats =
-        videos.stream()
-            .flatMap(
-                video ->
-                    Arrays.stream((video.getTitle() + " " + video.getDescription()).split("\\W+")))
-            .map(String::toLowerCase)
-            .filter(word -> !word.isEmpty())
-            .collect(Collectors.groupingBy(word -> word, Collectors.counting()));
+              // Count word frequencies in titles and descriptions
+              Map<String, Long> wordStats =
+                  videos.stream()
+                      .flatMap(
+                          video ->
+                              Arrays.stream(
+                                  (video.getTitle() + " " + video.getDescription()).split("\\W+")))
+                      .map(String::toLowerCase)
+                      .filter(word -> !word.isEmpty())
+                      .collect(Collectors.groupingBy(word -> word, Collectors.counting()));
 
-    // Check if the video list is empty and return a message if no results are found
-    if (videos.isEmpty()) {
-      return ok("No words found");
-    }
+              // Sort by frequency in descending order
+              Map<String, Long> sortedWordStats =
+                  wordStats.entrySet().stream()
+                      .sorted((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()))
+                      .collect(
+                          Collectors.toMap(
+                              Map.Entry::getKey,
+                              Map.Entry::getValue,
+                              (e1, e2) -> e1,
+                              java.util.LinkedHashMap::new));
 
-    // Sort by frequency in descending order
-    Map<String, Long> sortedWordStats =
-        wordStats.entrySet().stream()
-            .sorted((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()))
-            .collect(
-                Collectors.toMap(
-                    Map.Entry::getKey,
-                    Map.Entry::getValue,
-                    (e1, e2) -> e1,
-                    java.util.LinkedHashMap::new));
-
-    return ok(views.html.wordStats.render(sortedWordStats, query));
+              // Render the results
+              return ok(views.html.wordStats.render(sortedWordStats, query));
+            })
+        .exceptionally(
+            e -> {
+              // Handle exceptions and return an internal server error response
+              e.printStackTrace();
+              return internalServerError("An error occurred while processing your request.");
+            });
   }
 
   /**

@@ -93,7 +93,7 @@ public class YouTubeServiceTest extends WithApplication {
     YouTubeService youTubeService = new YouTubeService(mockWsClient, mockConfig());
 
     // Executing the searchVideos method and validating the result
-    List<Video> videos = youTubeService.searchVideos("test query");
+    List<Video> videos = youTubeService.searchVideos("test query", 10).toCompletableFuture().join();
 
     // Assertions
     assertEquals(1, videos.size());
@@ -219,7 +219,7 @@ public class YouTubeServiceTest extends WithApplication {
     YouTubeService youTubeService = new YouTubeService(mockWsClient, mockConfig());
 
     // Executing the searchVideos method only once
-    List<Video> videos = youTubeService.searchVideos("test query");
+    List<Video> videos = youTubeService.searchVideos("test query", 10).toCompletableFuture().join();
 
     // Verifying that the WSClient was called only once
     verify(mockWsClient, times(1)).url(contains("youtube/v3/search"));
@@ -252,7 +252,7 @@ public class YouTubeServiceTest extends WithApplication {
     YouTubeService youTubeService = new YouTubeService(mockWsClient, mockConfig());
 
     // Executing the searchVideos method with the new input
-    List<Video> videos = youTubeService.searchVideos(nonexistentQuery);
+    List<Video> videos = youTubeService.searchVideos(nonexistentQuery).toCompletableFuture().join();
 
     // Ensuring that the result is empty
     assertTrue(videos.isEmpty(), "Expected search result to be empty, but it was not.");

@@ -21,51 +21,49 @@ public class YouTubeService {
     this.apiKey = "";
   }
 
-  public List<Video> searchVideos(String query) {
-    return this.searchVideos(query, 10);
-  }
-
-  public List<Video> searchVideos(String query, int limit) {
+  public CompletionStage<List<Video>> searchVideos(String query, int limit) {
+    // Construct the YouTube API request URL
     String youtubeUrl = "https://www.googleapis.com/youtube/v3/search";
     String url =
         String.format(
             "%s?part=snippet&q=%s&type=video&maxResults=%d&key=%s",
             youtubeUrl, query, limit, apiKey);
 
-    var futureResult =
-        ws.url(url)
-            .get()
-            .thenApply(
-                response -> {
-                  JsonNode items = response.asJson().get("items");
+    // Make the asynchronous HTTP GET request
+    return ws.url(url)
+        .get() // Non-blocking call to initiate the request
+        .thenApply(
+            response -> {
+              // Parse the JSON response and return a list of videos
+              JsonNode items = response.asJson().get("items");
+              List<Video> videos = new ArrayList<>();
+              if (items != null) {
+                items.forEach(
+                    item -> {
+                      JsonNode snippet = item.get("snippet");
+                      videos.add(
+                          new Video(
+                              snippet.get("title").asText(),
+                              snippet.get("description").asText(),
+                              snippet.get("channelId").asText(),
+                              item.get("id").get("videoId").asText(),
+                              snippet.get("thumbnails").get("default").get("url").asText(),
+                              snippet.get("channelTitle").asText(),
+                              snippet.get("publishedAt").asText()));
+                    });
+              }
+              return videos;
+            })
+        .exceptionally(
+            e -> {
+              // Log any errors and return an empty list
+              System.err.println("Error in searchVideos: " + e.getMessage());
+              return new ArrayList<>();
+            });
+  }
 
-                  List<Video> videos = new ArrayList<>();
-                  items.forEach(
-                      item -> {
-                        JsonNode snippet = item.get("snippet");
-                        String title = snippet.get("title").asText();
-                        String description = snippet.get("description").asText();
-                        String channelId = snippet.get("channelId").asText();
-                        String channelTitle = snippet.get("channelTitle").asText();
-                        String thumbnail =
-                            snippet.get("thumbnails").get("default").get("url").asText();
-                        String publishedDate = snippet.get("publishedAt").asText();
-                        String videoId = item.get("id").get("videoId").asText();
-
-                        videos.add(
-                            new Video(
-                                title,
-                                description,
-                                channelId,
-                                videoId,
-                                thumbnail,
-                                channelTitle,
-                                publishedDate));
-                      });
-                  return videos;
-                });
-
-    return (List<Video>) futureResult.toCompletableFuture().join();
+  public CompletionStage<List<Video>> searchVideos(String query) {
+    return searchVideos(query, 10); // Default to 10 results
   }
   /**
    * Retrieves information about a YouTube channel based on the given channel ID. This includes

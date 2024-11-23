@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import models.ChannelInfo;
 import models.Video;
 import org.junit.Before;
@@ -94,7 +95,8 @@ public class HomeControllerTest {
                 "ThumbnailUrl2",
                 "ChannelTitle2",
                 "2024-11-06T04:41:46Z"));
-    when(mockYouTubeService.searchVideos("test")).thenReturn(mockVideos);
+    when(mockYouTubeService.searchVideos("test", 10))
+        .thenReturn(CompletableFuture.completedFuture(mockVideos));
 
     // Act
     Result result = homeController.index("test").toCompletableFuture().join();
@@ -130,61 +132,72 @@ public class HomeControllerTest {
   }
 
   @Test
-  // Test equivalence class: eldest key is removed when array size reaches maximum
   public void testIndexEldestQueryRemoval() {
+    // Arrange: Populate the map with 10 entries
     for (int i = 0; i < 10; i++) {
       String queryNew = query + i;
       queryResults.put(queryNew, videos);
     }
 
-    when(mockYouTubeService.searchVideos("query11")).thenReturn(videos);
+    // Mock the YouTubeService for a new query
+    when(mockYouTubeService.searchVideos("query11", 10))
+        .thenReturn(CompletableFuture.completedFuture(videos));
+
+    // Act: Add a new query to trigger eldest query removal
     homeController.index("query11").toCompletableFuture().join();
 
+    // Assert: Verify the size remains at 10 and the eldest entry is removed
     assertEquals(10, queryResults.size());
-    assertFalse("The oldest entry - cat - should be removed", queryResults.containsKey(query));
+    assertFalse("The oldest entry - cat0 - should be removed", queryResults.containsKey(query + 0));
     assertTrue("The new query exists", queryResults.containsKey("query11"));
   }
 
   @Test
-  // Test equivalence class: query fetched result is added to map
   public void testIndexResultAddedToMap() {
-    when(mockYouTubeService.searchVideos(query)).thenReturn(videos);
+    // Arrange
+    when(mockYouTubeService.searchVideos(query, 10))
+        .thenReturn(CompletableFuture.completedFuture(videos));
+
+    // Act
     homeController.index(query).toCompletableFuture().join();
 
-    assertTrue("There query should exist in Map", queryResults.containsKey(query));
+    // Assert
+    assertTrue("The query should exist in the map", queryResults.containsKey(query));
     assertEquals(videos, queryResults.get(query));
     assertEquals(1, queryResults.size());
   }
 
   @Test
-  // Test equivalence class: existing query re-added to map
   public void testIndexExistingResultReAddedToMap() {
-    // Fetching first entry
-    when(mockYouTubeService.searchVideos(query)).thenReturn(videos);
-    homeController.index(query).toCompletableFuture().join();
+    // Arrange: Mocking YouTubeService responses
+    when(mockYouTubeService.searchVideos(query, 10))
+        .thenReturn(CompletableFuture.completedFuture(videos));
 
-    // Fetching second entry
-    when(mockYouTubeService.searchVideos("dog"))
+    when(mockYouTubeService.searchVideos("dog", 10))
         .thenReturn(
-            List.of(
-                new Video(
-                    "DogVideoTitle1",
-                    "DogVideoDescription1",
-                    "DogVideoChannelId1",
-                    "DogVideoVideoId1",
-                    "DogVideoThumbnailUrl.jpg1",
-                    "DogVideoChannelTitle1",
-                    "2024-11-06T04:41:46Z")));
-    homeController.index("dog").toCompletableFuture().join();
+            CompletableFuture.completedFuture(
+                List.of(
+                    new Video(
+                        "DogVideoTitle1",
+                        "DogVideoDescription1",
+                        "DogVideoChannelId1",
+                        "DogVideoVideoId1",
+                        "DogVideoThumbnailUrl.jpg1",
+                        "DogVideoChannelTitle1",
+                        "2024-11-06T04:41:46Z"))));
 
-    // Adding first entry again
-    homeController.index(query).toCompletableFuture().join();
-    // Verifying "query" is only fetched once
-    verify(mockYouTubeService, times(1)).searchVideos(query);
+    // Act: Fetching the same query multiple times
+    homeController.index(query).toCompletableFuture().join(); // First fetch
+    homeController.index("dog").toCompletableFuture().join(); // Second fetch
+    homeController.index(query).toCompletableFuture().join(); // Re-fetch existing query
 
-    assertTrue("There query should exist in Map", queryResults.containsKey(query));
+    // Assert: Ensure query results are as expected
+    verify(mockYouTubeService, times(2)).searchVideos(query, 10); // "cat" queried twice
+    verify(mockYouTubeService, times(1)).searchVideos("dog", 10); // "dog" queried once
+
+    assertTrue("The query should exist in the map", queryResults.containsKey(query));
     assertEquals(videos, queryResults.get(query));
-    assertEquals(2, queryResults.size());
+    assertEquals(2, queryResults.size()); // Map size should remain 2
   }
 
   @Test
@@ -201,11 +214,13 @@ public class HomeControllerTest {
             "2024-11-06T04:41:46Z");
     List<Video> mockVideoList = Collections.singletonList(mockVideo);
 
-    // Set up the YouTubeService to return the mock video list
-    when(mockYouTubeService.searchVideos("test")).thenReturn(mockVideoList);
+    // Set up the YouTubeService to return the mock video list asynchronously
+    when(mockYouTubeService.searchVideos("test", 10))
+        .thenReturn(CompletableFuture.completedFuture(mockVideoList));
 
-    // Perform the search with a valid query
-    Result result = homeController.search("test");
+    // Act
+    CompletionStage<Result> resultStage = homeController.search("test");
+    Result result = resultStage.toCompletableFuture().join();
 
     // Assert status is OK and content contains "Mock Title"
     assertEquals(OK, result.status());
@@ -216,10 +231,11 @@ public class HomeControllerTest {
   @Test
   public void testSearchWithEmptyResult() {
     // Set up the YouTubeService to return an empty list
-    when(mockYouTubeService.searchVideos("empty")).thenReturn(Collections.emptyList());
+    when(mockYouTubeService.searchVideos("empty", 10))
+        .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
 
-    // Perform the search with a query that yields no results
-    Result result = homeController.search("empty");
+    CompletionStage<Result> resultStage = homeController.search("empty");
+    Result result = resultStage.toCompletableFuture().join();
 
     assertTrue(contentAsString(result).contains("No results found"));
   }
@@ -227,10 +243,13 @@ public class HomeControllerTest {
   @Test
   public void testSearchWithError() {
     // Set up the YouTubeService to throw an exception
-    doThrow(new RuntimeException("API failure")).when(mockYouTubeService).searchVideos(anyString());
+    doReturn(CompletableFuture.failedFuture(new RuntimeException("API failure")))
+        .when(mockYouTubeService)
+        .searchVideos(anyString(), eq(10));
 
-    // Perform the search to trigger the exception
-    Result result = homeController.search("error");
+    // Act
+    CompletionStage<Result> resultStage = homeController.search("error");
+    Result result = resultStage.toCompletableFuture().join();
 
     assertTrue(
         contentAsString(result).contains("An error occurred while processing your request."));
@@ -239,7 +258,8 @@ public class HomeControllerTest {
   @Test
   public void testSearchWithEmptyQuery() {
     // Perform search with an empty query
-    Result result = homeController.search("");
+    CompletionStage<Result> resultStage = homeController.search("");
+    Result result = resultStage.toCompletableFuture().join();
 
     assertTrue(contentAsString(result).contains("Please enter a search term"));
   }
@@ -247,7 +267,8 @@ public class HomeControllerTest {
   @Test
   public void testSearchWithNullQuery() {
     // Perform search with a null query
-    Result result = homeController.search(null);
+    CompletionStage<Result> resultStage = homeController.search(null);
+    Result result = resultStage.toCompletableFuture().join();
 
     // Assert that the status is BAD_REQUEST and message prompts to enter search term
     assertEquals(BAD_REQUEST, result.status());
@@ -267,7 +288,8 @@ public class HomeControllerTest {
   @Test
   public void testWordStatsWithNullQuery() {
     // Act: Perform the word stats search with a null query
-    Result result = homeController.wordStats(null);
+    CompletionStage<Result> resultStage = homeController.search(null);
+    Result result = resultStage.toCompletableFuture().join();
 
     // Assert: Check that the response status is BAD_REQUEST
     assertEquals(BAD_REQUEST, result.status());
@@ -300,9 +322,13 @@ public class HomeControllerTest {
             "2024-11-06T04:41:46Z");
     List<Video> mockVideos = Collections.singletonList(video);
 
-    // Act: Mock YouTubeService to return the list of videos
-    when(mockYouTubeService.searchVideos("special", 50)).thenReturn(mockVideos);
-    Result result = homeController.wordStats("special");
+    // Mock YouTubeService to return the list of videos asynchronously
+    when(mockYouTubeService.searchVideos("special", 50))
+        .thenReturn(CompletableFuture.completedFuture(mockVideos));
+
+    // Act: Call the wordStats method
+    CompletionStage<Result> resultStage = homeController.wordStats("special");
+    Result result = resultStage.toCompletableFuture().join();
 
     // Assert: Check that the response status is OK and specific words are counted
     assertEquals(OK, result.status());
@@ -352,9 +378,13 @@ public class HomeControllerTest {
             "2024-11-06T04:41:46Z");
     List<Video> mockVideos = Arrays.asList(video1, video2);
 
-    // Act: Mock YouTubeService to return the list of videos
-    when(mockYouTubeService.searchVideos("java", 50)).thenReturn(mockVideos);
-    Result result = homeController.wordStats("java");
+    // Mock YouTubeService to return the list of videos asynchronously
+    when(mockYouTubeService.searchVideos("java", 50))
+        .thenReturn(CompletableFuture.completedFuture(mockVideos));
+
+    // Act: Call the wordStats method
+    CompletionStage<Result> resultStage = homeController.wordStats("java");
+    Result result = resultStage.toCompletableFuture().join();
 
     // Assert: Check that the response status is OK
     assertEquals(OK, result.status());
@@ -371,47 +401,58 @@ public class HomeControllerTest {
     assertTrue(content.contains("2")); // Check for 'programming' frequency
   }
 
-
   @Test
   public void testSearch_NullQuery() {
-    Result result = homeController.search(null);
+    CompletionStage<Result> resultStage = homeController.search(null);
+    Result result = resultStage.toCompletableFuture().join();
     assertEquals("Please enter a search term.", contentAsString(result));
   }
 
   @Test
   public void testSearch_EmptyQuery() {
-    Result result = homeController.search(" ");
+    CompletionStage<Result> resultStage = homeController.search(" ");
+    Result result = resultStage.toCompletableFuture().join();
     assertEquals("Please enter a search term.", contentAsString(result));
   }
 
-  /** Tests the {@code wordStats} method with a query that yields no videos.
+  /**
+   * Tests the {@code wordStats} method with a query that yields no videos.
+   *
    * @author: Deniz Dinchdonmez
-   * */
+   */
   @Test
   public void testWordStats_NullQuery() {
-    Result result = homeController.wordStats(null);
+    CompletionStage<Result> resultStage = homeController.wordStats(null);
+    Result result = resultStage.toCompletableFuture().join();
     assertEquals("Please enter a search term.", contentAsString(result));
   }
 
-  /** Tests the {@code wordStats} method with a query that yields no videos.
+  /**
+   * Tests the {@code wordStats} method with a query that yields no videos.
+   *
    * @author: Deniz Dinchdonmez
-   * */
+   */
   @Test
   public void testWordStats_EmptyQuery() {
-    Result result = homeController.wordStats("");
+    CompletionStage<Result> resultStage = homeController.wordStats("");
+    Result result = resultStage.toCompletableFuture().join();
     assertEquals("Please enter a search term.", contentAsString(result));
   }
 
-  /** Tests the {@code wordStats} method with a query that yields no videos.
+  /**
+   * Tests the {@code wordStats} method with a query that yields no videos.
+   *
    * @author: Deniz Dinchdonmez
-   * */
+   */
   @Test
   public void testWordStats_NoVideos() {
     // Mock the YouTube service to return an empty list for the given query
-    when(mockYouTubeService.searchVideos("test-query", 50)).thenReturn(Collections.emptyList());
+    when(mockYouTubeService.searchVideos("test-query", 50))
+        .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
 
-    // Call the wordStats method with a valid query that returns no videos
-    Result result = homeController.wordStats("test-query");
+    // Act: Call the wordStats method with a valid query
+    CompletionStage<Result> resultStage = homeController.wordStats("test-query");
+    Result result = resultStage.toCompletableFuture().join();
 
     // Check that the response content is "No words found"
     assertEquals("No words found", contentAsString(result));

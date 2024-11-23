@@ -9,6 +9,7 @@ import models.ChannelInfo;
 import models.SearchResult;
 import models.Video;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 import services.YouTubeService;
 
@@ -22,6 +23,8 @@ public class HomeController extends Controller {
 
   private final YouTubeService youTubeService;
   private final LinkedHashMap<String, List<Video>> multipleQueryResult;
+  private static HashMap<String, LinkedHashMap<String, List<Video>>> multipleQueryResults =
+      new HashMap<>();
 
   @Inject
   public HomeController(
@@ -30,56 +33,92 @@ public class HomeController extends Controller {
     this.multipleQueryResult = multipleQueryResult;
   }
 
+  public HomeController(
+      YouTubeService youTubeService,
+      LinkedHashMap<String, List<Video>> multipleQueryResult,
+      HashMap<String, LinkedHashMap<String, List<Video>>> sessionQueryMap) {
+    this.youTubeService = youTubeService;
+    this.multipleQueryResult = multipleQueryResult;
+    this.multipleQueryResults = sessionQueryMap;
+  }
+
+  public CompletionStage<Result> index(String query) {
+    return index(query, null);
+  }
+
   /**
    * Given a query a list of videos are fetched from the youtubeAPI, processed and rendered
    *
    * @return completion stage result of the rendering of given query/queries
    * @author Jessica Chen, Aynaz Javanivayeghan, Deniz Dinchdonmez
    */
-  public CompletionStage<Result> index(String query) {
+  public CompletionStage<Result> index(String query, Http.Request request) {
+    // Retrieve session ID from cookies or generate a new one
+    String sessionId;
+
+    if (Optional.ofNullable(request).isEmpty()) {
+      sessionId = UUID.randomUUID().toString();
+    } else {
+      sessionId =
+          request.cookie("sessionId").map(Http.Cookie::value).orElse(UUID.randomUUID().toString());
+    }
+
+    // Ensure a session-specific map exists
+    multipleQueryResults.computeIfAbsent(sessionId, k -> new LinkedHashMap<>());
+
+    // Get the session-specific query results map
+    LinkedHashMap<String, List<Video>> multipleQueryResultFromHashMap =
+        multipleQueryResults.get(sessionId);
+
     return CompletableFuture.supplyAsync(
             () -> {
-              if (!multipleQueryResult.containsKey(query)) {
-
-                if (multipleQueryResult.size() == 10) {
-                  String eldestKey = multipleQueryResult.keySet().iterator().next();
-                  multipleQueryResult.remove(eldestKey);
+              // Handle new or existing queries
+              if (!multipleQueryResultFromHashMap.containsKey(query)) {
+                // If the size exceeds the limit, remove the oldest entry
+                if (multipleQueryResultFromHashMap.size() == 10) {
+                  String eldestKey = multipleQueryResultFromHashMap.keySet().iterator().next();
+                  multipleQueryResultFromHashMap.remove(eldestKey);
                 }
-
-                multipleQueryResult.put(query, List.of());
-
-              } else {
-                List<Video> videos = multipleQueryResult.get(query);
-                multipleQueryResult.remove(query);
-                multipleQueryResult.put(query, videos);
+                // Add the query with an empty list
+                multipleQueryResultFromHashMap.put(query, new ArrayList<>());
               }
               return query;
             })
         .thenCompose(
             queryToFetch -> {
+              // Handle null or empty queries
               if (queryToFetch == null || queryToFetch.isEmpty()) {
                 return CompletableFuture.completedFuture(List.of());
               }
+              // Fetch videos from the YouTube service
               return youTubeService.searchVideos(queryToFetch, 10);
             })
         .thenApply(
-            videos -> {
+            newVideos -> {
               if (query != null && !query.isEmpty()) {
-                multipleQueryResult.put(query, videos);
+                // Retrieve existing videos or initialize a new list
+                List<Video> existingVideos =
+                    multipleQueryResultFromHashMap.getOrDefault(query, new ArrayList<>());
+
+                // Append new videos to the existing list
+                existingVideos.addAll(newVideos);
+
+                // Update the query results map
+                multipleQueryResultFromHashMap.put(query, existingVideos);
               }
-              return multipleQueryResult;
-            })
-        .thenApply(
-            multipleQueryResult -> {
+
+              // Combine results from all queries in the order they were added
               List<SearchResult> searchResults =
-                  multipleQueryResult.entrySet().stream()
+                  multipleQueryResultFromHashMap.entrySet().stream()
                       .map(entry -> new SearchResult(entry.getKey(), entry.getValue()))
                       .collect(Collectors.toList());
 
+              // Reverse the order to show the most recent searches at the top
               Collections.reverse(searchResults);
 
-              // Render the index page
-              return ok(views.html.index.render(searchResults));
+              // Render the page with the combined results and set session ID in cookies
+              return ok(views.html.index.render(searchResults))
+                  .withCookies(Http.Cookie.builder("sessionId", sessionId).build());
             });
   }
 

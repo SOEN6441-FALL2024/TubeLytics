@@ -12,11 +12,7 @@ import static play.mvc.Http.Status.BAD_REQUEST;
 import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.contentAsString;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import models.ChannelInfo;
@@ -26,7 +22,9 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import play.mvc.Http;
 import play.mvc.Result;
+import play.test.Helpers;
 import services.YouTubeService;
 
 /**
@@ -36,6 +34,7 @@ import services.YouTubeService;
  */
 public class HomeControllerTest {
   private LinkedHashMap<String, List<Video>> queryResults;
+  private HashMap<String, LinkedHashMap<String, List<Video>>> sessionQueryMap;
   private List<Video> videos;
   private String query;
   @Mock private YouTubeService mockYouTubeService;
@@ -46,10 +45,16 @@ public class HomeControllerTest {
   public void setUp() {
     MockitoAnnotations.openMocks(this);
     mockYouTubeService = mock(YouTubeService.class);
+
+    // Initialize session-specific maps
     queryResults = new LinkedHashMap<>();
-    homeController = new HomeController(mockYouTubeService, queryResults);
+    sessionQueryMap = new HashMap<>();
+    homeController =
+        new HomeController(
+            mockYouTubeService, queryResults, sessionQueryMap); // Pass initialized maps
 
     query = "cat";
+
     // Adding mock entries into List<Video>
     videos = new ArrayList<>();
     Video video1 =
@@ -133,38 +138,72 @@ public class HomeControllerTest {
 
   @Test
   public void testIndexEldestQueryRemoval() {
-    // Arrange: Populate the map with 10 entries
+    // Arrange: Mock sessionQueryMap and its behavior
+    HashMap<String, LinkedHashMap<String, List<Video>>> mockSessionQueryMap = mock(HashMap.class);
+    String sessionId = "test-session-id";
+    LinkedHashMap<String, List<Video>> multiQueryResults = new LinkedHashMap<>();
     for (int i = 0; i < 10; i++) {
       String queryNew = query + i;
-      queryResults.put(queryNew, videos);
+      multiQueryResults.put(queryNew, videos);
     }
+    when(mockSessionQueryMap.get(sessionId)).thenReturn(multiQueryResults);
+
+    // Inject the mock sessionQueryMap into HomeController
+    homeController =
+        new HomeController(mockYouTubeService, new LinkedHashMap<>(), mockSessionQueryMap);
 
     // Mock the YouTubeService for a new query
     when(mockYouTubeService.searchVideos("query11", 10))
         .thenReturn(CompletableFuture.completedFuture(videos));
 
+    // Mock request with session ID
+    Http.RequestBuilder requestBuilder =
+        Helpers.fakeRequest().cookie(Http.Cookie.builder("sessionId", sessionId).build());
+
     // Act: Add a new query to trigger eldest query removal
-    homeController.index("query11").toCompletableFuture().join();
+    homeController.index("query11", requestBuilder.build()).toCompletableFuture().join();
+
+    // Retrieve the session-specific query results
+    verify(mockSessionQueryMap).get(sessionId);
+    LinkedHashMap<String, List<Video>> sessionQueryResults = mockSessionQueryMap.get(sessionId);
 
     // Assert: Verify the size remains at 10 and the eldest entry is removed
-    assertEquals(10, queryResults.size());
-    assertFalse("The oldest entry - cat0 - should be removed", queryResults.containsKey(query + 0));
-    assertTrue("The new query exists", queryResults.containsKey("query11"));
+    assertNotNull("Session-specific query results should not be null", sessionQueryResults);
+    assertEquals("The map should contain exactly 10 entries", 10, sessionQueryResults.size());
+    assertFalse(
+        "The oldest entry - cat0 - should be removed", sessionQueryResults.containsKey(query + 0));
+    assertTrue("The new query exists", sessionQueryResults.containsKey("query11"));
   }
 
   @Test
   public void testIndexResultAddedToMap() {
-    // Arrange
-    when(mockYouTubeService.searchVideos(query, 10))
+    // Arrange: Mock YouTube service to return a predefined list of videos
+    when(mockYouTubeService.searchVideos("hello", 10))
         .thenReturn(CompletableFuture.completedFuture(videos));
 
-    // Act
-    homeController.index(query).toCompletableFuture().join();
+    // Initialize session-specific map in the controller
+    String sessionId = "test-session-id";
 
-    // Assert
-    assertTrue("The query should exist in the map", queryResults.containsKey(query));
-    assertEquals(videos, queryResults.get(query));
-    assertEquals(1, queryResults.size());
+    LinkedHashMap<String, List<Video>> multiQueryResults = new LinkedHashMap<>();
+    multiQueryResults.put("hello", videos);
+    sessionQueryMap.put(sessionId, multiQueryResults);
+
+    // Mock request with session ID
+    Http.RequestBuilder requestBuilder =
+        Helpers.fakeRequest().cookie(Http.Cookie.builder("sessionId", sessionId).build());
+
+    // Act: Call the index method with the mock request
+    homeController.index("hello", requestBuilder.build()).toCompletableFuture().join();
+
+    // Retrieve the session-specific query results
+    LinkedHashMap<String, List<Video>> sessionQueryResults = sessionQueryMap.get(sessionId);
+
+    // Assert: Verify the query results for the session
+    assertNotNull("Session-specific query results should not be null", sessionQueryResults);
+    assertTrue(
+        "The query should exist in the session's map", sessionQueryResults.containsKey("hello"));
+    assertEquals("The videos for the query should match", videos, sessionQueryResults.get("hello"));
+    assertEquals("The map should contain only one query", 1, sessionQueryResults.size());
   }
 
   @Test
@@ -186,18 +225,46 @@ public class HomeControllerTest {
                         "DogVideoChannelTitle1",
                         "2024-11-06T04:41:46Z"))));
 
+    // Initialize session-specific map in the controller
+    String sessionId = "test-session-id";
+    LinkedHashMap<String, List<Video>> multiQueryResults = new LinkedHashMap<>();
+    sessionQueryMap.put(sessionId, multiQueryResults);
+
+    // Mock request with session ID
+    Http.RequestBuilder requestBuilder =
+        Helpers.fakeRequest().cookie(Http.Cookie.builder("sessionId", sessionId).build());
+
     // Act: Fetching the same query multiple times
-    homeController.index(query).toCompletableFuture().join(); // First fetch
-    homeController.index("dog").toCompletableFuture().join(); // Second fetch
-    homeController.index(query).toCompletableFuture().join(); // Re-fetch existing query
+    homeController.index(query, requestBuilder.build()).toCompletableFuture().join(); // First fetch
+    homeController
+        .index("dog", requestBuilder.build())
+        .toCompletableFuture()
+        .join(); // Second fetch
+    homeController
+        .index(query, requestBuilder.build())
+        .toCompletableFuture()
+        .join(); // Re-fetch existing query
+
+    // Retrieve session-specific query results
+    LinkedHashMap<String, List<Video>> sessionQueryResults = sessionQueryMap.get(sessionId);
 
     // Assert: Ensure query results are as expected
     verify(mockYouTubeService, times(2)).searchVideos(query, 10); // "cat" queried twice
     verify(mockYouTubeService, times(1)).searchVideos("dog", 10); // "dog" queried once
 
-    assertTrue("The query should exist in the map", queryResults.containsKey(query));
-    assertEquals(videos, queryResults.get(query));
-    assertEquals(2, queryResults.size()); // Map size should remain 2
+    assertNotNull("Session-specific query results should not be null", sessionQueryResults);
+    assertTrue(
+        "The query should exist in the session's map", sessionQueryResults.containsKey(query));
+
+    // Expected behavior: videos are appended, so the size is doubled for the query
+    List<Video> expectedVideos = new ArrayList<>(videos);
+    expectedVideos.addAll(videos); // Because the query was fetched twice
+
+    assertEquals(
+        "The videos for the query should match the appended list",
+        expectedVideos,
+        sessionQueryResults.get(query));
+    assertEquals("The map should contain two queries", 2, sessionQueryResults.size());
   }
 
   @Test

@@ -72,7 +72,6 @@ public class HomeControllerTest {
     system = ActorSystem.create();
 
     query = "cat";
-
     // Adding mock entries into List<Video>
     videos = new ArrayList<>();
     Video video1 =

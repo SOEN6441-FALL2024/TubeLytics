@@ -12,14 +12,17 @@ import static play.mvc.Http.Status.BAD_REQUEST;
 import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.contentAsString;
 
+import actors.SupervisorActor;
 import com.typesafe.config.Config;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import models.ChannelInfo;
 import models.Video;
+import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.stream.Materializer;
+import org.apache.pekko.testkit.TestProbe;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.Before;
 import org.junit.Rule;
@@ -31,13 +34,12 @@ import org.mockito.MockitoAnnotations;
 import play.libs.ws.WSClient;
 import play.mvc.Http;
 import play.mvc.Result;
-import play.test.Helpers;
 import play.mvc.WebSocket;
+import play.test.Helpers;
 import services.YouTubeService;
 
 /**
  * Unit test for HomeController
- *
  * @author Deniz Dinchdonmez, Aynaz Javanivayeghan, Jessica Chen
  */
 public class HomeControllerTest {
@@ -45,11 +47,11 @@ public class HomeControllerTest {
   private HashMap<String, LinkedHashMap<String, List<Video>>> sessionQueryMap;
   private List<Video> videos;
   private String query;
+  private ActorSystem system;
   private Materializer materializer;
-  private TestKit testKit;
+  private WSClient wsClient;
 
   @Mock private YouTubeService mockYouTubeService;
-  @Mock private ActorSystem system;
 
   @Rule public ExpectedException thrown = ExpectedException.none();
 
@@ -64,14 +66,10 @@ public class HomeControllerTest {
     queryResults = new LinkedHashMap<>();
     sessionQueryMap = new HashMap<>();
     homeController =
-        new HomeController(
+        new HomeController(system, materializer, wsClient,
             mockYouTubeService, queryResults, sessionQueryMap); // Pass initialized maps
 
     system = ActorSystem.create();
-    materializer = Materializer.createMaterializer(system);
-    testKit = new TestKit(system);
-
-    homeController = new HomeController(system, materializer, mockYouTubeService);
 
     query = "cat";
 
@@ -100,14 +98,29 @@ public class HomeControllerTest {
   }
 
   @Test
+  public void testWsTestIndex() {
+    Result result = homeController.wsTestIndex();
+    assertEquals(200, result.status());
+    assertTrue(result.toString().contains("TubeLytics via WebSockets"));
+  }
+
+  @Test
   public void testWs() {
-    String sessionId = UUID.randomUUID().toString();
-
+    Http.Request request = mock(Http.Request.class);
     WebSocket ws = homeController.ws();
-
     assertNotNull(ws);
-    assertTrue(queryResults.containsKey(sessionId));
-    assertNotNull(queryResults.get(sessionId));
+  }
+
+  @Test
+  public void testWebSocketFlow() {
+    new TestKit(system) {{
+      TestProbe wsOut = new TestProbe(system);
+      TestProbe userActorProbe = new TestProbe(system);
+      ActorRef supervisorActor = system.actorOf(SupervisorActor.props(wsOut.ref(), wsClient));
+
+      supervisorActor.tell("Cats", wsOut.ref());
+      userActorProbe.expectMsg("Cats");
+    }};
   }
 
   @Test

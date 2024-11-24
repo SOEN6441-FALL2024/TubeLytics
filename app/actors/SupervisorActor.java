@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 /**
  * SupervisorActor who acts as supervisor for all other actors
+ * @author Jessica Chen
  */
 public class SupervisorActor extends AbstractActor {
     private final ActorRef userActor;
@@ -27,16 +28,18 @@ public class SupervisorActor extends AbstractActor {
         this.userActor = getContext().actorOf(UserActor.props(wsOut, youtubeServiceActor),"userActor");
         this.wsClient = wsClient;
     }
+
     @Override
     public Receive createReceive() {
         return receiveBuilder()
                 .match(String.class, message -> {
                     userActor.tell(message, getSelf());
-                    System.out.println("Supervisor Actor receives message: " + message);
+                    System.out.println("Supervisor Actor receives message for userActor: " + message);
                 })
                 .matchAny(message -> {
-                    System.out.println("Supervisor Actor receives unknown message: " + message);
+                    System.out.println("Supervisor Actor receives message: " + message);
                 })
                 .build();
     }
+
 }

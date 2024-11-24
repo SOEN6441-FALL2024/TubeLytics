@@ -14,6 +14,7 @@ import java.util.List;
 
 /**
  * YouTubeServiceActor handles calls to the YoutubeApi based on given query and returns results to sender
+ * @author Jessica Chen
  */
 public class YouTubeServiceActor extends AbstractActor {
     private final String apiKey = "AIzaSyAOBE-wqail4JWdW1P5wPxFefoMxRCMrSo";
@@ -35,7 +36,13 @@ public class YouTubeServiceActor extends AbstractActor {
                 .build();
     }
 
+    /**
+     * Method to call searchVideosRequest method to get video results and then send it back to the
+     * actor that requested it
+     * @param query - inputted by the user in the browser and sent over via websockets and actors
+     */
     private void handleSearchQuery(String query) {
+        // to help debugging, can be deleted once done using
         System.out.println("YouTubeServiceActor receives message to search videos: " + query);
         ActorRef sender = getSender();
         CompletionStage<List<Video>> videos = searchVideosRequest(query);
@@ -50,8 +57,14 @@ public class YouTubeServiceActor extends AbstractActor {
         });
     }
 
+    /**
+     * Method to talk to the youtubeAPI, previously in YouTubeService
+     * @param message - query
+     * @return - CompletionStage list of videos
+     */
     private CompletionStage<List<Video>> searchVideosRequest(String message) {
         int limit = 10;
+
         String youtubeUrl = "https://www.googleapis.com/youtube/v3/search";
         String url =
                String.format(

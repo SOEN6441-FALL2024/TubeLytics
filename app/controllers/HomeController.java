@@ -7,20 +7,14 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import actors.SupervisorActor;
-import actors.UserActor;
-import actors.WebSocketActor;
-
-import actors.YouTubeServiceActor;
 import models.ChannelInfo;
 import models.SearchResult;
 import models.Video;
 
-import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.stream.Materializer;
 
 import play.libs.streams.ActorFlow;
-import play.libs.ws.WSClient;
 import play.libs.ws.WSClient;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -35,43 +29,51 @@ import services.YouTubeService;
  * @author Deniz Dinchdonmez, Aynaz, Jessica Chen
  */
 public class HomeController extends Controller {
-  private final ActorSystem actorSystem;
-  private final Materializer materializer;
-  private final YouTubeService youTubeService;
-  private final LinkedHashMap<String, List<Video>> multipleQueryResult;
-  private static HashMap<String, LinkedHashMap<String, List<Video>>> multipleQueryResults =
+    private final ActorSystem actorSystem;
+    private final Materializer materializer;
+    private final YouTubeService youTubeService;
+    private final LinkedHashMap<String, List<Video>> multipleQueryResult;
+    private static HashMap<String, LinkedHashMap<String, List<Video>>> multipleQueryResults =
       new HashMap<>();
-  private final WSClient wsClient;
+    private final WSClient wsClient;
 
-  @Inject
-  public HomeController(ActorSystem actorSystem, Materializer materializer,
+
+    @Inject
+    public HomeController(ActorSystem actorSystem, Materializer materializer, WSClient wsClient,
       YouTubeService youTubeService, LinkedHashMap<String, List<Video>> multipleQueryResult) {
-    this.actorSystem = actorSystem;
-    this.materializer = materializer;
-    this.youTubeService = Objects.requireNonNull(youTubeService, "YouTubeService cannot be null");
-    this.multipleQueryResult =
-        Objects.requireNonNull(multipleQueryResult, "Query result map cannot be null");
-    this.wsClient = wsClient;
-  }
+        this.actorSystem = actorSystem;
+        this.materializer = materializer;
+        this.wsClient = wsClient;
+        this.youTubeService = Objects.requireNonNull(youTubeService, "YouTubeService cannot be null");
+        this.multipleQueryResult =
+              Objects.requireNonNull(multipleQueryResult, "Query result map cannot be null");
+    }
 
+    /**
+     * Current index used for WebSocket connection (part 2 of project). Will change to index() once we have
+     * moved all logic below.
+     * @return
+     * @author Jessica Chen
+     */
     public Result wsTestIndex() {
         return ok(views.html.reactiveIndex.render("TubeLytics via WebSockets"));
     }
 
-  public CompletionStage<Result> index(String query) {
-    return index(query, null);
-  }
+    /**
+     * Start of webSocket connection, which will create a supervisor actor who is in charge of looking
+     * after all children actors.
+     * @author Jessica Chen
+     */
+    public WebSocket ws() {
+        return WebSocket.Text.accept(request ->  {
+            System.out.println("New Websocket Connection Established!" + request);
+            return ActorFlow.actorRef(out -> SupervisorActor.props(out, wsClient), actorSystem, materializer);
+        });
+    }
 
-  public WebSocket ws() {
-    return WebSocket.Text.accept(request ->  {
-        // Obtains sessionId of user or generates new one
-        String sessionId = request.session().get("sessionId").orElse(UUID.randomUUID().toString());
-        // Adds sessionId in map if it doesn't already exist in it
-        multipleQueryResults.putIfAbsent(sessionId, new LinkedHashMap<>());
-      System.out.println("New Websocket Connection Established!" + request);
-      return ActorFlow.actorRef(out -> SupervisorActor.props(out, wsClient), actorSystem, materializer);
-    });
-  }
+    public CompletionStage<Result> index(String query) {
+        return index(query, null);
+    }
 
   /**
    * Given a query a list of videos are fetched from the youtubeAPI, processed and rendered

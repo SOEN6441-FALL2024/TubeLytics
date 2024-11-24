@@ -3,15 +3,13 @@ package actors;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
-import models.Video;
 import org.apache.pekko.actor.AbstractActor;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
 
-import java.util.List;
-
 /**
  * User actor who talks to the client and gets the information needed from others
+ * @author Jessica Chen
  */
 public class UserActor extends AbstractActor {
     private final ActorRef ws;
@@ -34,18 +32,17 @@ public class UserActor extends AbstractActor {
                         youTubeServiceActor.tell(message, getSelf());
                 })
                 .match(Messages.SearchResultsMessage.class, response -> {
-                    try {
                         System.out.println("Received response from YouTubeServiceActor: " + response.getVideos());
                         processReceivedResults(response);
-                    } catch (Exception e) {
-                        System.err.println("Error Sending JSON response: " + e.getMessage());
-                    }
-
-
-                })
+                    })
                 .build();
     }
 
+    /**
+     * Method used to process received response from YouTubeServiceActor to process it into a Json for the client
+     * to read and display, and sends it to the client
+     * @param response - SearchResultMessage object that contains query and list of videos
+     */
     private void processReceivedResults(Messages.SearchResultsMessage response) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {

@@ -1,6 +1,5 @@
 package actors;
 
-import org.apache.pekko.actor.Actor;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.InvalidMessageException;
@@ -13,7 +12,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
-public class ParentActorTest {
+public class UserActorTest {
     private ActorSystem system;
     private ActorRef youTubeServiceActor;
     private TestKit testKit;
@@ -36,11 +35,11 @@ public class ParentActorTest {
      * @author Jessica Chen
      */
     @Test
-    public void testParentActorQueryForward() {
-        final ActorRef parentActor = system.actorOf(ParentActor.props(youTubeServiceActor));
-        parentActor.tell("cats", testKit.getRef());
+    public void testUserActorQueryForward() {
+        final ActorRef userActor = system.actorOf(UserActor.props(youTubeServiceActor));
+        userActor.tell("cats", testKit.getRef());
 
-        verify(youTubeServiceActor).tell("cats", parentActor);
+        verify(youTubeServiceActor).tell("cats", userActor);
     }
 
     /**
@@ -49,7 +48,7 @@ public class ParentActorTest {
      */
     @Test
     public void testParentActorEmptyQuery() {
-        final ActorRef parentActor = system.actorOf(ParentActor.props(youTubeServiceActor));
+        final ActorRef parentActor = system.actorOf(UserActor.props(youTubeServiceActor));
         parentActor.tell("", testKit.getRef());
         verify(youTubeServiceActor, never()).tell("", parentActor);
     }
@@ -61,7 +60,7 @@ public class ParentActorTest {
      */
     @Test
     public void testParentActorNullQueryForward() {
-        final ActorRef parentActor = system.actorOf(ParentActor.props(youTubeServiceActor));
+        final ActorRef parentActor = system.actorOf(UserActor.props(youTubeServiceActor));
         try{
             parentActor.tell(null, testKit.getRef());
             fail("InvalidMessageException should be thrown.");

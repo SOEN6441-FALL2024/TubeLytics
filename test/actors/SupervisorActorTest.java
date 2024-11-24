@@ -13,7 +13,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
-public class WebSocketActorTest {
+public class SupervisorActorTest {
     static ActorSystem system;
     private ActorRef out;
     private ActorRef parentActor;
@@ -40,7 +40,7 @@ public class WebSocketActorTest {
      */
     @Test
     public void testWebSocketActorQueryForward() {
-        final ActorRef webSocketActor = system.actorOf(WebSocketActor.props("session1", parentActor, out));
+        final ActorRef webSocketActor = system.actorOf(SupervisorActor.props("session1", parentActor, out));
         webSocketActor.tell("Test", testKit.getRef());
         verify(parentActor).tell("Test", webSocketActor);
     }
@@ -50,7 +50,7 @@ public class WebSocketActorTest {
      */
     @Test
     public void testWebSocketActorEmptyQuery() {
-        final ActorRef webSocketActor = system.actorOf(WebSocketActor.props("session1", parentActor, out));
+        final ActorRef webSocketActor = system.actorOf(SupervisorActor.props("session1", parentActor, out));
         webSocketActor.tell("", testKit.getRef());
         verify(parentActor, never()).tell("", webSocketActor);
     }
@@ -60,7 +60,7 @@ public class WebSocketActorTest {
      */
     @Test
     public void testWebSocketActorNullQueryForward() {
-        final ActorRef webSocketActor = system.actorOf(WebSocketActor.props("session1", parentActor, out));
+        final ActorRef webSocketActor = system.actorOf(SupervisorActor.props("session1", parentActor, out));
         try{
             webSocketActor.tell(null, testKit.getRef());
             fail("InvalidMessageException should be thrown.");

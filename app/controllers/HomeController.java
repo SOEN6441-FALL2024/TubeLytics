@@ -6,6 +6,8 @@ import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 
+import actors.SupervisorActor;
+import actors.UserActor;
 import actors.WebSocketActor;
 
 import actors.YouTubeServiceActor;
@@ -18,6 +20,8 @@ import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.stream.Materializer;
 
 import play.libs.streams.ActorFlow;
+import play.libs.ws.WSClient;
+import play.libs.ws.WSClient;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -37,6 +41,7 @@ public class HomeController extends Controller {
   private final LinkedHashMap<String, List<Video>> multipleQueryResult;
   private static HashMap<String, LinkedHashMap<String, List<Video>>> multipleQueryResults =
       new HashMap<>();
+  private final WSClient wsClient;
 
   @Inject
   public HomeController(ActorSystem actorSystem, Materializer materializer,
@@ -46,34 +51,27 @@ public class HomeController extends Controller {
     this.youTubeService = Objects.requireNonNull(youTubeService, "YouTubeService cannot be null");
     this.multipleQueryResult =
         Objects.requireNonNull(multipleQueryResult, "Query result map cannot be null");
+    this.wsClient = wsClient;
   }
 
-  public HomeController(
-      YouTubeService youTubeService,
-      LinkedHashMap<String, List<Video>> multipleQueryResult,
-      HashMap<String, LinkedHashMap<String, List<Video>>> sessionQueryMap) {
-    this.youTubeService = youTubeService;
-    this.multipleQueryResult = multipleQueryResult;
-    this.multipleQueryResults = sessionQueryMap;
-  }
+    public Result wsTestIndex() {
+        return ok(views.html.reactiveIndex.render("TubeLytics via WebSockets"));
+    }
 
   public CompletionStage<Result> index(String query) {
     return index(query, null);
   }
 
   public WebSocket ws() {
-    return WebSocket.Text.accept(request -> {
-      // Obtains sessionId of user or generates new one
-      String sessionId = request.session().get("sessionId").orElse(UUID.randomUUID().toString());
-      // Adds sessionId in map if it doesn't already exist in it
-      multipleQueryResults.putIfAbsent(sessionId, new LinkedHashMap<>());
-      ActorRef youTubeServiceActor = actorSystem.actorOf(YouTubeServiceActor.props(youTubeService));
-      ActorRef parentActor = actorSystem.actorOf(ParentActor.props(youTubeServiceActor));
-      return ActorFlow.actorRef(out -> WebSocketActor.props(sessionId, parentActor, out), actorSystem, materializer);
+    return WebSocket.Text.accept(request ->  {
+        // Obtains sessionId of user or generates new one
+        String sessionId = request.session().get("sessionId").orElse(UUID.randomUUID().toString());
+        // Adds sessionId in map if it doesn't already exist in it
+        multipleQueryResults.putIfAbsent(sessionId, new LinkedHashMap<>());
+      System.out.println("New Websocket Connection Established!" + request);
+      return ActorFlow.actorRef(out -> SupervisorActor.props(out, wsClient), actorSystem, materializer);
     });
   }
-
-
 
   /**
    * Given a query a list of videos are fetched from the youtubeAPI, processed and rendered

@@ -7,7 +7,9 @@ GET     /               controllers.HomeController.index(query: String ?= null, 
 
 GET     /ws-test        controllers.Assets.at(path="/public", file="index.html")
 
-GET     /ws             controllers.HomeController.ws
+GET   /ws               controllers.HomeController.ws()
+GET   /wsTestIndex      controllers.HomeController.wsTestIndex()
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

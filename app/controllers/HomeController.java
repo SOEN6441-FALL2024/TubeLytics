@@ -29,8 +29,9 @@ public class HomeController extends Controller {
   @Inject
   public HomeController(
       YouTubeService youTubeService, LinkedHashMap<String, List<Video>> multipleQueryResult) {
-    this.youTubeService = youTubeService;
-    this.multipleQueryResult = multipleQueryResult;
+    this.youTubeService = Objects.requireNonNull(youTubeService, "YouTubeService cannot be null");
+    this.multipleQueryResult =
+        Objects.requireNonNull(multipleQueryResult, "Query result map cannot be null");
   }
 
   public HomeController(

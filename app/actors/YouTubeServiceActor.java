@@ -18,7 +18,6 @@ import java.util.List;
  * @author Jessica Chen
  */
 public class YouTubeServiceActor extends AbstractActor {
-    private final String apiKey = "";
     private final WSClient wsClient;
 
     public static Props props(WSClient wsClient) {

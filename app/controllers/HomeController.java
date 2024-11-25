@@ -17,7 +17,6 @@ import org.apache.pekko.stream.Materializer;
 import play.libs.streams.ActorFlow;
 import play.libs.ws.WSClient;
 
-import org.apache.pekko.actor.ActorRef;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -51,15 +50,17 @@ public class HomeController extends Controller {
               Objects.requireNonNull(multipleQueryResult, "Query result map cannot be null");
     }
 
-    /**
-     * Current index used for WebSocket connection (part 2 of project). Will change to index() once we have
-     * moved all logic below.
-     * @return
-     * @author Jessica Chen
-     */
-//    public Result wsTestIndex() {
-//        return ok(views.html.reactiveIndex.render("TubeLytics via WebSockets"));
-//    }
+    public HomeController(
+            ActorSystem actorSystem, Materializer materializer, WSClient wsClient, YouTubeService youTubeService,
+            LinkedHashMap<String, List<Video>> multipleQueryResult,
+            HashMap<String, LinkedHashMap<String, List<Video>>> sessionQueryMap) {
+        this.actorSystem = actorSystem;
+        this.materializer = materializer;
+        this.wsClient = wsClient;
+        this.youTubeService = youTubeService;
+        this.multipleQueryResult = multipleQueryResult;
+        this.multipleQueryResults = sessionQueryMap;
+    }
 
     /**
      * Start of webSocket connection, which will create a supervisor actor who is in charge of looking

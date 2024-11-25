@@ -1,5 +1,6 @@
 package actors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
@@ -43,18 +44,12 @@ public class UserActor extends AbstractActor {
      * to read and display, and sends it to the client
      * @param response - SearchResultMessage object that contains query and list of videos
      */
-    private void processReceivedResults(Messages.SearchResultsMessage response) {
+    private void processReceivedResults(Messages.SearchResultsMessage response) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
-        try {
             JsonNode json = objectMapper.createObjectNode()
                     .put("searchTerm", response.getSearchTerm())
                     .set("videos", objectMapper.valueToTree(response.getVideos()));
-
-            System.out.println("UserActor sending JSON response: " + json);
             String jsonStr = objectMapper.writeValueAsString(json);
             ws.tell(jsonStr, getSelf());
-        } catch (Exception e) {
-            System.err.println("Error parsing JSON: " + e.getMessage());
-        }
     }
 }

@@ -9,6 +9,13 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 public class MessagesTest {
+
+    @Test
+    public void testMessageClass() {
+        Messages message = new Messages();
+        assertNotNull(message);
+    }
+
     @Test
     public void testSearchResultMessage() {
         String query = "sample";
@@ -35,5 +42,15 @@ public class MessagesTest {
 
         assertNull(message.getSearchTerm());
         assertNull(message.getVideos());
+    }
+
+    @Test
+    public void testEmptySearchResultsMessage() {
+        Messages.SearchResultsMessage message = new Messages.SearchResultsMessage("dogs", new ArrayList<>());
+
+
+        assertEquals("dogs", message.getSearchTerm());
+        assertTrue("There are no videos in this list.", message.getVideos().isEmpty());
+        assertNotNull(message);
     }
 }

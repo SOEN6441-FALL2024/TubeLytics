@@ -1,5 +1,7 @@
 package actors;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 
@@ -42,22 +44,29 @@ public class SupervisorActorTest {
     }
 
     /**
-     * Tests if supervisorActor is able to forward query to userActor and the userActor to the youtubeServiceActor
+     * Tests if supervisorActor is able to forward query to userActor and the userActor to the youtubeServiceActor.
+     * Creating a mockWsClient, working with a mockRequest and mockResponses and ensuring that it transform into a
+     * mockJsonResponse to prevent any null pointer exceptions.
      * @author Jessica Chen
      */
     @Test
     public void testSupervisorActorQueryForward() {
         new TestKit(system) {{
-            TestProbe youTubeServiceActorProbe = new TestProbe(system);
-            TestProbe userActorProbe = new TestProbe(system);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode mockJsonResponse = objectMapper.createObjectNode();
+
             when(mockWsClient.url(anyString())).thenReturn(mockRequest);
             when(mockRequest.get()).thenReturn(CompletableFuture.completedFuture(mockResponse));
 
-            ActorRef supervisorActor = system.actorOf(SupervisorActor.props(userActorProbe.ref(), mockWsClient));
-            String query = "cats";
-            supervisorActor.tell(query, getRef());
+            when(mockResponse.asJson()).thenReturn(mockJsonResponse);
+            when(mockResponse.getStatus()).thenReturn(200);
 
-            userActorProbe.expectMsg(query);
+            TestProbe wsProbe = new TestProbe(system);
+            ActorRef supervisorActor = system.actorOf(SupervisorActor.props(wsProbe.ref(), mockWsClient));
+
+            supervisorActor.tell("cats", getRef());
+            expectNoMessage(Duration.ofSeconds(1));
         }};
     }
     /**

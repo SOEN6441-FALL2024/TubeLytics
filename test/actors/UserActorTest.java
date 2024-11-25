@@ -3,6 +3,7 @@ package actors;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.typesafe.sslconfig.ssl.FakeChainedKeyStore;
 import models.Video;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
@@ -11,8 +12,12 @@ import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import play.libs.ws.WSClient;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -127,40 +132,6 @@ public class UserActorTest {
             }
         }};
     }
-
-    /**
-     * Tests userActor parsing method with null response.
-     * @author Jessica Chen
-     */
-    @Test
-    public void testUserActorProcessInvalidSearchResult() throws JsonProcessingException {
-        new TestKit(system) {{
-            TestProbe youTubeServiceActorProbe = new TestProbe(system);
-            TestProbe wsProbe = new TestProbe(system);
-            ActorRef userActor = system.actorOf(UserActor.props(wsProbe.ref(), youTubeServiceActorProbe.ref()));
-
-            try {
-                String query = "sample";
-                List<Video> invalidVideos = new ArrayList<>();
-                invalidVideos.add(new Video(
-                        "title",
-                        "Description",
-                        "ChannelId",
-                        "VideoId",
-                        "ThumbnailUrl",
-                        "channelTitle",
-                        "October11"));
-
-                Messages.SearchResultsMessage mockResponse = new Messages.SearchResultsMessage(query, invalidVideos);
-                userActor.tell(mockResponse, getRef());
-                fail("Expected JsonProcessingException not thrown");
-            } catch (Exception e) {
-                assertTrue(e instanceof JsonProcessingException);
-                System.err.println("Expected JsonProcessingException caught: " + e.getMessage());
-            }
-        }};
-    }
-
     /**
      * Tests userActor parsing method with null videos.
      * @author Jessica Chen

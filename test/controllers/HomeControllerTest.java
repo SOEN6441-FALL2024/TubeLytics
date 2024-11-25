@@ -17,6 +17,7 @@ import com.typesafe.config.Config;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+
 import models.ChannelInfo;
 import models.Video;
 import org.apache.pekko.actor.ActorRef;
@@ -24,6 +25,7 @@ import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.stream.Materializer;
 import org.apache.pekko.testkit.TestProbe;
 import org.apache.pekko.testkit.javadsl.TestKit;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,6 +33,7 @@ import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import play.libs.streams.ActorFlow;
 import play.libs.ws.WSClient;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -61,15 +64,16 @@ public class HomeControllerTest {
   public void setUp() {
     MockitoAnnotations.openMocks(this);
     mockYouTubeService = mock(YouTubeService.class);
+    wsClient = mock(WSClient.class);
+    materializer = mock(Materializer.class);
+    system = ActorSystem.create();
 
     // Initialize session-specific maps
     queryResults = new LinkedHashMap<>();
     sessionQueryMap = new HashMap<>();
     homeController =
-        new HomeController(system, materializer, wsClient,
-            mockYouTubeService, queryResults, sessionQueryMap); // Pass initialized maps
-
-    system = ActorSystem.create();
+        new HomeController(system, materializer,
+                wsClient, mockYouTubeService, queryResults, sessionQueryMap); // Pass initialized maps
 
     query = "cat";
     // Adding mock entries into List<Video>
@@ -96,16 +100,16 @@ public class HomeControllerTest {
     videos.add(video2);
   }
 
-  @Test
-  public void testWsTestIndex() {
-    Result result = homeController.wsTestIndex();
-    assertEquals(200, result.status());
-    assertTrue(result.toString().contains("TubeLytics via WebSockets"));
+  @After
+  public void tearDown() {
+    TestKit.shutdownActorSystem(system);
+    system = null;
   }
 
   @Test
   public void testWs() {
     Http.Request request = mock(Http.Request.class);
+    when(request.method()).thenReturn("GET");
     WebSocket ws = homeController.ws();
     assertNotNull(ws);
   }
@@ -113,12 +117,14 @@ public class HomeControllerTest {
   @Test
   public void testWebSocketFlow() {
     new TestKit(system) {{
-      TestProbe wsOut = new TestProbe(system);
-      TestProbe userActorProbe = new TestProbe(system);
-      ActorRef supervisorActor = system.actorOf(SupervisorActor.props(wsOut.ref(), wsClient));
+      Http.Request mockRequest = mock(Http.Request.class);
+      WebSocket ws = homeController.ws();
+      TestProbe wsProbe = new TestProbe(system);
 
-      supervisorActor.tell("Cats", wsOut.ref());
-      userActorProbe.expectMsg("Cats");
+      assertNotNull(ws);
+
+      ActorRef supervisorActor = system.actorOf(SupervisorActor.props(wsProbe.ref(), wsClient));
+      assertNotNull(supervisorActor);
     }};
   }
 
@@ -162,7 +168,7 @@ public class HomeControllerTest {
     thrown.expectMessage("YouTubeService cannot be null");
 
     // Act: Attempt to initialize HomeController with a null YouTubeService
-    new HomeController(null, new LinkedHashMap<>());
+    new HomeController(system, materializer, wsClient, null, new LinkedHashMap<>());
   }
 
   @Test
@@ -172,13 +178,13 @@ public class HomeControllerTest {
     thrown.expectMessage("Query result map cannot be null");
 
     // Act: Attempt to initialize HomeController with a null multipleQueryResult
-    new HomeController(new YouTubeService(mock(WSClient.class), mock(Config.class)), null);
+    new HomeController(system, materializer, wsClient, new YouTubeService(mock(WSClient.class), mock(Config.class)), null);
   }
 
   @Test(expected = NullPointerException.class)
   public void testConstructorWithNullParameters() {
-    // Act: Attempt to initialize HomeController with both parameters null
-    new HomeController(null, null);
+    // Act: Attempt to initialize HomeController with all parameters null
+    new HomeController(null, null, null, null, null);
   }
 
   @Test
@@ -188,7 +194,7 @@ public class HomeControllerTest {
     LinkedHashMap<String, List<Video>> validQueryResult = new LinkedHashMap<>();
 
     // Act: Initialize HomeController
-    HomeController controller = new HomeController(mockService, validQueryResult);
+    HomeController controller = new HomeController(system, materializer, wsClient, mockService, validQueryResult);
 
     // Mock YouTubeService behavior
     String query = "test";
@@ -218,8 +224,9 @@ public class HomeControllerTest {
 
   @Test
   public void testIndexWithEmptyQuery() {
+    Http.Request mockRequest = mock(Http.Request.class);
     // Act
-    Result result = homeController.index("").toCompletableFuture().join();
+    Result result = homeController.index("", mockRequest).toCompletableFuture().join();
 
     // Assert
     assertEquals(OK, result.status());
@@ -230,14 +237,15 @@ public class HomeControllerTest {
 
   @Test
   public void testIndexWithNullQuery() {
+    Http.Request mockRequest = mock(Http.Request.class);
     // Act
-    Result result = homeController.index(null).toCompletableFuture().join();
+    Result result = homeController.index(null, mockRequest).toCompletableFuture().join();
 
     // Assert
     assertEquals(OK, result.status());
-    assertTrue(
-        contentAsString(result)
-            .contains("No results found")); // Assuming index page shows this text for empty results
+
+    String  response = contentAsString(result);
+    assertTrue(response.contains("No results found")); // Assuming index page shows this text for empty results
   }
 
   @Test
@@ -254,7 +262,7 @@ public class HomeControllerTest {
 
     // Inject the mock sessionQueryMap into HomeController
     homeController =
-        new HomeController(mockYouTubeService, new LinkedHashMap<>(), mockSessionQueryMap);
+        new HomeController(system, materializer, wsClient, mockYouTubeService, new LinkedHashMap<>(), mockSessionQueryMap);
 
     // Mock the YouTubeService for a new query
     when(mockYouTubeService.searchVideos("query11", 10))

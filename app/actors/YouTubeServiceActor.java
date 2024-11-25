@@ -42,17 +42,13 @@ public class YouTubeServiceActor extends AbstractActor {
      * @param query - inputted by the user in the browser and sent over via websockets and actors
      */
     private void handleSearchQuery(String query) {
-        // to help debugging, can be deleted once done using
-        System.out.println("YouTubeServiceActor receives message to search videos: " + query);
         ActorRef sender = getSender();
         YouTubeService you = new YouTubeService(wsClient, null);
         CompletionStage<List<Video>> videos = you.searchVideos(query);
         videos.whenComplete((results, error) -> {
             if (error != null) {
-                System.out.println("YouTubeServiceActor sends out message with no videos: " + results);
                 sender.tell(new Messages.SearchResultsMessage(query, new ArrayList<>()), getSelf());
             } else {
-                System.out.println("YouTubeServiceActor sends out message with videos: " + results);
                 sender.tell(new Messages.SearchResultsMessage(query, results), getSelf());
             }
         });

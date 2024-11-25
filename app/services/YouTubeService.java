@@ -18,7 +18,7 @@ public class YouTubeService {
   @Inject
   public YouTubeService(WSClient ws, Config config) {
     this.ws = ws;
-    this.apiKey = "AIzaSyAOBE-wqail4JWdW1P5wPxFefoMxRCMrSo";
+    this.apiKey = "";
   }
 
   public CompletionStage<List<Video>> searchVideos(String query, int limit) {

@@ -7,13 +7,13 @@ import java.util.List;
  * Class used to better pass responses through actors
  * @author Jessica Chen
  */
-public class Messages {
+public final class Messages {
     /**
      * Class used specifically for passing search results (query, List<Video>) from YouTubeServiceActor to UseActor
      * and UserActor to client
      * @author Jessica Chen
      */
-    public static class SearchResultsMessage {
+    public static final class SearchResultsMessage {
         private String searchTerm;
         private List<Video> videos;
 

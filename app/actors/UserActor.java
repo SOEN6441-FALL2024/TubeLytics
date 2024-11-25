@@ -28,14 +28,8 @@ public class UserActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(String.class, message -> {
-                        System.out.println("Received message in YouTubeServiceActor: " + message);
-                        youTubeServiceActor.tell(message, getSelf());
-                })
-                .match(Messages.SearchResultsMessage.class, response -> {
-                        System.out.println("Received response from YouTubeServiceActor: " + response.getVideos());
-                        processReceivedResults(response);
-                    })
+                .match(String.class, message -> youTubeServiceActor.tell(message, getSelf()))
+                .match(Messages.SearchResultsMessage.class, response -> processReceivedResults(response))
                 .build();
     }
 

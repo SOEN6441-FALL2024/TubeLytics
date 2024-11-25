@@ -34,11 +34,8 @@ public class SupervisorActor extends AbstractActor {
         return receiveBuilder()
                 .match(String.class, message -> {
                     userActor.tell(message, getSelf());
-                    System.out.println("Supervisor Actor receives message for userActor: " + message);
                 })
-                .matchAny(message -> {
-                    System.out.println("Supervisor Actor receives message: " + message);
-                })
+                .matchAny(message -> System.out.println("Supervisor Actor receives message: " + message))
                 .build();
     }
 

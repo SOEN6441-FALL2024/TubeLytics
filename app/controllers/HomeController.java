@@ -69,7 +69,6 @@ public class HomeController extends Controller {
      */
     public WebSocket ws() {
         return WebSocket.Text.accept(request ->  {
-            System.out.println("New Websocket Connection Established!" + request);
             return ActorFlow.actorRef(out -> SupervisorActor.props(out, wsClient), actorSystem, materializer);
         });
     }

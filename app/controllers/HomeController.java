@@ -57,9 +57,9 @@ public class HomeController extends Controller {
      * @return
      * @author Jessica Chen
      */
-    public Result wsTestIndex() {
-        return ok(views.html.reactiveIndex.render("TubeLytics via WebSockets"));
-    }
+//    public Result wsTestIndex() {
+//        return ok(views.html.reactiveIndex.render("TubeLytics via WebSockets"));
+//    }
 
     /**
      * Start of webSocket connection, which will create a supervisor actor who is in charge of looking
@@ -148,7 +148,7 @@ public class HomeController extends Controller {
               Collections.reverse(searchResults);
 
               // Render the page with the combined results and set session ID in cookies
-              return ok(views.html.index.render(searchResults))
+              return ok(views.html.reactiveIndex.render(searchResults))
                   .withCookies(Http.Cookie.builder("sessionId", sessionId).build());
             });
   }

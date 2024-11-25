@@ -8,7 +8,7 @@ GET     /               controllers.HomeController.index(query: String ?= null, 
 GET     /ws-test        controllers.Assets.at(path="/public", file="index.html")
 
 GET   /ws               controllers.HomeController.ws()
-GET   /wsTestIndex      controllers.HomeController.wsTestIndex()
+#GET   /wsTestIndex      controllers.HomeController.wsTestIndex()
 
 
 GET     /ws-test        controllers.Assets.at(path="/public", file="index.html")

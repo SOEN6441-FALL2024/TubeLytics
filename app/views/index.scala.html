@@ -2,66 +2,27 @@
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YT Lytics</title>
-    <link rel="stylesheet" href='@routes.Assets.versioned("css/styles.css")' />
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        @*        <title>@title</title>*@
+        <link rel="stylesheet" href='@routes.Assets.versioned("css/styles.css")' />
+    </head>
+    <body>
 
-<body>
+        <p id="status"></p>
 
-<h1>Welcome to YT Lytics</h1>
+        <h1>Welcome to YT Lytics</h1>
 
-<!-- Search form -->
-<form id="search-form" action="@routes.HomeController.index()" method="GET" class="search-bar">
-    <input type="text" name="query" id="search-input" placeholder="Enter search terms" required />
-    <button type="submit">Go!</button>
-</form>
+        <form id="search-form">
+            <input type="text" name="query" id="search-input" placeholder="Enter search terms" required />
+            <button type="submit">Go!</button>
+        </form>
 
-<!-- Results Section -->
-<div class="results" id="results">
-    @for(searchResult <- searchResults) {
-    @if(searchResult.getVideos().nonEmpty) {
-    <!-- Display search term and stats -->
-    <div class="search-stats">
-        <p>Search term:
-            <strong>
-                <a href="@routes.HomeController.wordStats(searchResult.getQuery())" target="_blank">@searchResult.getQuery()</a>
-            </strong>
-        </p>
-        <p>Search terms: <strong>@searchResult.getQuery() @searchResult.getOverallSentiment()</strong> (Flesch-Kincaid Grade Level Avg.= @searchResult.getAverageFleschKincaidGradeLevel(), Flesch Reading Ease Score Avg.= @searchResult.getAverageFleschReadingEaseScore())</p>
-    </div>
+        <div id="searchResults" class="results">
+        </div>
 
-    <!-- List of videos -->
-    <ul>
-        @for((video, index) <- searchResult.getVideos().zipWithIndex) {
-        <li class="video-item">
-            <div class="video-details">
-                <p class="video-title">@{index + 1}. <strong>Title:</strong> <a href="https://www.youtube.com/watch?v=@video.getVideoId()" target="_blank">@video.getTitle()</a></p>
-                <p class="channel-link"><strong>Channel:</strong> <a href="/channel/@video.getChannelId()" target="_blank">@video.getChannelTitle()</a></p>
-                <p class="video-description"><strong>Description:</strong> @video.getDescription().take(150) + "..."</p>
-                <p class="video-stats">Flesch-Kincaid Grade Level = @video.getFleschKincaidGradeLevel(), Flesch Reading Ease Score = @video.getFleschReadingEaseScore() .</p>
+        <script src='@routes.Assets.versioned("javascripts/main.js")'></script>
 
-                <!-- لینک به تگ‌ها -->
-                <p>
-                    <strong>Tags:</strong>
-                    <a href="@routes.HomeController.showTags(video.getVideoId())" target="_blank" class="tags-link">View Tags</a>
-                </p>
-
-                <!-- لینک به آمار کلمات -->
-                <a href="@routes.HomeController.wordStats(searchResult.getQuery())" class="more-stats-link">More Word Stats</a>
-            </div>
-            <div class="video-thumbnail">
-                <img src="@video.getThumbnailUrl()" alt="Thumbnail">
-            </div>
-        </li>
-        }
-    </ul>
-    } else {
-    <p>No results found. Please try searching for a video.</p>
-    }
-    }
-</div>
-</body>
+    </body>
 </html>

@@ -3,79 +3,90 @@ document.addEventListener('DOMContentLoaded', function() {
     var searchForm = document.getElementById('search-form');
     var searchQuery = document.getElementById('search-input');
     var searchResults = document.getElementById('searchResults');
+    var statusElement = document.getElementById("status");
 
-    socket.addEventListener("open", (event) => {
-        document.getElementById("status").innerHTML = "connected";
+    socket.addEventListener("open", () => {
+        statusElement.innerHTML = "connected";
+        console.log("WebSocket connection established");
     });
 
-    socket.addEventListener("close", (event) => {
-        document.getElementById("status").innerHTML = "Disconnected";
+    socket.addEventListener("close", () => {
+        statusElement.innerHTML = "Disconnected";
+        console.log("WebSocket connection closed");
     });
 
     socket.addEventListener("error", (event) => {
         console.error("WebSocket error: ", event);
-        document.getElementById("status").innerHTML = "WebSocket error: ";
+        statusElement.innerHTML = "WebSocket error.";
     });
 
     searchForm.addEventListener('submit', function(event) {
         event.preventDefault();
-        var query = searchQuery.value.trim();
-        if(query) {
+        const query = searchQuery.value.trim();
+        if (query) {
             console.log("Sending search query: ", query);
             socket.send(query);
         } else {
-            console.log("empty");
+            console.log("Query is empty");
         }
-    })
+    });
 
     socket.addEventListener("message", (event) => {
-        console.log("Ws message received: ", event.data);
+        console.log("WebSocket message received: ", event.data);
         try {
-           var data = JSON.parse(event.data);
-           displayVideos(data.videos);
-        } catch(error) {
+            const data = JSON.parse(event.data);
+            console.log("Parsed JSON data: ", data);
+            if (data.videos && Array.isArray(data.videos)) {
+                appendSearchResults(data.searchTerm, data.videos);
+            } else {
+                console.error("Data does not have a valid videos property:", data);
+            }
+        } catch (error) {
             console.error("Failed to parse server message as JSON:", error);
         }
     });
 
-    function displayVideos(data) {
-        console.log("Data received: ", data);
+    function appendSearchResults(searchTerm, videos) {
+        if (!videos || !Array.isArray(videos)) {
+            console.error("Invalid videos data or videos is not an array:", videos);
+            return;
+        }
 
-        var searchTerm = data.searchTerm;
-        var videos = data.videos;
+        console.log("Appending videos for search term: ", searchTerm);
 
-        searchResults.innerHTML = '';
+        const searchTermSection = document.createElement('div');
+        searchTermSection.classList.add('search-term-section');
 
-        var searchTermSection = document.createElement('div');
-        var searchHeader = document.createElement('h2');
+        const searchStats = document.createElement('div');
+        searchStats.classList.add('search-stats');
+        searchStats.innerHTML = `
+            <p>Search term: <strong>${searchTerm}</strong></p>
+            <p>Static Placeholder: (Sentiment: :-) , Flesch-Kincaid Grade Level Avg.: ## Flesch Reading Ease Score Avg.: ##)</p>
+        `;
+        searchTermSection.appendChild(searchStats);
 
-        searchHeader.textContent = `Results for: "${searchTerm}"`;
-        searchTermSection.appendChild(searchHeader);
+        const videoList = document.createElement('ul');
+        videoList.classList.add('video-list');
 
-        var listOfVideos = document.createElement('div');
-
-        videos.forEach(function(video) {
-            var videoElement = document.createElement('div');
-
-            var videoTitle = document.createElement('h3');
-            videoTitle.textContent = video.title;
-            videoElement.appendChild(videoTitle);
-
-            var videoDescription = document.createElement('p');
-            videoDescription.textContent = video.description;
-            videoElement.appendChild(videoDescription);
-
-            var videoLink = document.createElement('a');
-            videoLink.href = `https://www.youtube.com/watch?v=${video.id}`;
-            videoLink.textContent = "Watch Video";
-            videoLink.target = "_blank";
-            videoElement.appendChild(videoLink);
-
-            listOfVideos.appendChild(videoElement);
+        videos.forEach((video, index) => {
+            const videoItem = document.createElement('li');
+            videoItem.classList.add('video-item');
+            videoItem.innerHTML = `
+                <div class="video-details">
+                    <p class="video-title"><strong>Title:</strong> <a href="${video.url}" target="_blank">${video.title}</a></p>
+                    <p class="channel-link"><strong>Channel:</strong> <a href="/channel/${video.channelId}" target="_blank">${video.channelTitle}</a></p>
+                    <p class="video-description"><strong>Description:</strong> ${video.description || "No description available"}...</p>
+                    <p class="video-stats">Static Placeholder for Flesch-Kincaid Grade Level and Tags</p>
+                </div>
+                <div class="video-thumbnail">
+                    <img src="${video.thumbnailUrl}" alt="Thumbnail">
+                </div>
+            `;
+            videoList.appendChild(videoItem);
         });
-        searchTermsSection.appendChild(listOfVideos);
-        searchResults.appendChild(searchTermsSection);
-    };
-})
 
+        searchTermSection.appendChild(videoList);
 
+        searchResults.prepend(searchTermSection);
+    }
+});

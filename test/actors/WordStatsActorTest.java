@@ -3,29 +3,38 @@ package actors;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.testkit.javadsl.TestKit;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class WordStatsActorTest {
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+
+
+public class WordStatsActorTest {
 
     private static ActorSystem system;
 
-    @BeforeAll
-    static void setup() {
+
+    @Before
+    public void setup() {
         system = ActorSystem.create("WordStatsActorTestSystem");
     }
 
-    @AfterAll
-    static void teardown() {
+    @After
+    public void teardown() {
         TestKit.shutdownActorSystem(system);
         system = null;
     }
 
     @Test
-    void testWordStatsRequestWithValidData() {
+    public void testWordStatsRequestWithValidData() {
         new TestKit(system) {{
             // Create WordStatsActor
             ActorRef wordStatsActor = system.actorOf(WordStatsActor.props(), "wordStatsActor1");
@@ -56,7 +65,7 @@ class WordStatsActorTest {
     }
 
     @Test
-    void testWordStatsRequestWithEmptyData() {
+    public void testWordStatsRequestWithEmptyData() {
         new TestKit(system) {{
             // Create WordStatsActor
             ActorRef wordStatsActor = system.actorOf(WordStatsActor.props(), "wordStatsActor2");
@@ -72,7 +81,7 @@ class WordStatsActorTest {
     }
 
     @Test
-    void testWordStatsRequestWithNullData() {
+    public void testWordStatsRequestWithNullData() {
         new TestKit(system) {{
             // Create WordStatsActor
             ActorRef wordStatsActor = system.actorOf(WordStatsActor.props(), "wordStatsActor3");
@@ -88,7 +97,7 @@ class WordStatsActorTest {
     }
 
     @Test
-    void testGetCumulativeStats() {
+    public void testGetCumulativeStats() {
         new TestKit(system) {{
             // Create WordStatsActor
             ActorRef wordStatsActor = system.actorOf(WordStatsActor.props(), "wordStatsActor4");
@@ -124,7 +133,7 @@ class WordStatsActorTest {
     }
 
     @Test
-    void testUnexpectedMessage() {
+    public void testUnexpectedMessage() {
         new TestKit(system) {{
             // Create WordStatsActor
             ActorRef wordStatsActor = system.actorOf(WordStatsActor.props(), "wordStatsActor5");

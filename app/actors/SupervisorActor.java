@@ -52,6 +52,26 @@ public class SupervisorActor extends AbstractActor {
         );
     }
 
+    public SupervisorActor(ActorRef wsOut, WSClient wsClient, ActorRef wordStatsActor) {
+        // Use the provided WordStatsActor if available; otherwise, create a new one
+        this.wordStatsActor = wordStatsActor != null ? wordStatsActor : getContext().actorOf(WordStatsActor.props(), "wordStatsActor");
+
+        // Create YouTubeService instance
+        YouTubeService youTubeService = new YouTubeService(wsClient, null);
+
+        // Instantiate YouTubeServiceActor with both WSClient and YouTubeService
+        this.youtubeServiceActor = getContext().actorOf(
+                YouTubeServiceActor.props(wsClient, youTubeService),
+                "youTubeServiceActor"
+        );
+
+        // Create UserActor and pass the YouTubeServiceActor
+        this.userActor = getContext().actorOf(
+                UserActor.props(wsOut, youtubeServiceActor),
+                "userActor"
+        );
+    }
+
     @Override
     public Receive createReceive() {
         return receiveBuilder()

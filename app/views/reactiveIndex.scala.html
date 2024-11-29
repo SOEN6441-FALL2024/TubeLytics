@@ -2,33 +2,34 @@
 
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-@*        <title>@title</title>*@
-        <link rel="stylesheet" href='@routes.Assets.versioned("css/styles.css")' />
-    </head>
-    <body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    @*        <title>@title</title>*@
+    <link rel="stylesheet" href='@routes.Assets.versioned("css/styles.css")' />
+</head>
+<body>
 
-            <!-- Status Message -->
-        <p id="status"></p>
+<!-- Status Message -->
+<p id="status"></p>
 
-            <!-- Header -->
-        <h1>Welcome to YT Lytics</h1>
+<!-- Header -->
+<h1>Welcome to YT Lytics</h1>
 
-            <!-- Search Form -->
-        <form id="search-form">
-            <input type="text" name="query" id="search-input" placeholder="Enter search terms" required />
-            <button type="submit">Go!</button>
-        </form>
+<!-- Search Form -->
+<form id="search-form">
+    <input type="text" name="query" id="search-input" placeholder="Enter search terms" required />
+    <button type="submit">Go!</button>
+</form>
 
-            <!-- Results Section -->
-        <div id="searchResults" class="results">
-                <!-- Dynamic results will be injected here via JavaScript -->
-        </div>
 
-            <!-- JavaScript -->
-        <script src='@routes.Assets.versioned("javascripts/main.js")'></script>
+<!-- Results Section -->
+<div id="searchResults" class="results">
+    <!-- Dynamic results will be injected here via JavaScript -->
+</div>
 
-    </body>
+<!-- JavaScript -->
+<script src='@routes.Assets.versioned("javascripts/main.js")'></script>
+
+</body>
 </html>

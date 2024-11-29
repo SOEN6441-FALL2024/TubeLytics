@@ -637,8 +637,8 @@ public class HomeControllerTest {
   }
 
   /**
-   * Tests the channelProfile method with valid channel data. Verifies that the response contains
-   * the expected channel and video information.
+   * Tests the `channelProfile` method with valid channel and video data.
+   * Ensures the response contains the expected channel information and video list.
    *
    * @author Aidassj
    */
@@ -646,24 +646,26 @@ public class HomeControllerTest {
   public void testChannelProfileWithValidData() {
     // Arrange: Mock ChannelInfo and List<Video> for a valid channel
     ChannelInfo mockChannelInfo =
-        new ChannelInfo("Mock Channel Name", "Mock Channel Description", 1000, 50000, 200);
+            new ChannelInfo("Mock Channel Name", "Mock Channel Description", 1000, 50000, 200, "channelId123");
     Video mockVideo =
-        new Video(
-            "Mock Video Title",
-            "Mock Video Description",
-            "channelId123",
-            "videoId123",
-            "http://mockthumbnail.com",
-            "Mock Channel",
-            "2024-01-01");
+            new Video(
+                    "Mock Video Title",
+                    "Mock Video Description",
+                    "channelId123",
+                    "videoId123",
+                    "http://mockthumbnail.com",
+                    "Mock Channel",
+                    "2024-01-01");
     List<Video> mockVideoList = List.of(mockVideo);
 
-    // Mock the service methods to return the mock data
-    when(mockYouTubeService.getChannelInfo("channelId123")).thenReturn(mockChannelInfo);
-    when(mockYouTubeService.getLast10Videos("channelId123")).thenReturn(mockVideoList);
+    // Mock the service methods to return the mock data asynchronously
+    when(mockYouTubeService.getChannelInfoAsync("channelId123"))
+            .thenReturn(CompletableFuture.completedFuture(mockChannelInfo));
+    when(mockYouTubeService.getLast10VideosAsync("channelId123"))
+            .thenReturn(CompletableFuture.completedFuture(mockVideoList));
 
     // Act: Call the channelProfile method
-    Result result = homeController.channelProfile("channelId123");
+    Result result = homeController.channelProfile("channelId123").toCompletableFuture().join();
 
     // Assert: Check status and verify content
     assertEquals(OK, result.status());
@@ -673,49 +675,120 @@ public class HomeControllerTest {
   }
 
   /**
-   * Tests the channelProfile method with a non-existent channel ID. Expects an error response
-   * indicating no data found.
+   * Tests the channelProfile method with a non-existent channel ID.
+   * Expects an error response indicating no data found.
    *
    * @author Aidassj
    */
   @Test
   public void testChannelProfileWithNonExistentChannel() {
     // Arrange: Simulate non-existent channel by returning null values
-    when(mockYouTubeService.getChannelInfo("invalidChannelId")).thenReturn(null);
-    when(mockYouTubeService.getLast10Videos("invalidChannelId"))
-        .thenReturn(Collections.emptyList());
+    when(mockYouTubeService.getChannelInfoAsync("invalidChannelId"))
+            .thenReturn(CompletableFuture.completedFuture(null));
+    when(mockYouTubeService.getLast10VideosAsync("invalidChannelId"))
+            .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
 
     // Act: Call the channelProfile method
-    Result result = homeController.channelProfile("invalidChannelId");
+    Result result = homeController.channelProfile("invalidChannelId").toCompletableFuture().join();
 
     // Assert: Check if the response contains error or no data found message
     assertEquals(INTERNAL_SERVER_ERROR, result.status());
     assertTrue(contentAsString(result).contains("An error occurred while fetching channel data."));
   }
 
+
   /**
-   * Tests the channelProfile method when an exception occurs in data fetching. Expects an error
-   * response with an appropriate error message.
+   * Tests the channelProfile method when an exception occurs in data fetching.
+   * Expects an error response with an appropriate error message.
    *
    * @author Aidassj
    */
   @Test
   public void testChannelProfileWithErrorInFetchingData() {
     // Arrange: Simulate an exception in service methods
-    doThrow(new RuntimeException("API failure"))
-        .when(mockYouTubeService)
-        .getChannelInfo(anyString());
-    doThrow(new RuntimeException("API failure"))
-        .when(mockYouTubeService)
-        .getLast10Videos(anyString());
+    when(mockYouTubeService.getChannelInfoAsync(anyString()))
+            .thenReturn(CompletableFuture.failedFuture(new RuntimeException("API failure")));
+    when(mockYouTubeService.getLast10VideosAsync(anyString()))
+            .thenReturn(CompletableFuture.failedFuture(new RuntimeException("API failure")));
 
     // Act: Call the channelProfile method to trigger the exception
-    Result result = homeController.channelProfile("errorChannel");
+    Result result = homeController.channelProfile("errorChannel").toCompletableFuture().join();
 
     // Assert: Check if the response contains error message
     assertEquals(INTERNAL_SERVER_ERROR, result.status());
     assertTrue(contentAsString(result).contains("An error occurred while fetching channel data."));
   }
+
+
+  /**
+   * Tests the `fetchLatestVideos` method with valid and invalid data.
+   * Ensures the response contains JSON data or appropriate error messages.
+   *
+   * @throws Exception if an error occurs during execution
+   * @author Aidassj
+   */
+  @Test
+  public void testFetchLatestVideosWithValidData() throws Exception {
+    // Arrange: Mock a list of videos
+    List<Video> mockVideos = Arrays.asList(
+            new Video("Title1", "Description1", "Channel1", "VideoId1", "Thumbnail1", "ChannelTitle1", "2024-11-06T04:41:46Z"),
+            new Video("Title2", "Description2", "Channel2", "VideoId2", "Thumbnail2", "ChannelTitle2", "2024-11-06T04:41:46Z")
+    );
+
+    // Mock the YouTubeService to return the mock list
+    when(mockYouTubeService.getLast10VideosAsync("channelId123"))
+            .thenReturn(CompletableFuture.completedFuture(mockVideos));
+
+    // Act: Call the method
+    Result result = homeController.fetchLatestVideos("channelId123").toCompletableFuture().join();
+
+    // Assert: Check the response
+    assertEquals(OK, result.status());
+    assertTrue(contentAsString(result).contains("Title1"));
+    assertTrue(contentAsString(result).contains("Description1"));
+    assertTrue(contentAsString(result).contains("Channel1"));
+  }
+
+  /**
+   * Tests the `fetchLatestVideos` method when no videos are found for the channel.
+   *
+   * @throws Exception if an error occurs during execution
+   * @author Aidassj
+   */
+  @Test
+  public void testFetchLatestVideosWithNoVideos() throws Exception {
+    // Arrange: Mock an empty list
+    when(mockYouTubeService.getLast10VideosAsync("channelId123"))
+            .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
+
+    // Act: Call the method
+    Result result = homeController.fetchLatestVideos("channelId123").toCompletableFuture().join();
+
+    // Assert: Check the response
+    assertEquals(404, result.status());
+    assertTrue(contentAsString(result).contains("No videos found for this channel."));
+  }
+
+  /**
+   * Tests the `fetchLatestVideos` method when an exception occurs during data retrieval.
+   * Ensures the response status is `INTERNAL_SERVER_ERROR` and an appropriate error message is returned.
+   *
+   * @author Aidassj
+   */
+  @Test
+  public void testFetchLatestVideosWithError() {
+    // Arrange: Simulate an exception in the service
+    when(mockYouTubeService.getLast10VideosAsync(anyString()))
+            .thenReturn(CompletableFuture.failedFuture(new RuntimeException("API failure")));
+
+    // Act: Call the fetchLatestVideos method
+    Result result = homeController.fetchLatestVideos("channelId123").toCompletableFuture().join();
+
+    // Assert: Verify the response status and content
+    assertEquals(INTERNAL_SERVER_ERROR, result.status());
+    assertTrue(contentAsString(result).contains("An error occurred while fetching videos."));
+  }
+
 
   @Test
   public void testShowTagsWithValidData() {

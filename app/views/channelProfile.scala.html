@@ -11,41 +11,97 @@
 
 <body>
 
-<!-- Channel Profile Section -->
-<div class="channel-profile">
-    @if(channelInfo != null) {
-    <h1><strong>Channel Name : </strong>@channelInfo.getName()</h1>
-    <p><strong>Channel Description : </strong> @channelInfo.getDescription()</p>
-    <p class="channel-stats"><strong>Subscribers : </strong> @channelInfo.getSubscriberCount()</p>
-    <p class="channel-stats"><strong>Total Views : </strong> @channelInfo.getViewCount()</p>
-    <p class="channel-stats"><strong>Video Count : </strong> @channelInfo.getVideoCount()</p>
-    } else {
-    <p>No channel information available</p>
-    }
-</div>
-
-
-<!-- Last 10 Videos Section -->
-<div class="channel-videos">
-    <h2>Last 10 Videos</h2>
-    @if(videos != null && videos.nonEmpty) {
-    <ul>
-        @for(video <- videos) {
-        <li>
-            <div class="channelpage">
-                <p class="video-title"><strong>Title:</strong><a class="video-title" href="@video.getUrl()" target="_blank">@video.getTitle()</a></p>
-                <p class="video-description"><strong>Description:</strong>@video.getDescription()</p>
-                <p class="video-stats"><strong>Published on:</strong> @video.getPublishedDate()</p>
-            </div>
-            <img class="channelvideo" src="@video.getThumbnailUrl()" alt="Thumbnail for @video.getTitle()" width="120" height="90">
-        </li>
+<!-- Wrapper for dynamically loaded channel profile -->
+    <div id="channel-profile-content" data-channel-id="@channelInfo.getChannelId()">
+    <!-- Channel Profile Section -->
+    <div class="channel-profile">
+        @if(channelInfo != null) {
+        <h1><strong>Channel Name : </strong>@channelInfo.getName()</h1>
+        <p><strong>Channel Description : </strong> @channelInfo.getDescription()</p>
+        <p class="channel-stats"><strong>Subscribers : </strong> @channelInfo.getSubscriberCount()</p>
+        <p class="channel-stats"><strong>Total Views : </strong> @channelInfo.getViewCount()</p>
+        <p class="channel-stats"><strong>Video Count : </strong> @channelInfo.getVideoCount()</p>
+        } else {
+        <p>No channel information available</p>
         }
-    </ul>
-    } else {
-    <p>No videos available</p>
-    }
+    </div>
+
+    <!-- Last 10 Videos Section -->
+    <div class="channel-videos">
+        <h2>Last 10 Videos</h2>
+        <ul id="video-list">
+            @if(videos != null && videos.nonEmpty) {
+            @for(video <- videos) {
+            <li>
+                <div class="channelpage">
+                    <p class="video-title">
+                        <strong>Title:</strong>
+                        <a class="video-title" href="@video.getUrl()" target="_blank">@video.getTitle()</a>
+                    </p>
+                    <p class="video-description"><strong>Description:</strong> @video.getDescription()</p>
+                    <p class="video-stats"><strong>Published on:</strong> @video.getPublishedDate()</p>
+                </div>
+                <img class="channelvideo" src="@video.getThumbnailUrl()" alt="Thumbnail for @video.getTitle()" width="120" height="90">
+            </li>
+            }
+            } else {
+            <p>No videos available</p>
+            }
+        </ul>
+    </div>
 </div>
 
+<!-- JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const channelId = '@channelInfo.getChannelId()'; // Assuming `channelInfo` contains the channel ID
+        const videosContainer = document.querySelector('#video-list');
+
+        // Function to fetch new videos and update the list
+        async function fetchLatestVideos() {
+            try {
+                const response = await fetch(`/api/channel/${channelId}/latest-videos`);
+                if (!response.ok) {
+                    console.error('Failed to fetch latest videos:', response.statusText);
+                    return;
+                }
+
+                const newVideos = await response.json();
+
+                // Append new videos, but keep only the latest 10
+                newVideos.forEach(video => {
+                    // Check if the video is already in the list to avoid duplicates
+                    if (!Array.from(videosContainer.children).some(li => li.textContent.includes(video.title))) {
+                        // Create a new video list item
+                        const listItem = document.createElement('li');
+                        listItem.innerHTML = `
+                            <div class="channelpage">
+                                <p class="video-title">
+                                    <strong>Title:</strong>
+                                    <a class="video-title" href="https://www.youtube.com/watch?v=${video.videoId}" target="_blank">${video.title}</a>
+                                </p>
+                                <p class="video-description"><strong>Description:</strong> ${video.description || "No description available"}</p>
+                                <p class="video-stats"><strong>Published on:</strong> ${video.publishedDate}</p>
+                            </div>
+                            <img class="channelvideo" src="${video.thumbnailUrl}" alt="Thumbnail for ${video.title}" width="120" height="90">
+                        `;
+                        videosContainer.appendChild(listItem);
+                    }
+                });
+
+                // Keep only the latest 10 videos
+                while (videosContainer.children.length > 10) {
+                    videosContainer.removeChild(videosContainer.firstChild); // Remove the oldest video
+                }
+            } catch (error) {
+                console.error('Error fetching latest videos:', error);
+            }
+        }
+
+        // Periodically fetch the latest videos
+        setInterval(fetchLatestVideos, 10000); // Fetch every 10 seconds
+    });
+</script>
 
 </body>
 

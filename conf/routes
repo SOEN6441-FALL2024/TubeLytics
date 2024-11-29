@@ -30,4 +30,8 @@ GET     /tags/:videoId                   controllers.HomeController.showTags(vid
 
 #     searching a special tag
 GET     /search/tag/:tag                 controllers.HomeController.searchByTag(tag: String)
+GET    /api/channel/:channelId/latest-videos    controllers.HomeController.fetchLatestVideos(channelId: String)
+
+
+
 

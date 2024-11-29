@@ -26,8 +26,12 @@
             <p>@video.getDescription()</p>
             <p>
                 <a href="@routes.HomeController.channelProfile(video.getChannelId())" target="_blank">
-                    @video.getChannelTitle()
+                    View Channel Profile: @video.getChannelTitle()
                 </a>
+
+                <!--                <a href="@routes.HomeController.channelProfile(video.getChannelId())" target="_blank">-->
+<!--                    @video.getChannelTitle()-->
+<!--                </a>-->
                 <a href="@routes.HomeController.showTags(video.getVideoId())" class="tags-link">Tags</a>
 
             </p>

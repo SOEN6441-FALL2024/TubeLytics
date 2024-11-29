@@ -1,6 +1,5 @@
 package actors;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import models.Video;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
@@ -10,17 +9,17 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
-import play.libs.Json;
 import play.libs.ws.WSClient;
 import play.libs.ws.WSRequest;
 import play.libs.ws.WSResponse;
 import services.YouTubeService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import static org.junit.Assert.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for YouTubeServiceActor class
@@ -28,20 +27,14 @@ import static org.mockito.Mockito.*;
 public class YouTubeServiceActorTest {
     private ActorSystem system;
     private WSClient mockWsClient;
-    private WSRequest mockRequest;
-    private WSResponse mockResponse;
+    private YouTubeService mockYouTubeService;
 
     @Before
     public void setUp() {
         system = ActorSystem.create();
         MockitoAnnotations.openMocks(this);
-
-        mockRequest = mock(WSRequest.class);
         mockWsClient = mock(WSClient.class);
-        mockResponse = mock(WSResponse.class);
-
-        when(mockWsClient.url(anyString())).thenReturn(mockRequest);
-        when(mockRequest.get()).thenReturn(CompletableFuture.completedFuture(mockResponse));
+        mockYouTubeService = mock(YouTubeService.class);
     }
 
     @After
@@ -49,159 +42,86 @@ public class YouTubeServiceActorTest {
         TestKit.shutdownActorSystem(system);
         system = null;
     }
-    /**
-     * From YouTubeService but adjusted to actor.
-     */
+
     @Test
-    public void testYouTubeServiceActorValidItem() {
+    public void testValidSearchQuery() {
         new TestKit(system) {{
-            TestProbe userActorProbe = new TestProbe(system);
-            ActorRef youTubeServiceActor = system.actorOf(YouTubeServiceActor.props(mockWsClient));
+            TestProbe senderProbe = new TestProbe(system);
 
-            // Mocking JSON response
-            String responseBody =
-                    "{\"items\": [{\"snippet\": {\"title\": \"Test Video\", \"description\": \"Test Description\", \"channelId\": \"testChannel\", \"channelTitle\": \"Test Channel\", \"thumbnails\": {\"default\": {\"url\": \"thumbnailUrl\"}}, \"publishedAt\": \"2024-11-06T04:41:46Z\"}, \"id\": {\"videoId\": \"videoId123\"}}]}";
-            JsonNode mockJson = Json.parse(responseBody);
-            when(mockResponse.asJson()).thenReturn(mockJson);
+            // Create YouTubeServiceActor with a mocked YouTubeService
+            ActorRef youTubeServiceActor = system.actorOf(YouTubeServiceActor.props(mockWsClient, mockYouTubeService));
 
-            // Setting up WSClient to return mocked request and response
-            when(mockWsClient.url(anyString())).thenReturn(mockRequest);
-            when(mockRequest.get()).thenReturn(CompletableFuture.completedFuture(mockResponse));
+            // Mock YouTubeService to return valid video data
+            List<Video> mockVideos = List.of(
+                    new Video("Title 1", "Description 1", "ChannelId1", "videoId1", "Thumbnail 1", "Channel 1", "2024-01-01"),
+                    new Video("Title 2", "Description 2", "ChannelId2", "videoId2", "Thumbnail 2", "Channel 2", "2024-01-02")
+            );
 
-            String query = "test";
-            youTubeServiceActor.tell(query, userActorProbe.ref());
+            when(mockYouTubeService.searchVideos("test"))
+                    .thenReturn(CompletableFuture.completedFuture(mockVideos));
 
-            Messages.SearchResultsMessage resultMessage =
-                    userActorProbe.expectMsgClass(Messages.SearchResultsMessage.class);
+            // Send a search query
+            youTubeServiceActor.tell("test", senderProbe.ref());
 
-            assertEquals(query, resultMessage.getSearchTerm());
-            assertEquals("Test Video", resultMessage.getVideos().get(0).getTitle());
-            assertEquals("Test Description", resultMessage.getVideos().get(0).getDescription());
-            assertEquals("testChannel", resultMessage.getVideos().get(0).getChannelId());
-            assertEquals("videoId123", resultMessage.getVideos().get(0).getVideoId());
-            assertEquals("thumbnailUrl", resultMessage.getVideos().get(0).getThumbnailUrl());
-            assertEquals("2024-11-06T04:41:46Z", resultMessage.getVideos().get(0).getPublishedDate());
+            // Expect the actor to send back a SearchResultsMessage
+            Messages.SearchResultsMessage message = senderProbe.expectMsgClass(Messages.SearchResultsMessage.class);
+            assertEquals("test", message.getSearchTerm());
+            assertEquals(2, message.getVideos().size());
         }};
     }
 
     @Test
-    public void testYouTubeServiceActorItemNotArray() throws Exception {
+    public void testErrorHandling() {
         new TestKit(system) {{
-            // Creating a search query that is expected to return no results
-            String nonexistentQuery = "nonexistentquery1234567890";
+            TestProbe senderProbe = new TestProbe(system);
 
-            TestProbe userActorProbe = new TestProbe(system);
-            ActorRef youTubeServiceActor = system.actorOf(YouTubeServiceActor.props(mockWsClient));
-            try {
-                // Mocking an empty JSON response
-                String responseBody = "{\"items\": \"Iamnotanarray\"}";
-                JsonNode mockJson = Json.parse(responseBody);
-                when(mockResponse.asJson()).thenReturn(mockJson);
+            // Create YouTubeServiceActor with a mocked YouTubeService
+            ActorRef youTubeServiceActor = system.actorOf(YouTubeServiceActor.props(mockWsClient, mockYouTubeService));
 
-                // Setting up WSClient to return the mocked request and response
-                when(mockWsClient.url(anyString())).thenReturn(mockRequest);
-                when(mockRequest.get()).thenReturn(CompletableFuture.completedFuture(mockResponse));
+            // Mock YouTubeService to throw an exception
+            when(mockYouTubeService.searchVideos("error"))
+                    .thenReturn(CompletableFuture.failedFuture(new RuntimeException("Simulated API failure")));
 
-                youTubeServiceActor.tell(nonexistentQuery, userActorProbe.ref());
+            // Send a search query
+            youTubeServiceActor.tell("error", senderProbe.ref());
 
-                Messages.SearchResultsMessage resultMessage =
-                        userActorProbe.expectMsgClass(Messages.SearchResultsMessage.class);
-                assertEquals(nonexistentQuery, resultMessage.getSearchTerm());
+            // Expect the actor to send back an empty SearchResultsMessage
+            Messages.SearchResultsMessage message = senderProbe.expectMsgClass(Messages.SearchResultsMessage.class);
+            assertTrue(message.getVideos().isEmpty());
+        }};
+    }
 
-                // Ensure that the result is empty (no videos)
-                assertTrue(resultMessage.getVideos().isEmpty(), "List is empty because item is not an array.");
-            } catch (Exception e){
-                fail("Item not an array, exception was not handled: " + e.getMessage());
+    @Test
+    public void testLargeResponseHandling() {
+        new TestKit(system) {{
+            TestProbe senderProbe = new TestProbe(system);
+
+            // Create YouTubeServiceActor with a mocked YouTubeService
+            ActorRef youTubeServiceActor = system.actorOf(YouTubeServiceActor.props(mockWsClient, mockYouTubeService));
+
+            // Mock YouTubeService to return a large list of videos
+            List<Video> mockVideos = new ArrayList<>();
+            for (int i = 0; i < 1000; i++) {
+                mockVideos.add(new Video(
+                        "Title " + i,
+                        "Description " + i,
+                        "ChannelId " + i,
+                        "videoId" + i,
+                        "Thumbnail " + i,
+                        "Channel " + i,
+                        "2024-01-01"
+                ));
             }
-        }};
-    }
 
-    /**
-     * From YouTubeService but adjusted to actor.
-     */
-    @Test
-    public void testYouTubeServiceActorEmptyItem() throws Exception {
-        new TestKit(system) {{
-            // Creating a search query that is expected to return no results
-            String nonexistentQuery = "nonexistentquery1234567890";
+            when(mockYouTubeService.searchVideos("large"))
+                    .thenReturn(CompletableFuture.completedFuture(mockVideos));
 
-            TestProbe userActorProbe = new TestProbe(system);
-            ActorRef youTubeServiceActor = system.actorOf(YouTubeServiceActor.props(mockWsClient));
+            // Send a search query
+            youTubeServiceActor.tell("large", senderProbe.ref());
 
-            // Mocking an empty JSON response
-            String emptyResponseBody = "{\"items\": []}";
-            JsonNode mockJson = Json.parse(emptyResponseBody);
-            when(mockResponse.asJson()).thenReturn(mockJson);
-
-            // Setting up WSClient to return the mocked request and response
-            when(mockWsClient.url(anyString())).thenReturn(mockRequest);
-            when(mockRequest.get()).thenReturn(CompletableFuture.completedFuture(mockResponse));
-
-            youTubeServiceActor.tell(nonexistentQuery, userActorProbe.ref());
-
-            Messages.SearchResultsMessage resultMessage =
-                    userActorProbe.expectMsgClass(Messages.SearchResultsMessage.class);
-
-            assertEquals(nonexistentQuery, resultMessage.getSearchTerm());
-
-            // Ensure that the result is empty (no videos)
-            assertTrue(resultMessage.getVideos().isEmpty(), "List is empty because there are no videos.");
-        }};
-    }
-
-    /**
-     * From YouTubeService but adjusted to actor.
-     */
-    @Test
-    public void testYouTubeServiceActorNullItem() throws Exception {
-        new TestKit(system) {{
-            // Creating a search query that is expected to return no results
-            String nonexistentQuery = "nonexistentquery1234567890";
-
-            TestProbe userActorProbe = new TestProbe(system);
-            ActorRef youTubeServiceActor = system.actorOf(YouTubeServiceActor.props(mockWsClient));
-
-            // Mocking an empty JSON response
-            String nullResponseBody = "{\"items\": null}";
-            JsonNode mockJson = Json.parse(nullResponseBody);
-            when(mockResponse.asJson()).thenReturn(mockJson);
-
-            // Setting up WSClient to return the mocked request and response
-            when(mockWsClient.url(anyString())).thenReturn(mockRequest);
-            when(mockRequest.get()).thenReturn(CompletableFuture.completedFuture(mockResponse));
-
-            youTubeServiceActor.tell(nonexistentQuery, userActorProbe.ref());
-
-            Messages.SearchResultsMessage resultMessage =
-                    userActorProbe.expectMsgClass(Messages.SearchResultsMessage.class);
-
-            // Ensure that the result is null
-            assertTrue(resultMessage.getVideos().isEmpty(), "List is empty because item is null.");
-        }};
-    }
-
-    @Test
-    public void testYouTubeServiceActorErrorHandling() {
-        new TestKit(system) {{
-            try {
-                TestProbe userActorProbe = new TestProbe(system);
-                ActorRef youTubeServiceActor = system.actorOf(YouTubeServiceActor.props(mockWsClient));
-                when(mockWsClient.url(anyString())).thenReturn(mockRequest);
-                when(mockRequest.get()).thenReturn(CompletableFuture
-                        .failedFuture(new RuntimeException("Simulated error")));
-
-                String query = "error";
-                youTubeServiceActor.tell(query, userActorProbe.ref());
-
-                Messages.SearchResultsMessage resultMessage =
-                        userActorProbe.expectMsgClass(Messages.SearchResultsMessage.class);
-
-                assertEquals(query, resultMessage.getSearchTerm(), "Query should match even in case of error.");
-                assertTrue(resultMessage.getVideos() != null, "List should be empty not null.");
-                assertTrue(resultMessage.getVideos().isEmpty(), "List is empty because error occurred");
-            } catch (Exception e){
-                fail("Simulated Exception but was not handled: " + e.getMessage());
-            }
+            // Expect the actor to process and send all videos
+            Messages.SearchResultsMessage message = senderProbe.expectMsgClass(Messages.SearchResultsMessage.class);
+            assertEquals(1000, message.getVideos().size());
         }};
     }
 }

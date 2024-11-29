@@ -14,11 +14,11 @@ import play.libs.ws.WSClient;
 import play.libs.ws.WSRequest;
 import play.libs.ws.WSResponse;
 import services.YouTubeService;
-
+import scala.jdk.javaapi.CollectionConverters;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 public class SupervisorActorTest {
@@ -252,4 +252,104 @@ public class SupervisorActorTest {
         }};
     }
 
+    /**
+     * Tests SupervisorActor's ability to handle WordStatsRequest.
+     */
+    @Test
+    public void testSupervisorActorHandlesSearchResultsMessage() {
+        new TestKit(system) {{
+            TestProbe wordStatsActorProbe = new TestProbe(system);
+            ActorRef supervisorActor = system.actorOf(SupervisorActor.props(getRef(), mockWsClient));
+
+            // Mock the WordStatsActor as a child of SupervisorActor
+            system.actorOf(WordStatsActor.props(), "wordStatsActor");
+
+            // Create a Video object
+            models.Video video = new models.Video(
+                    "Test Title",               // title
+                    "Test Description",         // description
+                    "ChannelID",                // channelId
+                    "VideoID",                  // videoId
+                    "ThumbnailUrl",             // thumbnailUrl
+                    "ChannelTitle",             // channelTitle
+                    "PublishedDate"             // publishedDate
+            );
+
+            // Create a SearchResultsMessage with a search term and a list of Video objects
+            Messages.SearchResultsMessage message = new Messages.SearchResultsMessage(
+                    "Test Search Term",         // Search term
+                    List.of(video)              // List of Video objects
+            );
+
+            // Send the message to the SupervisorActor
+            supervisorActor.tell(message, getRef());
+
+            // Validate no unexpected response
+            expectNoMessage(scala.concurrent.duration.Duration.create(1, "second"));
+        }};
+    }
+
+    @Test
+    public void testSupervisorActorHandlesWordStatsRequest() {
+        new TestKit(system) {{
+            TestProbe wordStatsActorProbe = new TestProbe(system);
+            ActorRef supervisorActor = system.actorOf(SupervisorActor.props(getRef(), mockWsClient));
+
+            // Mock the WordStatsActor as a child of SupervisorActor
+            system.actorOf(WordStatsActor.props(), "wordStatsActor");
+
+            // Send a WordStatsRequest message
+            Messages.WordStatsRequest request = new Messages.WordStatsRequest(List.of("test"));
+            supervisorActor.tell(request, getRef());
+
+            // Expect a WordStatsResponse message from the WordStatsActor
+            Messages.WordStatsResponse response = expectMsgClass(Messages.WordStatsResponse.class);
+
+            // Validate the response
+            assertNotNull(response);
+            assertTrue(response.getWordStats().size() > 0); // Check if the response contains stats
+        }};
+    }
+
+
+
+//    @Test
+//    public void testSupervisorActorHandlesGetCumulativeStats() {
+//        new TestKit(system) {{
+//            TestProbe wordStatsActorProbe = new TestProbe(system);
+//
+//            // Create the SupervisorActor
+//            ActorRef supervisorActor = system.actorOf(SupervisorActor.props(getRef(), mockWsClient));
+//
+//            // Send a GetCumulativeStats message
+//            Messages.GetCumulativeStats request = new Messages.GetCumulativeStats();
+//            supervisorActor.tell(request, wordStatsActorProbe.ref());
+//
+//            // Mock the WordStatsActor's response
+//            java.util.Map<String, Integer> mockStats = java.util.Collections.singletonMap("exampleWord", 10); // Example response
+//            scala.collection.immutable.Map<String, Integer> scalaMockStats =
+//                    CollectionConverters.asScala(mockStats).toMap(); // Convert to Scala Map
+//            Messages.WordStatsResponse mockResponse = new Messages.WordStatsResponse(scalaMockStats);
+//
+//            wordStatsActorProbe.expectMsg(Messages.GetCumulativeStats.class);
+//            wordStatsActorProbe.reply(mockResponse);
+//
+//            // Expect a WordStatsResponse message from the SupervisorActor
+//            Messages.WordStatsResponse response = expectMsgClass(Messages.WordStatsResponse.class);
+//
+//            // Debugging logs for the response
+//            System.out.println("Received response: " + response);
+//            System.out.println("WordStats content: " + response.getWordStats());
+//
+//            // Validate the response
+//            assertNotNull("The WordStatsResponse is null", response);
+//            assertNotNull("The word stats map is null", response.getWordStats());
+//            assertFalse("The word stats map is empty", response.getWordStats().isEmpty());
+//
+//            // Validate the map contains the expected data
+//            assertTrue("The word stats map does not contain expected data",
+//                    response.getWordStats().contains("exampleWord") &&
+//                            response.getWordStats().apply("exampleWord") == 10);
+//        }};
+//    }
 }

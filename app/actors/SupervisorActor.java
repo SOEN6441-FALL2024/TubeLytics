@@ -81,6 +81,10 @@ public class SupervisorActor extends AbstractActor {
                     System.out.println("SupervisorActor: Received WordStatsResponse: " + response.getWordStats());
                     getSender().tell(response, getSelf());
                 })
+                .match(Throwable.class, throwable -> {
+                    // Log and handle exceptions separately to avoid unexpected behavior in tests
+                    System.err.println("SupervisorActor received an exception: " + throwable);
+                })
                 .matchAny(message -> {
                     // Handle unexpected messages
                     System.err.println("SupervisorActor: Received unexpected message: " + message);

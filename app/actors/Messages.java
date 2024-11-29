@@ -4,6 +4,7 @@ import models.Video;
 import java.util.List;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.SortedMap;
 
 /**
  * Class used to better pass responses through actors
@@ -19,6 +20,7 @@ public final class Messages {
     public static final class SearchResultsMessage {
         private String searchTerm;
         private List<Video> videos;
+
 
         public SearchResultsMessage(String searchTerm, List<Video> videos) {
             this.searchTerm = searchTerm;
@@ -91,5 +93,56 @@ public final class Messages {
             return Objects.hash(message); // Use `message` for hashCode calculation
         }
     }
+
+    /**
+     * WordStatsRequest encapsulates a list of video texts for processing word statistics.
+     * @author Aynaz Javanivayeghan
+     */
+
+    public static class WordStatsRequest implements Serializable {
+        private final List<String> videoTexts;
+
+        public WordStatsRequest(List<String> videoTexts) {
+            this.videoTexts = videoTexts;
+        }
+
+        public List<String> getVideoTexts() {
+            return videoTexts;
+        }
+    }
+
+    /**
+     * WordStatsResponse provides the resulting word statistics as a sorted list of entries.
+     * @author Aynaz Javanivayeghan
+     */
+
+    public static class WordStatsResponse implements Serializable {
+        private final List<SortedMap.Entry<String, Long>> wordStats;
+
+        public WordStatsResponse(List<SortedMap.Entry<String, Long>> wordStats) {
+            this.wordStats = wordStats;
+        }
+
+        public List<SortedMap.Entry<String, Long>> getWordStats() {
+            return wordStats;
+        }
+    }
+
+
+    /**
+     * GetCumulativeStats is a message to request cumulative word statistics from WordStatsActor.
+     * This message contains no additional fields and serves as a trigger for fetching stats.
+     * @author Aynaz Javanivayeghan
+     */
+
+    public static final class GetCumulativeStats implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        // Empty message to request cumulative stats
+        public GetCumulativeStats() {}
+    }
+
+
+
 
 }

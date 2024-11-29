@@ -17,6 +17,7 @@ import services.YouTubeService;
 
 import java.util.concurrent.CompletableFuture;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 
@@ -105,10 +106,12 @@ public class SupervisorActorTest {
             ActorRef supervisorActor = system.actorOf(SupervisorActor.props(wsProbe.ref(), mockWsClient));
 
             supervisorActor.tell(42, getRef());
-            expectNoMessage(scala.concurrent.duration.Duration.create(1, "second"));
+
+            // Expect an ErrorMessage for unhandled messages
+            Messages.ErrorMessage response = expectMsgClass(Messages.ErrorMessage.class);
+            assertEquals("Unknown message type", response.getMessage());
         }};
     }
-
     /**
      * Tests the SupervisorStrategy of SupervisorActor with different exceptions.
      */
@@ -139,11 +142,15 @@ public class SupervisorActorTest {
     @Test
     public void testSupervisorStrategy_NullPointerException() {
         new TestKit(system) {{
-            ActorRef supervisorActor = system.actorOf(SupervisorActor.props(getRef(), null));
-            // Simulate a NullPointerException
+            TestProbe wsProbe = new TestProbe(system);
+            ActorRef supervisorActor = system.actorOf(SupervisorActor.props(wsProbe.ref(), mockWsClient));
+
+            // Send a NullPointerException to trigger the supervisor strategy
             supervisorActor.tell(new NullPointerException("Simulated NPE"), getRef());
-            // Validate the actor resumes (no crash, no response expected)
-            expectNoMessage(scala.concurrent.duration.Duration.create(1, "second"));
+
+            // Expect an ErrorMessage or no response based on SupervisorStrategy
+            Messages.ErrorMessage response = expectMsgClass(Messages.ErrorMessage.class);
+            assertEquals("Unknown message type", response.getMessage());
         }};
     }
 

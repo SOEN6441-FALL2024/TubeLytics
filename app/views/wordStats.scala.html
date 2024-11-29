@@ -12,24 +12,62 @@
 <body>
 <h1>Word Statistics for "@query"</h1>
 
-<table>
-    <thead>
-    <tr>
-        <th>Word</th>
-        <th>Count</th>
-    </tr>
-    </thead>
-    <tbody>
-    @for((word, count) <- wordStats) {
-    <tr>
-        <td>@word</td>
-        <td>@count</td>
-    </tr>
-    }
-    </tbody>
-</table>
+<div id="word-stats-container">
+    <table>
+        <thead>
+        <tr>
+            <th>Word</th>
+            <th>Count</th>
+        </tr>
+        </thead>
+        <tbody>
+        @for((word, count) <- wordStats) {
+        <tr>
+            <td>@word</td>
+            <td>@count</td>
+        </tr>
+        }
+        </tbody>
+    </table>
+</div>
 
 <a href="@routes.HomeController.index()">Back to Search</a>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Function to fetch and update Word Stats
+        function updateWordStats() {
+            fetch("/getCumulativeWordStats")
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Fetched Word Stats:", data); // Debugging log
+
+                    // Generate new rows for the table body
+                    const tbodyContent = Object.entries(data).map(([word, count]) => `
+                        <tr>
+                            <td>${word}</td>
+                            <td>${count}</td>
+                        </tr>
+                    `).join('');
+
+                    // Update only the <tbody> content
+                    document.querySelector("#word-stats-container table tbody").innerHTML = tbodyContent;
+                })
+                .catch(error => {
+                    console.error("Error fetching word stats:", error);
+                });
+        }
+
+        // Update stats every 5 seconds
+        updateWordStats(); // Initial fetch
+        setInterval(updateWordStats, 5000); // Fetch every 5 seconds
+    });
+</script>
 
 </body>
 </html>

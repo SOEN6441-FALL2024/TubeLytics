@@ -10,17 +10,24 @@ import play.libs.ws.WSClient;
 import scala.runtime.AbstractPartialFunction;
 import services.YouTubeService;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static org.apache.pekko.actor.SupervisorStrategy.restart;
 import static org.apache.pekko.actor.SupervisorStrategy.stop;
 import static org.apache.pekko.actor.SupervisorStrategy.resume;
 
 /**
- * SupervisorActor who acts as supervisor for all other actors
+ * SupervisorActor manages and supervises WordStatsActor, YouTubeServiceActor, and UserActor.
+ * It handles message forwarding, processes search results, and implements a recovery strategy for actor failures.
  * @author Aynaz Javanivayeghan, Jessica Chen
  */
+
 public class SupervisorActor extends AbstractActor {
     private final ActorRef userActor;
     private final ActorRef youtubeServiceActor;
+    private final ActorRef wordStatsActor;
+
 
     public static Props props(ActorRef wsOut, WSClient wsClient) {
         return Props.create(SupervisorActor.class, wsOut, wsClient);
@@ -29,6 +36,8 @@ public class SupervisorActor extends AbstractActor {
     public SupervisorActor(ActorRef wsOut, WSClient wsClient) {
         // Create YouTubeService instance
         YouTubeService youTubeService = new YouTubeService(wsClient, null);
+        this.wordStatsActor = getContext().actorOf(WordStatsActor.props(), "wordStatsActor");
+
 
         // Instantiate YouTubeServiceActor with both WSClient and YouTubeService
         this.youtubeServiceActor = getContext().actorOf(
@@ -47,6 +56,36 @@ public class SupervisorActor extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder()
                 .match(String.class, message -> userActor.tell(message, getSelf()))
+                .match(Messages.SearchResultsMessage.class, message -> {
+                    // Extract video texts (title + description) from the search results
+                    List<String> videoTexts = message.getVideos().stream()
+                            .map(video -> video.getTitle() + " " + video.getDescription())
+                            .collect(Collectors.toList());
+
+                    // Send WordStatsRequest to WordStatsActor
+                    System.out.println("SupervisorActor: Sending WordStatsRequest to WordStatsActor with " + videoTexts.size() + " video texts.");
+                    wordStatsActor.tell(new Messages.WordStatsRequest(videoTexts), getSelf());
+                })
+                .match(Messages.WordStatsRequest.class, request -> {
+                    // Forward WordStatsRequest to the WordStatsActor
+                    System.out.println("SupervisorActor: Forwarding WordStatsRequest to WordStatsActor.");
+                    wordStatsActor.forward(request, getContext());
+                })
+                .match(Messages.GetCumulativeStats.class, request -> {
+                    // Forward GetCumulativeStats to WordStatsActor
+                    System.out.println("SupervisorActor: Forwarding GetCumulativeStats to WordStatsActor.");
+                    wordStatsActor.forward(request, getContext());
+                })
+                .match(Messages.WordStatsResponse.class, response -> {
+                    // Handle WordStatsResponse and forward it
+                    System.out.println("SupervisorActor: Received WordStatsResponse: " + response.getWordStats());
+                    getSender().tell(response, getSelf());
+                })
+                .matchAny(message -> {
+                    // Handle unexpected messages
+                    System.err.println("SupervisorActor: Received unexpected message: " + message);
+                    getSender().tell(new Messages.ErrorMessage("Unknown message type"), getSelf());
+                })
                 .build();
     }
 

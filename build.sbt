@@ -22,7 +22,7 @@ libraryDependencies ++= Seq(
   "org.apache.pekko" %% "pekko-serialization-jackson" % PekkoVersion,
   "org.apache.pekko" %% "pekko-stream" % PekkoVersion,
   "org.apache.pekko" %% "pekko-actor-testkit-typed" % PekkoVersion % Test
- // "com.typesafe.play" %% "play-test" % playVersion % Test
+  // "com.typesafe.play" %% "play-test" % playVersion % Test
 )
 
 Test / testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")

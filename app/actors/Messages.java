@@ -1,33 +1,81 @@
 package actors;
 
+import models.ChannelInfo;
 import models.Video;
+import org.apache.pekko.actor.AbstractActor;
+import org.apache.pekko.actor.Props;
+import services.YouTubeService;
+
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
- * Class used to better pass responses through actors
- * @author Jessica Chen
+ * Actor for handling the fetching of channel profile data and the last 10 videos asynchronously.
+ *
+ * @author Aidassj
  */
-public final class Messages {
+public class ChannelProfileActor extends AbstractActor {
+
+    private final YouTubeService youTubeService;
+
     /**
-     * Class used specifically for passing search results (query, List<Video>) from YouTubeServiceActor to UseActor
-     * and UserActor to client
-     * @author Jessica Chen
+     * Constructor to initialize the actor with a YouTubeService instance.
+     *
+     * @param youTubeService the service used to fetch YouTube channel data.
+     * @author Aidassj
      */
-    public static final class SearchResultsMessage {
-        private String searchTerm;
-        private List<Video> videos;
+    public ChannelProfileActor(YouTubeService youTubeService) {
+        this.youTubeService = youTubeService;
+    }
 
-        public SearchResultsMessage(String searchTerm, List<Video> videos) {
-            this.searchTerm = searchTerm;
-            this.videos = videos;
-        }
+    /**
+     * Factory method to create Props for the ChannelProfileActor.
+     *
+     * @param youTubeService the YouTubeService instance.
+     * @return Props for the ChannelProfileActor.
+     * @author Aidassj
+     */
+    public static Props props(YouTubeService youTubeService) {
+        return Props.create(ChannelProfileActor.class, () -> new ChannelProfileActor(youTubeService));
+    }
 
-        public String getSearchTerm() {
-            return searchTerm;
-        }
+    @Override
+    public Receive createReceive() {
+        return receiveBuilder()
+                .match(FetchChannelProfile.class, this::handleFetchChannelProfile)
+                .build();
+    }
 
-        public List<Video> getVideos() {
-            return videos;
-        }
+    /**
+     * Handles the FetchChannelProfile message.
+     *
+     * @param message the message containing the channel ID to fetch.
+     * @author Aidassj
+     */
+    private void handleFetchChannelProfile(FetchChannelProfile message) {
+        String channelId = message.getChannelId();
+
+        CompletableFuture.supplyAsync(() -> {
+                    ChannelInfo channelInfo = youTubeService.getChannelInfo(channelId);
+                    List<Video> videos = youTubeService.getLast10Videos(channelId);
+                    return new ChannelProfileResponse(serializeChannelData(channelInfo, videos));
+                }).thenAccept(response -> sender().tell(response, self()))
+                .exceptionally(ex -> {
+                    sender().tell(new ErrorResponse("Failed to fetch channel profile: " + ex.getMessage()), self());
+                    return null;
+                });
+    }
+
+    /**
+     * Serializes channel info and videos into a JSON string.
+     *
+     * @param channelInfo the channel information.
+     * @param videos the list of videos.
+     * @return a JSON string representing the serialized data.
+     * @author Aidassj
+     */
+    private String serializeChannelData(ChannelInfo channelInfo, List<Video> videos) {
+        // Replace with proper JSON serialization (e.g., Jackson or Gson)
+        return "Serialized Channel Info and Videos";
     }
 }

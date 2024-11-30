@@ -7,7 +7,12 @@
  * @author Aidassj
  */
 package models;
-
+/**
+ * Represents information about a YouTube channel, including its name, description,
+ * subscriber count, view count, video count, and channel ID.
+ * This class provides getters to access each of the fields.
+ * @author Aidassj
+ */
 public class ChannelInfo {
   private final String name;
   private final String description;

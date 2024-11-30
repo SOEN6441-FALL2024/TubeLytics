@@ -18,7 +18,6 @@ import services.YouTubeService;
 
 /**
  * Unit tests for the ChannelProfileActor class using Pekko.
- *
  * @author Aidassj
  */
 public class ChannelProfileActorTest {
@@ -36,6 +35,11 @@ public class ChannelProfileActorTest {
     system = null;
   }
 
+  /**
+   * Verifies that ChannelProfileActor fetches channel info and the last 10 videos correctly
+   * using a mocked YouTubeService. Asserts the response matches the mocked data.
+   * @author Aidassj
+   */
   @Test
   public void testFetchChannelProfile_Success() {
     new TestKit(system) {
@@ -83,6 +87,12 @@ public class ChannelProfileActorTest {
     };
   }
 
+  /**
+   * Verifies that ChannelProfileActor handles API failures gracefully.
+   * Asserts that fallback values are returned for channel info and an empty video list is sent.
+   * @author Aidassj
+   */
+
   @Test
   public void testFetchChannelProfile_Failure() {
     new TestKit(system) {
@@ -115,6 +125,11 @@ public class ChannelProfileActorTest {
     };
   }
 
+  /**
+   * Verifies that ChannelProfileActor handles partial API failures gracefully.
+   * Asserts that channel info is returned when available, and an empty video list is sent if fetching videos fails.
+   * @author Aidassj
+   */
   @Test
   public void testFetchChannelProfile_PartialFailure() {
     new TestKit(system) {
@@ -148,6 +163,11 @@ public class ChannelProfileActorTest {
     };
   }
 
+  /**
+   * Tests the toString method of ChannelProfileData to ensure it provides a correctly formatted string representation.
+   * Verifies that the method includes the channel information and video list as expected.
+   * @author Aidassj
+   */
   @Test
   public void testChannelProfileDataToString() {
     // Arrange: Create mock ChannelInfo and Video list

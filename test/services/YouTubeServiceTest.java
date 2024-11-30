@@ -108,7 +108,6 @@ public class YouTubeServiceTest extends WithApplication {
   /**
    * Tests the `getChannelInfoAsync` method of `YouTubeService` by mocking a valid JSON response.
    * Verifies that the returned `ChannelInfo` object contains the expected channel details.
-   *
    * @throws Exception if an error occurs during the test setup or execution
    * @author Aidassj
    */
@@ -144,7 +143,6 @@ public class YouTubeServiceTest extends WithApplication {
    * Tests the `getLast10VideosAsync` method of `YouTubeService` by mocking a valid JSON response
    * for 10 videos. Verifies that the returned list contains exactly 10 `Video` objects with the
    * expected details.
-   *
    * @throws Exception if an error occurs during the test setup or execution
    * @author Aidassj
    */
@@ -221,7 +219,6 @@ public class YouTubeServiceTest extends WithApplication {
     // Verifying that the WSClient was called only once
     verify(mockWsClient, times(1)).url(contains("youtube/v3/search"));
 
-    // Further assertions can go here
   }
 
   // Mock configuration for testing
@@ -356,8 +353,7 @@ public class YouTubeServiceTest extends WithApplication {
   /**
    * Tests the getChannelInfo method of YouTubeService by mocking an exception during the API
    * request. Verifies that the method returns null when an exception occurs.
-   *
-   * @author Deniz Dinchdonmez, Aidassj
+   * @author Aidassj
    */
   @Test
   public void testGetChannelInfoAsync_ExceptionHandling() {
@@ -378,8 +374,7 @@ public class YouTubeServiceTest extends WithApplication {
   /**
    * Tests the getLast10Videos method of YouTubeService by mocking an exception during the API
    * request. Verifies that the method returns an empty list when an exception occurs.
-   *
-   * @author Deniz Dinchdonmez, Aidassj
+   * @author Aidassj
    */
   @Test
   public void testGetLast10Videos_ExceptionHandling() {
@@ -401,8 +396,7 @@ public class YouTubeServiceTest extends WithApplication {
   /**
    * Tests the getChannelInfo method of YouTubeService by mocking a valid response but with missing
    * fields. Verifies that the method returns null when parsing errors occur.
-   *
-   * @author Deniz Dinchdonmez, Aidassj
+   * @author Aidassj
    */
   @Test
   public void testGetLast10Videos_ParsingErrorHandling() {

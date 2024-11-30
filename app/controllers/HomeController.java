@@ -53,7 +53,7 @@ import java.util.List;
  * This controller contains an action to handle HTTP requests to the application's home page. It
  * obtains queries from the user, retrieves, processes and renders video results to page
  *
- * @author Deniz Dinchdonmez, Aynaz, Jessica Chen
+ * @author Deniz Dinchdonmez, Aynaz, Jessica Chen, Aidassj
  */
 public class HomeController extends Controller {
   private final ActorSystem actorSystem;
@@ -329,7 +329,6 @@ public class HomeController extends Controller {
   /**
    * Displays the channel profile with all available profile information and the last 10 videos of
    * the channel.
-   *
    * @param channelId the ID of the YouTube channel
    * @return a CompletionStage of Result rendering the channel profile page
    * @author Aidassj
@@ -354,7 +353,6 @@ public class HomeController extends Controller {
 
   /**
    * API to fetch the latest 10 videos of a channel as JSON.
-   *
    * @param channelId the ID of the YouTube channel
    * @return a JSON response containing the list of latest videos
    * @author Aidassj
@@ -375,35 +373,6 @@ public class HomeController extends Controller {
               return internalServerError("An error occurred while fetching videos.");
             });
   }
-
-  //    /**
-  //     * @author Aidassj Method to display the channel profile with all available profile
-  // information
-  //     *     and the last 10 videos of the channel.
-  //     */
-  //    public Result channelProfile(String channelId) {
-  //        System.out.println("Channel ID received: " + channelId);
-  //
-  //        try {
-  //            // Fetch channel information synchronously
-  //            ChannelInfo channelInfo = youTubeService.getChannelInfo(channelId);
-  //
-  //            // Check if channel information is null (error occurred)
-  //            if (channelInfo == null) {
-  //                return internalServerError("An error occurred while fetching channel data.");
-  //            }
-  //
-  //            // Fetch the last 10 videos for the channel synchronously
-  //            List<Video> videos = youTubeService.getLast10Videos(channelId);
-  //
-  //            // Return the rendered view with channel info and videos
-  //            return ok(views.html.channelProfile.render(channelInfo, videos));
-  //        } catch (RuntimeException ex) {
-  //            // Log error and return an internal server error response
-  //            System.err.println("Error fetching data: " + ex.getMessage());
-  //            return internalServerError("An error occurred while fetching channel data.");
-  //        }
-  //    }
 
   public CompletionStage<Result> showTags(String videoId) {
     return youTubeService

@@ -37,6 +37,13 @@ public final class Messages {
       return videos;
     }
 
+    /**
+     * Overrides the equals method to compare two SearchResultsMessage objects.
+     * Two objects are considered equal if their search terms and video lists are equal.
+     * @param o the object to compare with this SearchResultsMessage
+     * @return true if the objects are equal, false otherwise
+     * @author Aidassj
+     */
     @Override
     public boolean equals(Object o) {
       if (this == o) return true;
@@ -44,12 +51,22 @@ public final class Messages {
       SearchResultsMessage that = (SearchResultsMessage) o;
       return Objects.equals(searchTerm, that.searchTerm) && Objects.equals(videos, that.videos);
     }
+    /**
+     * Overrides the hashCode method to generate a hash code based on the searchTerm and video list.
+     * Ensures that objects considered equal by the equals method produce the same hash code.
+     * @return the hash code of this SearchResultsMessage object
+     * @author Aidassj
+     */
 
     @Override
     public int hashCode() {
       return Objects.hash(searchTerm, videos);
     }
-
+    /**
+     * Overrides the toString method to provide a string representation of the SearchResultsMessage object.
+     * The string includes the search term and the list of videos associated with the message.
+     * @author Aidassj
+     */
     @Override
     public String toString() {
       return "SearchResultsMessage{"
@@ -62,7 +79,13 @@ public final class Messages {
     }
   }
 
-  /** Error message class to handle errors during communication between actors. */
+  /**
+   * ErrorMessage class represents an error message for communication between actors.
+   * This class is immutable and serializable, providing a structured way to send error messages.
+   * It includes methods for retrieving the error message, generating a string representation,
+   * and comparing objects for equality.
+   * @author Aidassj
+   */
   public static class ErrorMessage implements Serializable {
     private final String message;
 

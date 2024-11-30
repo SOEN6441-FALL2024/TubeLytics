@@ -38,6 +38,11 @@ public class YouTubeServiceActorTest {
     system = null;
   }
 
+  /**
+   * Tests that YouTubeServiceActor processes a valid search query and returns the expected video results.
+   * Verifies that a SearchResultsMessage is sent back with the correct query term and video list.
+   * @author Aidassj
+   */
   @Test
   public void testValidSearchQuery() {
     new TestKit(system) {
@@ -83,6 +88,11 @@ public class YouTubeServiceActorTest {
     };
   }
 
+  /**
+   * Tests that YouTubeServiceActor handles errors gracefully when the YouTubeService fails.
+   * Verifies that a SearchResultsMessage is sent back with an empty video list.
+   * @author Aidassj
+   */
   @Test
   public void testErrorHandling() {
     new TestKit(system) {
@@ -109,6 +119,11 @@ public class YouTubeServiceActorTest {
     };
   }
 
+  /**
+   * Tests that YouTubeServiceActor can handle large responses without errors.
+   * Verifies that all videos in a large result set are processed and sent back correctly.
+   * @author Aidassj
+   */
   @Test
   public void testLargeResponseHandling() {
     new TestKit(system) {

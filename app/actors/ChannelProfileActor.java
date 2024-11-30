@@ -14,7 +14,6 @@ import services.YouTubeService;
 /**
  * Actor responsible for fetching and processing channel profile information and the latest 10
  * videos of a YouTube channel using YouTube API.
- *
  * @author Aidassj
  */
 public class ChannelProfileActor extends AbstractActor {
@@ -24,8 +23,8 @@ public class ChannelProfileActor extends AbstractActor {
 
   /**
    * Constructor for ChannelProfileActor.
-   *
    * @param youTubeService The service to fetch YouTube data.
+   * @author Aidassj
    */
   public ChannelProfileActor(YouTubeService youTubeService) {
     this.youTubeService = youTubeService;
@@ -49,7 +48,6 @@ public class ChannelProfileActor extends AbstractActor {
 
   /**
    * Handles the FetchChannelProfile message to fetch channel data.
-   *
    * @param message the FetchChannelProfile message containing channel ID.
    * @author Aidassj
    */
@@ -95,7 +93,6 @@ public class ChannelProfileActor extends AbstractActor {
 
   /**
    * Message class to request channel profile data.
-   *
    * @author Aidassj
    */
   public static class FetchChannelProfile {
@@ -104,7 +101,6 @@ public class ChannelProfileActor extends AbstractActor {
 
     /**
      * Constructor for FetchChannelProfile message.
-     *
      * @param channelId the ID of the YouTube channel to fetch.
      * @author Aidassj
      */
@@ -115,7 +111,6 @@ public class ChannelProfileActor extends AbstractActor {
 
   /**
    * Data class to represent the fetched channel profile information.
-   *
    * @author Aidassj
    */
   public static class ChannelProfileData {
@@ -124,7 +119,6 @@ public class ChannelProfileActor extends AbstractActor {
 
     /**
      * Constructor for ChannelProfileData.
-     *
      * @param channelInfo The channel's profile information.
      * @param videos The list of the latest 10 videos for the channel.
      * @author Aidassj

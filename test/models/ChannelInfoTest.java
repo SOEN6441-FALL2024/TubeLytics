@@ -6,11 +6,17 @@ import org.junit.Test;
 
 /**
  * Test class for the {@link ChannelInfo} model.
- *
  * @author Aidassj
  */
 public class ChannelInfoTest {
 
+  /**
+   * Tests the creation of a ChannelInfo object to ensure all fields are correctly set and accessible.
+   * Verifies that the getter methods return the expected values provided during object creation.
+   * Assertions:
+   * - Validates name, description, subscriber count, view count, video count, and channel ID.
+   * @author Aidassj
+   */
   @Test
   public void testChannelInfoCreation() {
     // Arrange
@@ -40,6 +46,14 @@ public class ChannelInfoTest {
     assertEquals(
         channelId, channelInfo.getChannelId(), "Channel ID should match the expected value.");
   }
+  /**
+   * Tests the creation of a ChannelInfo object with edge case values.
+   * Ensures that the object handles minimal values, such as zero counts and an empty description, correctly.
+   * Verifies that the getter methods return the expected edge values provided during object creation.
+   * Assertions:
+   * - Validates name, description, subscriber count, view count, video count, and channel ID with edge values.
+   * @author Aidassj
+   */
 
   @Test
   public void testChannelInfoWithEdgeValues() {
@@ -63,7 +77,15 @@ public class ChannelInfoTest {
     assertEquals(videoCount, channelInfo.getVideoCount());
     assertEquals(channelId, channelInfo.getChannelId());
   }
-
+  /**
+   * Tests the immutability of the ChannelInfo class.
+   * Ensures that once a ChannelInfo object is created, its fields cannot be altered,
+   * and any modifications require the creation of a new object.
+   * Assertions:
+   * - Validates that two ChannelInfo objects with different data are not equal.
+   * - Confirms that the original object's fields remain unchanged after creating a new object.
+   * @author Aidassj
+   */
   @Test
   public void testChannelInfoImmutability() {
     // Arrange: Create an initial instance

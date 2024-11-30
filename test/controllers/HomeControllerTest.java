@@ -47,7 +47,7 @@ import org.apache.pekko.actor.Props;
 /**
  * Unit test for HomeController
  *
- * @author Deniz Dinchdonmez, Aynaz Javanivayeghan, Jessica Chen
+ * @author Deniz Dinchdonmez, Aynaz Javanivayeghan, Jessica Chen, Aidassj
  */
 public class HomeControllerTest {
   private LinkedHashMap<String, List<Video>> queryResults;
@@ -672,7 +672,6 @@ public class HomeControllerTest {
   /**
    * Tests the `channelProfile` method with valid channel and video data. Ensures the response
    * contains the expected channel information and video list.
-   *
    * @author Aidassj
    */
   @Test
@@ -711,7 +710,6 @@ public class HomeControllerTest {
   /**
    * Tests the channelProfile method with a non-existent channel ID. Expects an error response
    * indicating no data found.
-   *
    * @author Aidassj
    */
   @Test
@@ -733,7 +731,6 @@ public class HomeControllerTest {
   /**
    * Tests the channelProfile method when an exception occurs in data fetching. Expects an error
    * response with an appropriate error message.
-   *
    * @author Aidassj
    */
   @Test
@@ -755,7 +752,6 @@ public class HomeControllerTest {
   /**
    * Tests the `fetchLatestVideos` method with valid and invalid data. Ensures the response contains
    * JSON data or appropriate error messages.
-   *
    * @throws Exception if an error occurs during execution
    * @author Aidassj
    */
@@ -797,7 +793,6 @@ public class HomeControllerTest {
 
   /**
    * Tests the `fetchLatestVideos` method when no videos are found for the channel.
-   *
    * @throws Exception if an error occurs during execution
    * @author Aidassj
    */
@@ -818,7 +813,6 @@ public class HomeControllerTest {
   /**
    * Tests the `fetchLatestVideos` method when an exception occurs during data retrieval. Ensures
    * the response status is `INTERNAL_SERVER_ERROR` and an appropriate error message is returned.
-   *
    * @author Aidassj
    */
   @Test

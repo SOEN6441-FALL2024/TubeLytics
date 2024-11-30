@@ -19,7 +19,7 @@ import services.YouTubeService;
  * YouTubeServiceActor handles calls to the YoutubeApi based on given query and returns results to
  * sender
  *
- * @author Aydassj, Jessica Chen
+ * @author Aidassj, Jessica Chen
  */
 public class YouTubeServiceActor extends AbstractActor {
   private final YouTubeService youTubeService;
@@ -42,8 +42,7 @@ public class YouTubeServiceActor extends AbstractActor {
   /**
    * Method to call searchVideosRequest method to get video results and then send it back to the
    * actor that requested it
-   *
-   * @author Aydassj
+   * @author Aidassj
    */
   private void handleSearchQuery(String query) {
     ActorRef sender = getSender();
@@ -58,6 +57,14 @@ public class YouTubeServiceActor extends AbstractActor {
             () -> fetchAndStreamResults(query, sender),
             getContext().dispatcher());
   }
+
+  /**
+   * Fetches video results for a query and sends unique results to the sender.
+   * Filters duplicates and handles errors by sending an empty result set.
+   * @param query the search query
+   * @param sender the actor to send results to
+   * @author Aidassj
+   */
 
   private void fetchAndStreamResults(String query, ActorRef sender) {
     CompletionStage<List<Video>> videos = youTubeService.searchVideos(query);

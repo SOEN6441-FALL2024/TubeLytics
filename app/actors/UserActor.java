@@ -22,14 +22,15 @@ public class UserActor extends AbstractActor {
   private final ActorRef ws;
   private final ActorRef youTubeServiceActor;
   private final ActorRef readabilityActor;
+  private final ActorRef submissionSentimentActor;
   private final Set<String> processedQueries = new HashSet<>();
   private final LinkedList<Video> cumulativeResults =
       new LinkedList<>(); // Stores the latest 10 results
   ObjectMapper objectMapper = new ObjectMapper();
 
   public static Props props(
-      final ActorRef wsOut, final ActorRef youTubeServiceActor, final ActorRef readabilityActor) {
-    return Props.create(UserActor.class, wsOut, youTubeServiceActor, readabilityActor);
+      final ActorRef wsOut, final ActorRef youTubeServiceActor, final ActorRef readabilityActor, final ActorRef submissionSentimentActor) {
+    return Props.create(UserActor.class, wsOut, youTubeServiceActor, readabilityActor, submissionSentimentActor);
   }
 
   public UserActor(
@@ -37,6 +38,7 @@ public class UserActor extends AbstractActor {
     this.ws = wsOut;
     this.youTubeServiceActor = youTubeServiceActor;
     this.readabilityActor = readabilityActor;
+      this.submissionSentimentActor = submissionSentimentActor;
   }
 
   @Override
@@ -45,6 +47,7 @@ public class UserActor extends AbstractActor {
         .match(String.class, this::handleSearchQuery)
         .match(Messages.SearchResultsMessage.class, this::processReceivedResults)
         .match(Messages.ReadabilityResultsMessage.class, this::sendResultsToClient)
+            .match(Messages.SearchResultsMessage.class, this::processReceivedSentimentResults)
         .build();
   }
 

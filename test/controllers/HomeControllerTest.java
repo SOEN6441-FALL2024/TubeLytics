@@ -6,7 +6,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static play.mvc.Http.Status.BAD_REQUEST;
 import static play.mvc.Http.Status.OK;
@@ -17,7 +16,6 @@ import com.typesafe.config.Config;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-
 import models.ChannelInfo;
 import models.Video;
 import org.apache.pekko.actor.ActorRef;
@@ -33,7 +31,6 @@ import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import play.libs.streams.ActorFlow;
 import play.libs.ws.WSClient;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -43,6 +40,7 @@ import services.YouTubeService;
 
 /**
  * Unit test for HomeController
+ *
  * @author Deniz Dinchdonmez, Aynaz Javanivayeghan, Jessica Chen
  */
 public class HomeControllerTest {
@@ -72,8 +70,13 @@ public class HomeControllerTest {
     queryResults = new LinkedHashMap<>();
     sessionQueryMap = new HashMap<>();
     homeController =
-        new HomeController(system, materializer,
-                wsClient, mockYouTubeService, queryResults, sessionQueryMap); // Pass initialized maps
+        new HomeController(
+            system,
+            materializer,
+            wsClient,
+            mockYouTubeService,
+            queryResults,
+            sessionQueryMap); // Pass initialized maps
 
     query = "cat";
     // Adding mock entries into List<Video>
@@ -116,16 +119,18 @@ public class HomeControllerTest {
 
   @Test
   public void testWebSocketFlow() {
-    new TestKit(system) {{
-      Http.Request mockRequest = mock(Http.Request.class);
-      WebSocket ws = homeController.ws();
-      TestProbe wsProbe = new TestProbe(system);
+    new TestKit(system) {
+      {
+        Http.Request mockRequest = mock(Http.Request.class);
+        WebSocket ws = homeController.ws();
+        TestProbe wsProbe = new TestProbe(system);
 
-      assertNotNull(ws);
+        assertNotNull(ws);
 
-      ActorRef supervisorActor = system.actorOf(SupervisorActor.props(wsProbe.ref(), wsClient));
-      assertNotNull(supervisorActor);
-    }};
+        ActorRef supervisorActor = system.actorOf(SupervisorActor.props(wsProbe.ref(), wsClient));
+        assertNotNull(supervisorActor);
+      }
+    };
   }
 
   @Test
@@ -158,8 +163,9 @@ public class HomeControllerTest {
     // Assert
     assertEquals(OK, result.status());
 
-    //removed assertTrue(contentAsString(result).contains("Title1"); due to unknown structure of result
-    //debugged and result was printing out as HTML did not change test coverage percentage
+    // removed assertTrue(contentAsString(result).contains("Title1"); due to unknown structure of
+    // result
+    // debugged and result was printing out as HTML did not change test coverage percentage
   }
 
   @Test
@@ -179,7 +185,12 @@ public class HomeControllerTest {
     thrown.expectMessage("Query result map cannot be null");
 
     // Act: Attempt to initialize HomeController with a null multipleQueryResult
-    new HomeController(system, materializer, wsClient, new YouTubeService(mock(WSClient.class), mock(Config.class)), null);
+    new HomeController(
+        system,
+        materializer,
+        wsClient,
+        new YouTubeService(mock(WSClient.class), mock(Config.class)),
+        null);
   }
 
   @Test(expected = NullPointerException.class)
@@ -195,7 +206,8 @@ public class HomeControllerTest {
     LinkedHashMap<String, List<Video>> validQueryResult = new LinkedHashMap<>();
 
     // Act: Initialize HomeController
-    HomeController controller = new HomeController(system, materializer, wsClient, mockService, validQueryResult);
+    HomeController controller =
+        new HomeController(system, materializer, wsClient, mockService, validQueryResult);
 
     // Mock YouTubeService behavior
     String query = "test";
@@ -219,8 +231,9 @@ public class HomeControllerTest {
 
     // Assert: Verify behavior
     assertEquals("The response should be OK", OK, result.status());
-    //removed assertTrue(contentAsString(result).contains("Title1"); due to unknown structure of result
-    //debugged and result was printing out as HTML did not change test coverage percentage
+    // removed assertTrue(contentAsString(result).contains("Title1"); due to unknown structure of
+    // result
+    // debugged and result was printing out as HTML did not change test coverage percentage
   }
 
   @Test
@@ -231,8 +244,9 @@ public class HomeControllerTest {
 
     // Assert
     assertEquals(OK, result.status());
-    //removed assertTrue(contentAsString(result).contains("No Results..."); due to unknown structure of result
-    //debugged and result was printing out as HTML did not change test coverage percentage
+    // removed assertTrue(contentAsString(result).contains("No Results..."); due to unknown
+    // structure of result
+    // debugged and result was printing out as HTML did not change test coverage percentage
   }
 
   @Test
@@ -243,8 +257,9 @@ public class HomeControllerTest {
 
     // Assert
     assertEquals(OK, result.status());
-    //removed assertTrue(contentAsString(result).contains("No Results..."); due to unknown structure of result
-    //debugged and result was printing out as HTML did not change test coverage percentage
+    // removed assertTrue(contentAsString(result).contains("No Results..."); due to unknown
+    // structure of result
+    // debugged and result was printing out as HTML did not change test coverage percentage
   }
 
   @Test
@@ -261,7 +276,13 @@ public class HomeControllerTest {
 
     // Inject the mock sessionQueryMap into HomeController
     homeController =
-        new HomeController(system, materializer, wsClient, mockYouTubeService, new LinkedHashMap<>(), mockSessionQueryMap);
+        new HomeController(
+            system,
+            materializer,
+            wsClient,
+            mockYouTubeService,
+            new LinkedHashMap<>(),
+            mockSessionQueryMap);
 
     // Mock the YouTubeService for a new query
     when(mockYouTubeService.searchVideos("query11", 10))
@@ -637,8 +658,8 @@ public class HomeControllerTest {
   }
 
   /**
-   * Tests the `channelProfile` method with valid channel and video data.
-   * Ensures the response contains the expected channel information and video list.
+   * Tests the `channelProfile` method with valid channel and video data. Ensures the response
+   * contains the expected channel information and video list.
    *
    * @author Aidassj
    */
@@ -646,23 +667,24 @@ public class HomeControllerTest {
   public void testChannelProfileWithValidData() {
     // Arrange: Mock ChannelInfo and List<Video> for a valid channel
     ChannelInfo mockChannelInfo =
-            new ChannelInfo("Mock Channel Name", "Mock Channel Description", 1000, 50000, 200, "channelId123");
+        new ChannelInfo(
+            "Mock Channel Name", "Mock Channel Description", 1000, 50000, 200, "channelId123");
     Video mockVideo =
-            new Video(
-                    "Mock Video Title",
-                    "Mock Video Description",
-                    "channelId123",
-                    "videoId123",
-                    "http://mockthumbnail.com",
-                    "Mock Channel",
-                    "2024-01-01");
+        new Video(
+            "Mock Video Title",
+            "Mock Video Description",
+            "channelId123",
+            "videoId123",
+            "http://mockthumbnail.com",
+            "Mock Channel",
+            "2024-01-01");
     List<Video> mockVideoList = List.of(mockVideo);
 
     // Mock the service methods to return the mock data asynchronously
     when(mockYouTubeService.getChannelInfoAsync("channelId123"))
-            .thenReturn(CompletableFuture.completedFuture(mockChannelInfo));
+        .thenReturn(CompletableFuture.completedFuture(mockChannelInfo));
     when(mockYouTubeService.getLast10VideosAsync("channelId123"))
-            .thenReturn(CompletableFuture.completedFuture(mockVideoList));
+        .thenReturn(CompletableFuture.completedFuture(mockVideoList));
 
     // Act: Call the channelProfile method
     Result result = homeController.channelProfile("channelId123").toCompletableFuture().join();
@@ -675,8 +697,8 @@ public class HomeControllerTest {
   }
 
   /**
-   * Tests the channelProfile method with a non-existent channel ID.
-   * Expects an error response indicating no data found.
+   * Tests the channelProfile method with a non-existent channel ID. Expects an error response
+   * indicating no data found.
    *
    * @author Aidassj
    */
@@ -684,9 +706,9 @@ public class HomeControllerTest {
   public void testChannelProfileWithNonExistentChannel() {
     // Arrange: Simulate non-existent channel by returning null values
     when(mockYouTubeService.getChannelInfoAsync("invalidChannelId"))
-            .thenReturn(CompletableFuture.completedFuture(null));
+        .thenReturn(CompletableFuture.completedFuture(null));
     when(mockYouTubeService.getLast10VideosAsync("invalidChannelId"))
-            .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
+        .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
 
     // Act: Call the channelProfile method
     Result result = homeController.channelProfile("invalidChannelId").toCompletableFuture().join();
@@ -696,10 +718,9 @@ public class HomeControllerTest {
     assertTrue(contentAsString(result).contains("An error occurred while fetching channel data."));
   }
 
-
   /**
-   * Tests the channelProfile method when an exception occurs in data fetching.
-   * Expects an error response with an appropriate error message.
+   * Tests the channelProfile method when an exception occurs in data fetching. Expects an error
+   * response with an appropriate error message.
    *
    * @author Aidassj
    */
@@ -707,9 +728,9 @@ public class HomeControllerTest {
   public void testChannelProfileWithErrorInFetchingData() {
     // Arrange: Simulate an exception in service methods
     when(mockYouTubeService.getChannelInfoAsync(anyString()))
-            .thenReturn(CompletableFuture.failedFuture(new RuntimeException("API failure")));
+        .thenReturn(CompletableFuture.failedFuture(new RuntimeException("API failure")));
     when(mockYouTubeService.getLast10VideosAsync(anyString()))
-            .thenReturn(CompletableFuture.failedFuture(new RuntimeException("API failure")));
+        .thenReturn(CompletableFuture.failedFuture(new RuntimeException("API failure")));
 
     // Act: Call the channelProfile method to trigger the exception
     Result result = homeController.channelProfile("errorChannel").toCompletableFuture().join();
@@ -719,10 +740,9 @@ public class HomeControllerTest {
     assertTrue(contentAsString(result).contains("An error occurred while fetching channel data."));
   }
 
-
   /**
-   * Tests the `fetchLatestVideos` method with valid and invalid data.
-   * Ensures the response contains JSON data or appropriate error messages.
+   * Tests the `fetchLatestVideos` method with valid and invalid data. Ensures the response contains
+   * JSON data or appropriate error messages.
    *
    * @throws Exception if an error occurs during execution
    * @author Aidassj
@@ -730,14 +750,28 @@ public class HomeControllerTest {
   @Test
   public void testFetchLatestVideosWithValidData() throws Exception {
     // Arrange: Mock a list of videos
-    List<Video> mockVideos = Arrays.asList(
-            new Video("Title1", "Description1", "Channel1", "VideoId1", "Thumbnail1", "ChannelTitle1", "2024-11-06T04:41:46Z"),
-            new Video("Title2", "Description2", "Channel2", "VideoId2", "Thumbnail2", "ChannelTitle2", "2024-11-06T04:41:46Z")
-    );
+    List<Video> mockVideos =
+        Arrays.asList(
+            new Video(
+                "Title1",
+                "Description1",
+                "Channel1",
+                "VideoId1",
+                "Thumbnail1",
+                "ChannelTitle1",
+                "2024-11-06T04:41:46Z"),
+            new Video(
+                "Title2",
+                "Description2",
+                "Channel2",
+                "VideoId2",
+                "Thumbnail2",
+                "ChannelTitle2",
+                "2024-11-06T04:41:46Z"));
 
     // Mock the YouTubeService to return the mock list
     when(mockYouTubeService.getLast10VideosAsync("channelId123"))
-            .thenReturn(CompletableFuture.completedFuture(mockVideos));
+        .thenReturn(CompletableFuture.completedFuture(mockVideos));
 
     // Act: Call the method
     Result result = homeController.fetchLatestVideos("channelId123").toCompletableFuture().join();
@@ -759,7 +793,7 @@ public class HomeControllerTest {
   public void testFetchLatestVideosWithNoVideos() throws Exception {
     // Arrange: Mock an empty list
     when(mockYouTubeService.getLast10VideosAsync("channelId123"))
-            .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
+        .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
 
     // Act: Call the method
     Result result = homeController.fetchLatestVideos("channelId123").toCompletableFuture().join();
@@ -770,8 +804,8 @@ public class HomeControllerTest {
   }
 
   /**
-   * Tests the `fetchLatestVideos` method when an exception occurs during data retrieval.
-   * Ensures the response status is `INTERNAL_SERVER_ERROR` and an appropriate error message is returned.
+   * Tests the `fetchLatestVideos` method when an exception occurs during data retrieval. Ensures
+   * the response status is `INTERNAL_SERVER_ERROR` and an appropriate error message is returned.
    *
    * @author Aidassj
    */
@@ -779,7 +813,7 @@ public class HomeControllerTest {
   public void testFetchLatestVideosWithError() {
     // Arrange: Simulate an exception in the service
     when(mockYouTubeService.getLast10VideosAsync(anyString()))
-            .thenReturn(CompletableFuture.failedFuture(new RuntimeException("API failure")));
+        .thenReturn(CompletableFuture.failedFuture(new RuntimeException("API failure")));
 
     // Act: Call the fetchLatestVideos method
     Result result = homeController.fetchLatestVideos("channelId123").toCompletableFuture().join();
@@ -788,7 +822,6 @@ public class HomeControllerTest {
     assertEquals(INTERNAL_SERVER_ERROR, result.status());
     assertTrue(contentAsString(result).contains("An error occurred while fetching videos."));
   }
-
 
   @Test
   public void testShowTagsWithValidData() {

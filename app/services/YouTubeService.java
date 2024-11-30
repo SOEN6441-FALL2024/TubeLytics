@@ -67,9 +67,9 @@ public class YouTubeService {
     }
     /**
      * Asynchronously fetches information about a YouTube channel.
-     *
      * @param channelId The unique ID of the YouTube channel.
      * @return A CompletionStage containing the ChannelInfo object, or null if an error occurs.
+     * @author Aidassj
      */
     public CompletionStage<ChannelInfo> getChannelInfoAsync(String channelId) {
         String url = String.format(
@@ -104,7 +104,6 @@ public class YouTubeService {
 
     /**
      * Asynchronously fetches the latest 10 videos from a specified YouTube channel.
-     *
      * @param channelId The unique ID of the YouTube channel.
      * @return A CompletionStage containing a list of Video objects, or an empty list if an error
      * occurs.

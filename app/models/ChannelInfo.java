@@ -17,7 +17,12 @@ public class ChannelInfo {
   private final String channelId; // Added field for channel ID
 
   public ChannelInfo(
-          String name, String description, int subscriberCount, int viewCount, int videoCount, String channelId) {
+      String name,
+      String description,
+      int subscriberCount,
+      int viewCount,
+      int videoCount,
+      String channelId) {
     this.name = name;
     this.description = description;
     this.subscriberCount = subscriberCount;

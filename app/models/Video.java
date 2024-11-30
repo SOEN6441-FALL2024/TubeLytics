@@ -12,8 +12,8 @@ public class Video {
   private final String videoId;
   private final String thumbnailUrl;
   private final String channelTitle;
-  private final double fleschKincaidGradeLevel;
-  private final double fleschReadingEaseScore;
+  private double fleschKincaidGradeLevel;
+  private double fleschReadingEaseScore;
   private final String submissionSentiment;
   private final double happyWordCount;
   private final double sadWordCount;
@@ -21,13 +21,13 @@ public class Video {
   private List<String> tags;
 
   public Video(
-          String title,
-          String description,
-          String channelId,
-          String videoId,
-          String thumbnailUrl,
-          String channelTitle,
-          String publishedDate) {
+      String title,
+      String description,
+      String channelId,
+      String videoId,
+      String thumbnailUrl,
+      String channelTitle,
+      String publishedDate) {
     this.title = title;
     this.description = description;
     this.channelId = channelId;
@@ -71,8 +71,16 @@ public class Video {
     return fleschKincaidGradeLevel;
   }
 
+  public void setFleschKincaidGradeLevel(double fleschKincaidGradeLevel) {
+    this.fleschKincaidGradeLevel = fleschKincaidGradeLevel;
+  }
+
   public double getFleschReadingEaseScore() {
     return fleschReadingEaseScore;
+  }
+
+  public void setFleschReadingEaseScore(double fleschReadingEaseScore) {
+    this.fleschReadingEaseScore = fleschReadingEaseScore;
   }
 
   public double getHappyWordCount() {
@@ -109,32 +117,47 @@ public class Video {
     if (o == null || getClass() != o.getClass()) return false;
     Video video = (Video) o;
     return Objects.equals(title, video.title)
-            && Objects.equals(description, video.description)
-            && Objects.equals(channelId, video.channelId)
-            && Objects.equals(videoId, video.videoId)
-            && Objects.equals(thumbnailUrl, video.thumbnailUrl)
-            && Objects.equals(channelTitle, video.channelTitle)
-            && Objects.equals(publishedDate, video.publishedDate)
-            && Objects.equals(tags, video.tags);
+        && Objects.equals(description, video.description)
+        && Objects.equals(channelId, video.channelId)
+        && Objects.equals(videoId, video.videoId)
+        && Objects.equals(thumbnailUrl, video.thumbnailUrl)
+        && Objects.equals(channelTitle, video.channelTitle)
+        && Objects.equals(publishedDate, video.publishedDate)
+        && Objects.equals(tags, video.tags);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(
-            title, description, channelId, videoId, thumbnailUrl, channelTitle, publishedDate, tags);
+        title, description, channelId, videoId, thumbnailUrl, channelTitle, publishedDate, tags);
   }
 
   @Override
   public String toString() {
-    return "Video{" +
-            "title='" + title + '\'' +
-            ", description='" + description + '\'' +
-            ", channelId='" + channelId + '\'' +
-            ", videoId='" + videoId + '\'' +
-            ", thumbnailUrl='" + thumbnailUrl + '\'' +
-            ", channelTitle='" + channelTitle + '\'' +
-            ", publishedDate='" + publishedDate + '\'' +
-            ", tags=" + tags +
-            '}';
+    return "Video{"
+        + "title='"
+        + title
+        + '\''
+        + ", description='"
+        + description
+        + '\''
+        + ", channelId='"
+        + channelId
+        + '\''
+        + ", videoId='"
+        + videoId
+        + '\''
+        + ", thumbnailUrl='"
+        + thumbnailUrl
+        + '\''
+        + ", channelTitle='"
+        + channelTitle
+        + '\''
+        + ", publishedDate='"
+        + publishedDate
+        + '\''
+        + ", tags="
+        + tags
+        + '}';
   }
 }

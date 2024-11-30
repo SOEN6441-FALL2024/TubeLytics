@@ -22,11 +22,13 @@ import scala.concurrent.duration.Duration;
 public class UserActorTest {
   private ActorSystem system;
   private WSClient mockWsClient;
+  private TestProbe readActorProbe;
 
   @Before
   public void setUp() {
     system = ActorSystem.create();
     mockWsClient = mock(WSClient.class);
+    readActorProbe = new TestProbe(system);
   }
 
   @After
@@ -47,7 +49,7 @@ public class UserActorTest {
         TestProbe youTubeServiceActorProbe = new TestProbe(system);
         TestProbe wsProbe = new TestProbe(system);
         ActorRef userActor =
-            system.actorOf(UserActor.props(wsProbe.ref(), youTubeServiceActorProbe.ref()));
+            system.actorOf(UserActor.props(wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref()));
 
         String query = "cats";
         userActor.tell(query, getRef());
@@ -71,7 +73,7 @@ public class UserActorTest {
         TestProbe youTubeServiceActorProbe = new TestProbe(system);
         TestProbe wsProbe = new TestProbe(system);
         ActorRef userActor =
-            system.actorOf(UserActor.props(wsProbe.ref(), youTubeServiceActorProbe.ref()));
+            system.actorOf(UserActor.props(wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref()));
 
         String query = "sample";
         List<Video> videos =
@@ -116,7 +118,7 @@ public class UserActorTest {
         TestProbe youTubeServiceActorProbe = new TestProbe(system);
         TestProbe wsProbe = new TestProbe(system);
         ActorRef userActor =
-            system.actorOf(UserActor.props(wsProbe.ref(), youTubeServiceActorProbe.ref()));
+            system.actorOf(UserActor.props(wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref()));
 
         String query = null;
         List<Video> videos = null;
@@ -148,7 +150,7 @@ public class UserActorTest {
         TestProbe wsProbe = new TestProbe(system);
         TestProbe youTubeServiceActorProbe = new TestProbe(system);
         ActorRef userActor =
-            system.actorOf(UserActor.props(wsProbe.ref(), youTubeServiceActorProbe.ref()));
+            system.actorOf(UserActor.props(wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref()));
 
         String query = "repeated-query";
 
@@ -170,7 +172,7 @@ public class UserActorTest {
         TestProbe wsProbe = new TestProbe(system);
         TestProbe youTubeServiceActorProbe = new TestProbe(system);
         ActorRef userActor =
-            system.actorOf(UserActor.props(wsProbe.ref(), youTubeServiceActorProbe.ref()));
+            system.actorOf(UserActor.props(wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref()));
 
         // Send an unsupported message type
         userActor.tell(42, getRef());
@@ -188,7 +190,7 @@ public class UserActorTest {
         TestProbe wsProbe = new TestProbe(system);
         TestProbe youTubeServiceActorProbe = new TestProbe(system);
         ActorRef userActor =
-            system.actorOf(UserActor.props(wsProbe.ref(), youTubeServiceActorProbe.ref()));
+            system.actorOf(UserActor.props(wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref()));
 
         // Case 1: Test with null videos in response
         Messages.SearchResultsMessage nullResponse =

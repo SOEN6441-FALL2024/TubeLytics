@@ -105,6 +105,11 @@ public class Helpers {
    * @author Deniz Dinchdonmez
    */
   private static TextMetrics calculateTextMetrics(String description) {
+
+    if (description == null || description.isEmpty()) {
+      return new TextMetrics(0, 0, 0);
+    }
+
     List<String> words = Arrays.asList(description.split("\\s+"));
 
     long sentenceCount = countSentences(description);
@@ -122,6 +127,11 @@ public class Helpers {
    * @author Deniz Dinchdonmez
    */
   public static double calculateFleschKincaidGradeLevel(String description) {
+
+    if (description == null || description.isEmpty()) {
+      return 0.0;
+    }
+
     TextMetrics metrics = calculateTextMetrics(description);
 
     double wordsPerSentence = (double) metrics.wordCount / metrics.sentenceCount;
@@ -138,6 +148,11 @@ public class Helpers {
    * @author Deniz Dinchdonmez
    */
   public static double calculateFleschReadingEaseScore(String description) {
+
+    if (description == null || description.isEmpty()) {
+      return 0.0;
+    }
+
     TextMetrics metrics = calculateTextMetrics(description);
 
     double wordsPerSentence = (double) metrics.wordCount / metrics.sentenceCount;

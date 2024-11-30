@@ -14,6 +14,9 @@ import play.libs.ws.WSClient;
 import scala.runtime.AbstractPartialFunction;
 import services.YouTubeService;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * SupervisorActor who acts as supervisor for all other actors
  *
@@ -22,6 +25,8 @@ import services.YouTubeService;
 public class SupervisorActor extends AbstractActor {
   private final ActorRef userActor;
   private final ActorRef youtubeServiceActor;
+  private final ActorRef wordStatsActor;
+
 
   public static Props props(ActorRef wsOut, WSClient wsClient) {
     return Props.create(SupervisorActor.class, wsOut, wsClient);
@@ -30,6 +35,8 @@ public class SupervisorActor extends AbstractActor {
   public SupervisorActor(ActorRef wsOut, WSClient wsClient) {
     // Create YouTubeService instance
     YouTubeService youTubeService = new YouTubeService(wsClient, null);
+    this.wordStatsActor = getContext().actorOf(WordStatsActor.props(), "wordStatsActor");
+
 
     // Instantiate YouTubeServiceActor with both WSClient and YouTubeService
     this.youtubeServiceActor =
@@ -44,13 +51,51 @@ public class SupervisorActor extends AbstractActor {
             .actorOf(UserActor.props(wsOut, youtubeServiceActor, readabilityActor), "userActor");
   }
 
-  @Override
-  public Receive createReceive() {
-    return receiveBuilder()
-        .match(String.class, message -> userActor.tell(message, getSelf()))
-        .build();
-  }
 
+
+    @Override
+    public Receive createReceive() {
+        return receiveBuilder()
+                .match(String.class, message -> userActor.tell(message, getSelf()))
+                .match(Messages.SearchResultsMessage.class, message -> {
+                    // Extract video texts (title + description) from the search results
+                    List<String> videoTexts = message.getVideos().stream()
+                            .map(video -> video.getTitle() + " " + video.getDescription())
+                            .collect(Collectors.toList());
+
+                    // Send WordStatsRequest to WordStatsActor
+                    System.out.println("SupervisorActor: Sending WordStatsRequest to WordStatsActor with " + videoTexts.size() + " video texts.");
+                    wordStatsActor.tell(new Messages.WordStatsRequest(videoTexts), getSelf());
+                })
+                .match(Messages.WordStatsRequest.class, request -> {
+                    // Forward WordStatsRequest to the WordStatsActor
+                    System.out.println("SupervisorActor: Forwarding WordStatsRequest to WordStatsActor.");
+                    wordStatsActor.forward(request, getContext());
+                })
+                .match(Messages.GetCumulativeStats.class, request -> {
+                    // Forward GetCumulativeStats to WordStatsActor
+                    System.out.println("SupervisorActor: Forwarding GetCumulativeStats to WordStatsActor.");
+                    wordStatsActor.forward(request, getContext());
+                })
+                .match(Messages.WordStatsResponse.class, response -> {
+                    // Handle WordStatsResponse and forward it
+                    System.out.println("SupervisorActor: Received WordStatsResponse: " + response.getWordStats());
+                    getSender().tell(response, getSelf());
+                })
+                .match(IllegalStateException.class, exception -> {
+                    throw exception; // Propagate the exception to trigger the supervisor strategy
+                })
+                .match(Exception.class, exception -> {
+                    // Log the exception and handle gracefully
+                    System.err.println("SupervisorActor: Caught unknown exception: " + exception.getMessage());
+                })
+                .matchAny(message -> {
+                    // Handle unexpected messages
+                    System.err.println("SupervisorActor: Received unexpected message: " + message);
+                    getSender().tell(new Messages.ErrorMessage("Unknown message type"), getSelf());
+                })
+                .build();
+    }
   /**
    * Processes the user input and returns the formatted result.
    *

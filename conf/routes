@@ -22,7 +22,9 @@ GET     /assets/*file        controllers.Assets.versioned(path="/public", file: 
 GET     /search         controllers.HomeController.search(query: String)
 POST    /search                 controllers.HomeController.search(query: String)
 
-GET    /word-stats         controllers.HomeController.wordStats(query: String)
+GET     /word-stats      controllers.HomeController.wordStats(query: String)
+
+GET     /getCumulativeWordStats     controllers.HomeController.getCumulativeWordStats
 GET     /channel/:channelId       controllers.HomeController.channelProfile(channelId:String)
 
 #     Showing tags for  video

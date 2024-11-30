@@ -45,8 +45,6 @@ public class HomeController extends Controller {
     private final WSClient wsClient;
     private final ActorRef supervisorActor;
 
-
-
     @Inject
     public HomeController(ActorSystem actorSystem, Materializer materializer, WSClient wsClient,
                           YouTubeService youTubeService, LinkedHashMap<String, List<Video>> multipleQueryResult) {
@@ -54,24 +52,31 @@ public class HomeController extends Controller {
         this.materializer = materializer;
         this.wsClient = wsClient;
         this.youTubeService = Objects.requireNonNull(youTubeService, "YouTubeService cannot be null");
-        this.multipleQueryResult =
-                Objects.requireNonNull(multipleQueryResult, "Query result map cannot be null");
-        this.supervisorActor = actorSystem.actorOf(SupervisorActor.props(null, wsClient), "supervisorActor");
+        this.multipleQueryResult = Objects.requireNonNull(multipleQueryResult, "Query result map cannot be null");
 
+        // Use a unique name for each supervisorActor instance
+        String uniqueActorName = "supervisorActor-" + UUID.randomUUID().toString();
+        this.supervisorActor = actorSystem.actorOf(SupervisorActor.props(null, wsClient), uniqueActorName);
     }
 
     public HomeController(
-            ActorSystem actorSystem, Materializer materializer, WSClient wsClient, YouTubeService youTubeService,
+            ActorSystem actorSystem,
+            Materializer materializer,
+            WSClient wsClient,
+            YouTubeService youTubeService,
             LinkedHashMap<String, List<Video>> multipleQueryResult,
-            HashMap<String, LinkedHashMap<String, List<Video>>> sessionQueryMap) {
-        this.actorSystem = actorSystem;
+            HashMap<String, LinkedHashMap<String, List<Video>>> sessionQueryMap
+    ) {
+        this.actorSystem = Objects.requireNonNull(actorSystem, "ActorSystem cannot be null");
         this.materializer = materializer;
         this.wsClient = wsClient;
-        this.youTubeService = youTubeService;
-        this.multipleQueryResult = multipleQueryResult;
-        this.multipleQueryResults = sessionQueryMap;
-        this.supervisorActor = actorSystem.actorOf(SupervisorActor.props(null, wsClient), "supervisorActor");
+        this.youTubeService = Objects.requireNonNull(youTubeService, "YouTubeService cannot be null");
+        this.multipleQueryResult = Objects.requireNonNull(multipleQueryResult, "Query result map cannot be null");
+        this.multipleQueryResults = sessionQueryMap != null ? sessionQueryMap : new HashMap<>();
 
+        // Use a unique name for each supervisorActor instance
+        String uniqueActorName = "supervisorActor-" + UUID.randomUUID().toString();
+        this.supervisorActor = this.actorSystem.actorOf(SupervisorActor.props(null, wsClient), uniqueActorName);
     }
 
     /**
@@ -215,63 +220,53 @@ public class HomeController extends Controller {
             return CompletableFuture.completedFuture(badRequest("Please enter a search term."));
         }
 
-        // Log the incoming query for debugging
         System.out.println("HomeController: Received query for word stats: " + query);
 
         // Fetch the latest 50 videos for the query
         return youTubeService.searchVideos(query, 50)
                 .thenCompose(videos -> {
                     if (videos.isEmpty()) {
-                        // Log and return if no videos are found
                         System.out.println("HomeController: No videos found for query: " + query);
                         return CompletableFuture.completedFuture(ok("No videos found for the given query."));
                     }
 
-                    // Extract titles and descriptions for word stats processing
+                    // Combine titles and descriptions for processing
                     List<String> videoTexts = videos.stream()
                             .map(video -> video.getTitle() + " " + video.getDescription())
                             .collect(Collectors.toList());
 
-                    // Log the number of texts being processed
-                    System.out.println("HomeController: Processing word stats for " + videoTexts.size() + " video texts.");
+                    System.out.println("HomeController: Processing " + videoTexts.size() + " video texts for word stats.");
 
-                    // Send to SupervisorActor for word stats processing
+                    // Send the request to SupervisorActor for processing
                     return Patterns.ask(supervisorActor, new Messages.WordStatsRequest(videoTexts), Duration.ofSeconds(15))
                             .thenApply(response -> {
                                 if (response instanceof Messages.WordStatsResponse) {
-                                    // Cast and process the response
                                     Messages.WordStatsResponse wordStatsResponse = (Messages.WordStatsResponse) response;
 
-                                    // Convert the word stats into a sorted map
+                                    // Convert to a sorted map by frequency
                                     Map<String, Long> wordStatsMap = wordStatsResponse.getWordStats().stream()
-                                            .sorted(Map.Entry.<String, Long>comparingByValue().reversed()) // Sort by value (frequency) descending
+                                            .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
                                             .collect(Collectors.toMap(
                                                     Map.Entry::getKey,
                                                     Map.Entry::getValue,
-                                                    (existing, replacement) -> existing, // Merge function
-                                                    LinkedHashMap::new // Preserve order
+                                                    (existing, replacement) -> existing,
+                                                    LinkedHashMap::new
                                             ));
 
-                                    // Log the size of the word stats result
                                     System.out.println("HomeController: Received " + wordStatsMap.size() + " word stats.");
-                                    System.out.println(wordStatsMap);
-
-                                    // Render the word stats page
                                     return ok(views.html.wordStats.render(wordStatsMap, query));
                                 } else {
-                                    // Log and return an error if response is unexpected
-                                    System.err.println("HomeController: Unexpected response from WordStatsActor.");
+                                    System.err.println("HomeController: Unexpected response type from SupervisorActor.");
                                     return internalServerError("Unexpected response from WordStatsActor.");
                                 }
                             })
                             .exceptionally(e -> {
-                                // Log any exceptions and return an error response
+                                System.err.println("HomeController: Error occurred while processing word stats: " + e.getMessage());
                                 e.printStackTrace();
                                 return internalServerError("An error occurred while processing word statistics.");
                             });
                 });
     }
-
     /**
      * Fetch cumulative word stats from WordStatsActor and return them as JSON.
      * @return JSON response with cumulative word stats.

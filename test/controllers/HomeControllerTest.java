@@ -6,17 +6,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static play.mvc.Http.Status.BAD_REQUEST;
 import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.contentAsString;
-
+import actors.Messages;
 import actors.SupervisorActor;
 import com.typesafe.config.Config;
+
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.stream.Collectors;
 
 import models.ChannelInfo;
 import models.Video;
@@ -30,19 +32,21 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import play.libs.streams.ActorFlow;
 import play.libs.ws.WSClient;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.WebSocket;
 import play.test.Helpers;
 import services.YouTubeService;
-
+import actors.WordStatsActor;
+import actors.SupervisorActor;
+import java.time.Duration;
+import org.apache.pekko.actor.Props;
 /**
  * Unit test for HomeController
+ *
  * @author Deniz Dinchdonmez, Aynaz Javanivayeghan, Jessica Chen
  */
 public class HomeControllerTest {
@@ -53,29 +57,44 @@ public class HomeControllerTest {
   private ActorSystem system;
   private Materializer materializer;
   private WSClient wsClient;
+  private ActorRef wordStatsActor;
 
   @Mock private YouTubeService mockYouTubeService;
 
   @Rule public ExpectedException thrown = ExpectedException.none();
 
-  @InjectMocks private HomeController homeController;
+  private HomeController homeController;
 
   @Before
   public void setUp() {
     MockitoAnnotations.openMocks(this);
+
+    // Mock dependencies
     mockYouTubeService = mock(YouTubeService.class);
     wsClient = mock(WSClient.class);
     materializer = mock(Materializer.class);
-    system = ActorSystem.create();
+
+    // Properly initialize ActorSystem
+    system = ActorSystem.create("TestActorSystem");
+    wordStatsActor = system.actorOf(WordStatsActor.props());
+
 
     // Initialize session-specific maps
     queryResults = new LinkedHashMap<>();
     sessionQueryMap = new HashMap<>();
+
+    // Manually instantiate HomeController
     homeController =
-            new HomeController(system, materializer,
-                    wsClient, mockYouTubeService, queryResults, sessionQueryMap); // Pass initialized maps
+            new HomeController(
+                    system,
+                    materializer,
+                    wsClient,
+                    mockYouTubeService,
+                    queryResults,
+                    sessionQueryMap);
 
     query = "cat";
+
     // Adding mock entries into List<Video>
     videos = new ArrayList<>();
     Video video1 =
@@ -116,16 +135,18 @@ public class HomeControllerTest {
 
   @Test
   public void testWebSocketFlow() {
-    new TestKit(system) {{
-      Http.Request mockRequest = mock(Http.Request.class);
-      WebSocket ws = homeController.ws();
-      TestProbe wsProbe = new TestProbe(system);
+    new TestKit(system) {
+      {
+        Http.Request mockRequest = mock(Http.Request.class);
+        WebSocket ws = homeController.ws();
+        TestProbe wsProbe = new TestProbe(system);
 
-      assertNotNull(ws);
+        assertNotNull(ws);
 
-      ActorRef supervisorActor = system.actorOf(SupervisorActor.props(wsProbe.ref(), wsClient));
-      assertNotNull(supervisorActor);
-    }};
+        ActorRef supervisorActor = system.actorOf(SupervisorActor.props(wsProbe.ref(), wsClient));
+        assertNotNull(supervisorActor);
+      }
+    };
   }
 
   @Test
@@ -158,8 +179,9 @@ public class HomeControllerTest {
     // Assert
     assertEquals(OK, result.status());
 
-    //removed assertTrue(contentAsString(result).contains("Title1"); due to unknown structure of result
-    //debugged and result was printing out as HTML did not change test coverage percentage
+    // removed assertTrue(contentAsString(result).contains("Title1"); due to unknown structure of
+    // result
+    // debugged and result was printing out as HTML did not change test coverage percentage
   }
 
   @Test
@@ -179,7 +201,12 @@ public class HomeControllerTest {
     thrown.expectMessage("Query result map cannot be null");
 
     // Act: Attempt to initialize HomeController with a null multipleQueryResult
-    new HomeController(system, materializer, wsClient, new YouTubeService(mock(WSClient.class), mock(Config.class)), null);
+    new HomeController(
+            system,
+            materializer,
+            wsClient,
+            new YouTubeService(mock(WSClient.class), mock(Config.class)),
+            null);
   }
 
   @Test(expected = NullPointerException.class)
@@ -195,7 +222,8 @@ public class HomeControllerTest {
     LinkedHashMap<String, List<Video>> validQueryResult = new LinkedHashMap<>();
 
     // Act: Initialize HomeController
-    HomeController controller = new HomeController(system, materializer, wsClient, mockService, validQueryResult);
+    HomeController controller =
+            new HomeController(system, materializer, wsClient, mockService, validQueryResult);
 
     // Mock YouTubeService behavior
     String query = "test";
@@ -219,10 +247,7 @@ public class HomeControllerTest {
 
     // Assert: Verify behavior
     assertEquals("The response should be OK", OK, result.status());
-    //removed assertTrue(contentAsString(result).contains("Title1"); due to unknown structure of result
-    //debugged and result was printing out as HTML did not change test coverage percentage
   }
-
   @Test
   public void testIndexWithEmptyQuery() {
     Http.Request mockRequest = mock(Http.Request.class);
@@ -231,8 +256,9 @@ public class HomeControllerTest {
 
     // Assert
     assertEquals(OK, result.status());
-    //removed assertTrue(contentAsString(result).contains("No Results..."); due to unknown structure of result
-    //debugged and result was printing out as HTML did not change test coverage percentage
+    // removed assertTrue(contentAsString(result).contains("No Results..."); due to unknown
+    // structure of result
+    // debugged and result was printing out as HTML did not change test coverage percentage
   }
 
   @Test
@@ -243,8 +269,9 @@ public class HomeControllerTest {
 
     // Assert
     assertEquals(OK, result.status());
-    //removed assertTrue(contentAsString(result).contains("No Results..."); due to unknown structure of result
-    //debugged and result was printing out as HTML did not change test coverage percentage
+    // removed assertTrue(contentAsString(result).contains("No Results..."); due to unknown
+    // structure of result
+    // debugged and result was printing out as HTML did not change test coverage percentage
   }
 
   @Test
@@ -261,7 +288,13 @@ public class HomeControllerTest {
 
     // Inject the mock sessionQueryMap into HomeController
     homeController =
-            new HomeController(system, materializer, wsClient, mockYouTubeService, new LinkedHashMap<>(), mockSessionQueryMap);
+            new HomeController(
+                    system,
+                    materializer,
+                    wsClient,
+                    mockYouTubeService,
+                    new LinkedHashMap<>(),
+                    mockSessionQueryMap);
 
     // Mock the YouTubeService for a new query
     when(mockYouTubeService.searchVideos("query11", 10))
@@ -624,7 +657,7 @@ public class HomeControllerTest {
    */
   @Test
   public void testWordStats_NoVideos() {
-    // Mock the YouTube service to return an empty list for the given query
+    // Arrange: Mock the YouTube service to return an empty list
     when(mockYouTubeService.searchVideos("test-query", 50))
             .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
 
@@ -632,13 +665,13 @@ public class HomeControllerTest {
     CompletionStage<Result> resultStage = homeController.wordStats("test-query");
     Result result = resultStage.toCompletableFuture().join();
 
-    // Check that the response content is "No words found"
-    assertEquals("No words found", contentAsString(result));
+    // Assert: Check that the response content is "No videos found for the given query."
+    assertEquals(OK, result.status()); // Ensure HTTP status is OK
+    assertEquals("No videos found for the given query.", contentAsString(result));
   }
-
   /**
-   * Tests the `channelProfile` method with valid channel and video data.
-   * Ensures the response contains the expected channel information and video list.
+   * Tests the `channelProfile` method with valid channel and video data. Ensures the response
+   * contains the expected channel information and video list.
    *
    * @author Aidassj
    */
@@ -646,7 +679,8 @@ public class HomeControllerTest {
   public void testChannelProfileWithValidData() {
     // Arrange: Mock ChannelInfo and List<Video> for a valid channel
     ChannelInfo mockChannelInfo =
-            new ChannelInfo("Mock Channel Name", "Mock Channel Description", 1000, 50000, 200, "channelId123");
+            new ChannelInfo(
+                    "Mock Channel Name", "Mock Channel Description", 1000, 50000, 200, "channelId123");
     Video mockVideo =
             new Video(
                     "Mock Video Title",
@@ -675,8 +709,8 @@ public class HomeControllerTest {
   }
 
   /**
-   * Tests the channelProfile method with a non-existent channel ID.
-   * Expects an error response indicating no data found.
+   * Tests the channelProfile method with a non-existent channel ID. Expects an error response
+   * indicating no data found.
    *
    * @author Aidassj
    */
@@ -696,10 +730,9 @@ public class HomeControllerTest {
     assertTrue(contentAsString(result).contains("An error occurred while fetching channel data."));
   }
 
-
   /**
-   * Tests the channelProfile method when an exception occurs in data fetching.
-   * Expects an error response with an appropriate error message.
+   * Tests the channelProfile method when an exception occurs in data fetching. Expects an error
+   * response with an appropriate error message.
    *
    * @author Aidassj
    */
@@ -719,10 +752,9 @@ public class HomeControllerTest {
     assertTrue(contentAsString(result).contains("An error occurred while fetching channel data."));
   }
 
-
   /**
-   * Tests the `fetchLatestVideos` method with valid and invalid data.
-   * Ensures the response contains JSON data or appropriate error messages.
+   * Tests the `fetchLatestVideos` method with valid and invalid data. Ensures the response contains
+   * JSON data or appropriate error messages.
    *
    * @throws Exception if an error occurs during execution
    * @author Aidassj
@@ -730,10 +762,24 @@ public class HomeControllerTest {
   @Test
   public void testFetchLatestVideosWithValidData() throws Exception {
     // Arrange: Mock a list of videos
-    List<Video> mockVideos = Arrays.asList(
-            new Video("Title1", "Description1", "Channel1", "VideoId1", "Thumbnail1", "ChannelTitle1", "2024-11-06T04:41:46Z"),
-            new Video("Title2", "Description2", "Channel2", "VideoId2", "Thumbnail2", "ChannelTitle2", "2024-11-06T04:41:46Z")
-    );
+    List<Video> mockVideos =
+            Arrays.asList(
+                    new Video(
+                            "Title1",
+                            "Description1",
+                            "Channel1",
+                            "VideoId1",
+                            "Thumbnail1",
+                            "ChannelTitle1",
+                            "2024-11-06T04:41:46Z"),
+                    new Video(
+                            "Title2",
+                            "Description2",
+                            "Channel2",
+                            "VideoId2",
+                            "Thumbnail2",
+                            "ChannelTitle2",
+                            "2024-11-06T04:41:46Z"));
 
     // Mock the YouTubeService to return the mock list
     when(mockYouTubeService.getLast10VideosAsync("channelId123"))
@@ -770,8 +816,8 @@ public class HomeControllerTest {
   }
 
   /**
-   * Tests the `fetchLatestVideos` method when an exception occurs during data retrieval.
-   * Ensures the response status is `INTERNAL_SERVER_ERROR` and an appropriate error message is returned.
+   * Tests the `fetchLatestVideos` method when an exception occurs during data retrieval. Ensures
+   * the response status is `INTERNAL_SERVER_ERROR` and an appropriate error message is returned.
    *
    * @author Aidassj
    */
@@ -788,7 +834,6 @@ public class HomeControllerTest {
     assertEquals(INTERNAL_SERVER_ERROR, result.status());
     assertTrue(contentAsString(result).contains("An error occurred while fetching videos."));
   }
-
 
   @Test
   public void testShowTagsWithValidData() {
@@ -878,5 +923,117 @@ public class HomeControllerTest {
     assertEquals(404, result.status());
     String content = contentAsString(result);
     assertTrue(content.contains("No videos found for tag: " + testTag));
+  }
+
+  /**
+   * Tests the behavior of the `WordStatsActor` for valid word statistics computation.
+   * @author Aynaz Javanivayeghan
+   */
+  @Test
+  public void testWordStatsActorValidInput() {
+    new TestKit(system) {{
+      // Mock input video texts
+      List<String> videoTexts = List.of("Java Basics", "Advanced Java Programming");
+
+      // Create a WordStatsRequest
+      Messages.WordStatsRequest request = new Messages.WordStatsRequest(videoTexts);
+
+      // Send the request to the WordStatsActor
+      wordStatsActor.tell(request, getRef());
+
+      // Expect a WordStatsResponse
+      Messages.WordStatsResponse response = expectMsgClass(Messages.WordStatsResponse.class);
+
+      // Convert response.getWordStats() to a Map
+      Map<String, Long> wordStats = response.getWordStats().stream()
+              .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+      // Validate the response
+      assertEquals(2L, (long) wordStats.get("java")); // Check frequency of "java"
+      assertEquals(1L, (long) wordStats.get("basics")); // Check frequency of "basics"
+      assertEquals(1L, (long) wordStats.get("programming")); // Check frequency of "programming"
+    }};
+  }
+  /**
+   * Tests the `WordStatsActor` with empty input.
+   * @author Aynaz Javanivayeghan
+   */
+  @Test
+  public void testWordStatsActorEmptyInput() {
+    new TestKit(system) {{
+      ActorRef wordStatsActor = system.actorOf(WordStatsActor.props());
+
+      Messages.WordStatsRequest request = new Messages.WordStatsRequest(Collections.emptyList());
+
+      wordStatsActor.tell(request, getRef());
+
+      Messages.WordStatsResponse response = expectMsgClass(Messages.WordStatsResponse.class);
+
+      // Assert empty response
+      assertTrue(response.getWordStats().isEmpty());
+    }};
+  }
+
+  /**
+   * Tests cumulative statistics in `WordStatsActor`.
+   * @author Aynaz Javanivayeghan
+   */
+  @Test
+  public void testWordStatsActorCumulativeStats() {
+    new TestKit(system) {{
+      ActorRef wordStatsActor = system.actorOf(WordStatsActor.props());
+
+      // First message
+      Messages.WordStatsRequest request1 = new Messages.WordStatsRequest(
+              List.of("Java Basics", "Basics of Java"));
+      wordStatsActor.tell(request1, getRef());
+      expectMsgClass(Messages.WordStatsResponse.class);
+
+      // Second message
+      Messages.WordStatsRequest request2 = new Messages.WordStatsRequest(
+              List.of("Advanced Java Programming"));
+      wordStatsActor.tell(request2, getRef());
+      expectMsgClass(Messages.WordStatsResponse.class);
+
+      // Request cumulative stats
+      wordStatsActor.tell(new Messages.GetCumulativeStats(), getRef());
+      Messages.WordStatsResponse cumulativeResponse = expectMsgClass(Messages.WordStatsResponse.class);
+
+      // Convert List<Map.Entry<String, Long>> to Map<String, Long>
+      Map<String, Long> cumulativeStats = cumulativeResponse.getWordStats().stream()
+              .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+      // Validate cumulative stats
+      assertEquals(3L, (long) cumulativeStats.get("java"));
+      assertEquals(2L, (long) cumulativeStats.get("basics"));
+      assertEquals(1L, (long) cumulativeStats.get("programming"));
+    }};
+  }
+
+
+  /**
+   * Tests the `SupervisorActor` behavior with unexpected messages.
+   * @author Aynaz Javanivayeghan
+   */
+  @Test
+  public void testSupervisorActorUnexpectedMessage() {
+    new TestKit(system) {{
+      ActorRef supervisorActor = system.actorOf(SupervisorActor.props(getRef(), null));
+
+      // Send an unexpected message
+      supervisorActor.tell("UnexpectedMessage", getRef());
+
+      // Expect no response
+      expectNoMessage();
+    }};
+  }
+
+  /**
+   * Validates `ActorSystem` initialization.
+   * * @author Aynaz Javanivayeghan
+   */
+  @Test
+  public void testActorSystemInitialization() {
+    assertEquals("TestActorSystem", system.name());
   }
 }

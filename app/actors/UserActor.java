@@ -8,6 +8,8 @@ import models.Video;
 import org.apache.pekko.actor.AbstractActor;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import utils.Helpers;
 
 /**
@@ -16,6 +18,7 @@ import utils.Helpers;
  * @author Marjan Khassafi, Jessica Chen
  */
 public class UserActor extends AbstractActor {
+  private static final Logger log = LoggerFactory.getLogger(UserActor.class);
   private final ActorRef ws;
   private final ActorRef youTubeServiceActor;
   private final ActorRef readabilityActor;
@@ -116,7 +119,7 @@ public class UserActor extends AbstractActor {
       String json = objectMapper.writeValueAsString(cumulativeResults);
       ws.tell(json, getSelf());
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("Failed to serialize videos to JSON", e);
     }
   }
 }

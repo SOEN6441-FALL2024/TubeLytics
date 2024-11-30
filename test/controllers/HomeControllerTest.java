@@ -72,30 +72,30 @@ public class HomeControllerTest {
     queryResults = new LinkedHashMap<>();
     sessionQueryMap = new HashMap<>();
     homeController =
-        new HomeController(system, materializer,
-                wsClient, mockYouTubeService, queryResults, sessionQueryMap); // Pass initialized maps
+            new HomeController(system, materializer,
+                    wsClient, mockYouTubeService, queryResults, sessionQueryMap); // Pass initialized maps
 
     query = "cat";
     // Adding mock entries into List<Video>
     videos = new ArrayList<>();
     Video video1 =
-        new Video(
-            "CatVideoTitle1",
-            "CatVideoDescription1",
-            "CatVideoChannelId1",
-            "CatVideoVideoId1",
-            "CatVideoThumbnailUrl.jpg1",
-            "CatVideoChannelTitle1",
-            "2024-11-06T04:41:46Z");
+            new Video(
+                    "CatVideoTitle1",
+                    "CatVideoDescription1",
+                    "CatVideoChannelId1",
+                    "CatVideoVideoId1",
+                    "CatVideoThumbnailUrl.jpg1",
+                    "CatVideoChannelTitle1",
+                    "2024-11-06T04:41:46Z");
     Video video2 =
-        new Video(
-            "CatVideoTitle2",
-            "CatVideoDescription2",
-            "CatVideoChannelId2",
-            "CatVideoVideoId2",
-            "CatVideoThumbnailUrl.jpg2",
-            "CatVideoChannelTitle2",
-            "2024-11-06T04:41:46Z");
+            new Video(
+                    "CatVideoTitle2",
+                    "CatVideoDescription2",
+                    "CatVideoChannelId2",
+                    "CatVideoVideoId2",
+                    "CatVideoThumbnailUrl.jpg2",
+                    "CatVideoChannelTitle2",
+                    "2024-11-06T04:41:46Z");
     videos.add(video1);
     videos.add(video2);
   }
@@ -132,25 +132,25 @@ public class HomeControllerTest {
   public void testIndexWithQuery() {
     // Arrange
     List<Video> mockVideos =
-        List.of(
-            new Video(
-                "Title1",
-                "Description1",
-                "Channel1",
-                "VideoId1",
-                "ThumbnailUrl1",
-                "ChannelTitle1",
-                "2024-11-06T04:41:46Z"),
-            new Video(
-                "Title2",
-                "Description2",
-                "Channel2",
-                "VideoId2",
-                "ThumbnailUrl2",
-                "ChannelTitle2",
-                "2024-11-06T04:41:46Z"));
+            List.of(
+                    new Video(
+                            "Title1",
+                            "Description1",
+                            "Channel1",
+                            "VideoId1",
+                            "ThumbnailUrl1",
+                            "ChannelTitle1",
+                            "2024-11-06T04:41:46Z"),
+                    new Video(
+                            "Title2",
+                            "Description2",
+                            "Channel2",
+                            "VideoId2",
+                            "ThumbnailUrl2",
+                            "ChannelTitle2",
+                            "2024-11-06T04:41:46Z"));
     when(mockYouTubeService.searchVideos("test", 10))
-        .thenReturn(CompletableFuture.completedFuture(mockVideos));
+            .thenReturn(CompletableFuture.completedFuture(mockVideos));
 
     // Act
     Result result = homeController.index("test").toCompletableFuture().join();
@@ -200,21 +200,21 @@ public class HomeControllerTest {
     // Mock YouTubeService behavior
     String query = "test";
     List<Video> mockVideos =
-        List.of(
-            new Video(
-                "Title1",
-                "Description1",
-                "Channel1",
-                "VideoId1",
-                "ThumbnailUrl1",
-                "ChannelTitle1",
-                "2024-11-06T04:41:46Z"));
+            List.of(
+                    new Video(
+                            "Title1",
+                            "Description1",
+                            "Channel1",
+                            "VideoId1",
+                            "ThumbnailUrl1",
+                            "ChannelTitle1",
+                            "2024-11-06T04:41:46Z"));
     when(mockService.searchVideos(query, 10))
-        .thenReturn(CompletableFuture.completedFuture(mockVideos));
+            .thenReturn(CompletableFuture.completedFuture(mockVideos));
 
     // Simulate behavior that depends on YouTubeService
     Http.RequestBuilder requestBuilder =
-        Helpers.fakeRequest().cookie(Http.Cookie.builder("sessionId", "test-session-id").build());
+            Helpers.fakeRequest().cookie(Http.Cookie.builder("sessionId", "test-session-id").build());
     Result result = controller.index(query, requestBuilder.build()).toCompletableFuture().join();
 
     // Assert: Verify behavior
@@ -261,15 +261,15 @@ public class HomeControllerTest {
 
     // Inject the mock sessionQueryMap into HomeController
     homeController =
-        new HomeController(system, materializer, wsClient, mockYouTubeService, new LinkedHashMap<>(), mockSessionQueryMap);
+            new HomeController(system, materializer, wsClient, mockYouTubeService, new LinkedHashMap<>(), mockSessionQueryMap);
 
     // Mock the YouTubeService for a new query
     when(mockYouTubeService.searchVideos("query11", 10))
-        .thenReturn(CompletableFuture.completedFuture(videos));
+            .thenReturn(CompletableFuture.completedFuture(videos));
 
     // Mock request with session ID
     Http.RequestBuilder requestBuilder =
-        Helpers.fakeRequest().cookie(Http.Cookie.builder("sessionId", sessionId).build());
+            Helpers.fakeRequest().cookie(Http.Cookie.builder("sessionId", sessionId).build());
 
     // Act: Add a new query to trigger eldest query removal
     homeController.index("query11", requestBuilder.build()).toCompletableFuture().join();
@@ -282,7 +282,7 @@ public class HomeControllerTest {
     assertNotNull("Session-specific query results should not be null", sessionQueryResults);
     assertEquals("The map should contain exactly 10 entries", 10, sessionQueryResults.size());
     assertFalse(
-        "The oldest entry - cat0 - should be removed", sessionQueryResults.containsKey(query + 0));
+            "The oldest entry - cat0 - should be removed", sessionQueryResults.containsKey(query + 0));
     assertTrue("The new query exists", sessionQueryResults.containsKey("query11"));
   }
 
@@ -290,7 +290,7 @@ public class HomeControllerTest {
   public void testIndexResultAddedToMap() {
     // Arrange: Mock YouTube service to return a predefined list of videos
     when(mockYouTubeService.searchVideos("hello", 10))
-        .thenReturn(CompletableFuture.completedFuture(videos));
+            .thenReturn(CompletableFuture.completedFuture(videos));
 
     // Initialize session-specific map in the controller
     String sessionId = "test-session-id";
@@ -301,7 +301,7 @@ public class HomeControllerTest {
 
     // Mock request with session ID
     Http.RequestBuilder requestBuilder =
-        Helpers.fakeRequest().cookie(Http.Cookie.builder("sessionId", sessionId).build());
+            Helpers.fakeRequest().cookie(Http.Cookie.builder("sessionId", sessionId).build());
 
     // Act: Call the index method with the mock request
     homeController.index("hello", requestBuilder.build()).toCompletableFuture().join();
@@ -312,7 +312,7 @@ public class HomeControllerTest {
     // Assert: Verify the query results for the session
     assertNotNull("Session-specific query results should not be null", sessionQueryResults);
     assertTrue(
-        "The query should exist in the session's map", sessionQueryResults.containsKey("hello"));
+            "The query should exist in the session's map", sessionQueryResults.containsKey("hello"));
     assertEquals("The videos for the query should match", videos, sessionQueryResults.get("hello"));
     assertEquals("The map should contain only one query", 1, sessionQueryResults.size());
   }
@@ -321,20 +321,20 @@ public class HomeControllerTest {
   public void testIndexExistingResultReAddedToMap() {
     // Arrange: Mocking YouTubeService responses
     when(mockYouTubeService.searchVideos(query, 10))
-        .thenReturn(CompletableFuture.completedFuture(videos));
+            .thenReturn(CompletableFuture.completedFuture(videos));
 
     when(mockYouTubeService.searchVideos("dog", 10))
-        .thenReturn(
-            CompletableFuture.completedFuture(
-                List.of(
-                    new Video(
-                        "DogVideoTitle1",
-                        "DogVideoDescription1",
-                        "DogVideoChannelId1",
-                        "DogVideoVideoId1",
-                        "DogVideoThumbnailUrl.jpg1",
-                        "DogVideoChannelTitle1",
-                        "2024-11-06T04:41:46Z"))));
+            .thenReturn(
+                    CompletableFuture.completedFuture(
+                            List.of(
+                                    new Video(
+                                            "DogVideoTitle1",
+                                            "DogVideoDescription1",
+                                            "DogVideoChannelId1",
+                                            "DogVideoVideoId1",
+                                            "DogVideoThumbnailUrl.jpg1",
+                                            "DogVideoChannelTitle1",
+                                            "2024-11-06T04:41:46Z"))));
 
     // Initialize session-specific map in the controller
     String sessionId = "test-session-id";
@@ -343,18 +343,18 @@ public class HomeControllerTest {
 
     // Mock request with session ID
     Http.RequestBuilder requestBuilder =
-        Helpers.fakeRequest().cookie(Http.Cookie.builder("sessionId", sessionId).build());
+            Helpers.fakeRequest().cookie(Http.Cookie.builder("sessionId", sessionId).build());
 
     // Act: Fetching the same query multiple times
     homeController.index(query, requestBuilder.build()).toCompletableFuture().join(); // First fetch
     homeController
-        .index("dog", requestBuilder.build())
-        .toCompletableFuture()
-        .join(); // Second fetch
+            .index("dog", requestBuilder.build())
+            .toCompletableFuture()
+            .join(); // Second fetch
     homeController
-        .index(query, requestBuilder.build())
-        .toCompletableFuture()
-        .join(); // Re-fetch existing query
+            .index(query, requestBuilder.build())
+            .toCompletableFuture()
+            .join(); // Re-fetch existing query
 
     // Retrieve session-specific query results
     LinkedHashMap<String, List<Video>> sessionQueryResults = sessionQueryMap.get(sessionId);
@@ -365,16 +365,16 @@ public class HomeControllerTest {
 
     assertNotNull("Session-specific query results should not be null", sessionQueryResults);
     assertTrue(
-        "The query should exist in the session's map", sessionQueryResults.containsKey(query));
+            "The query should exist in the session's map", sessionQueryResults.containsKey(query));
 
     // Expected behavior: videos are appended, so the size is doubled for the query
     List<Video> expectedVideos = new ArrayList<>(videos);
     expectedVideos.addAll(videos); // Because the query was fetched twice
 
     assertEquals(
-        "The videos for the query should match the appended list",
-        expectedVideos,
-        sessionQueryResults.get(query));
+            "The videos for the query should match the appended list",
+            expectedVideos,
+            sessionQueryResults.get(query));
     assertEquals("The map should contain two queries", 2, sessionQueryResults.size());
   }
 
@@ -382,19 +382,19 @@ public class HomeControllerTest {
   public void testSearchWithValidData() {
     // Mock valid video data
     Video mockVideo =
-        new Video(
-            "Mock Title",
-            "Mock Description",
-            "channelId123",
-            "videoId123",
-            "http://mockurl.com",
-            "Mock Channel",
-            "2024-11-06T04:41:46Z");
+            new Video(
+                    "Mock Title",
+                    "Mock Description",
+                    "channelId123",
+                    "videoId123",
+                    "http://mockurl.com",
+                    "Mock Channel",
+                    "2024-11-06T04:41:46Z");
     List<Video> mockVideoList = Collections.singletonList(mockVideo);
 
     // Set up the YouTubeService to return the mock video list asynchronously
     when(mockYouTubeService.searchVideos("test", 10))
-        .thenReturn(CompletableFuture.completedFuture(mockVideoList));
+            .thenReturn(CompletableFuture.completedFuture(mockVideoList));
 
     // Act
     CompletionStage<Result> resultStage = homeController.search("test");
@@ -410,7 +410,7 @@ public class HomeControllerTest {
   public void testSearchWithEmptyResult() {
     // Set up the YouTubeService to return an empty list
     when(mockYouTubeService.searchVideos("empty", 10))
-        .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
+            .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
 
     CompletionStage<Result> resultStage = homeController.search("empty");
     Result result = resultStage.toCompletableFuture().join();
@@ -422,15 +422,15 @@ public class HomeControllerTest {
   public void testSearchWithError() {
     // Set up the YouTubeService to throw an exception
     doReturn(CompletableFuture.failedFuture(new RuntimeException("API failure")))
-        .when(mockYouTubeService)
-        .searchVideos(anyString(), eq(10));
+            .when(mockYouTubeService)
+            .searchVideos(anyString(), eq(10));
 
     // Act
     CompletionStage<Result> resultStage = homeController.search("error");
     Result result = resultStage.toCompletableFuture().join();
 
     assertTrue(
-        contentAsString(result).contains("An error occurred while processing your request."));
+            contentAsString(result).contains("An error occurred while processing your request."));
   }
 
   @Test
@@ -490,19 +490,19 @@ public class HomeControllerTest {
   public void testWordStatsWithSpecialCharacters() {
     // Arrange: Set up videos with special characters in titles and descriptions
     Video video =
-        new Video(
-            "Hello, World!",
-            "Special & character test.",
-            "channelId3",
-            "videoId3",
-            "http://mockurl3.com",
-            "Channel Special",
-            "2024-11-06T04:41:46Z");
+            new Video(
+                    "Hello, World!",
+                    "Special & character test.",
+                    "channelId3",
+                    "videoId3",
+                    "http://mockurl3.com",
+                    "Channel Special",
+                    "2024-11-06T04:41:46Z");
     List<Video> mockVideos = Collections.singletonList(video);
 
     // Mock YouTubeService to return the list of videos asynchronously
     when(mockYouTubeService.searchVideos("special", 50))
-        .thenReturn(CompletableFuture.completedFuture(mockVideos));
+            .thenReturn(CompletableFuture.completedFuture(mockVideos));
 
     // Act: Call the wordStats method
     CompletionStage<Result> resultStage = homeController.wordStats("special");
@@ -537,28 +537,28 @@ public class HomeControllerTest {
   public void testWordStatsWithFrequencyCount() {
     // Arrange: Set up videos with repetitive words
     Video video1 =
-        new Video(
-            "Java Java",
-            "Java programming",
-            "channelId1",
-            "videoId1",
-            "http://mockurl1.com",
-            "Channel Java",
-            "2024-11-06T04:41:46Z");
+            new Video(
+                    "Java Java",
+                    "Java programming",
+                    "channelId1",
+                    "videoId1",
+                    "http://mockurl1.com",
+                    "Channel Java",
+                    "2024-11-06T04:41:46Z");
     Video video2 =
-        new Video(
-            "Java Basics",
-            "Basics of Java programming",
-            "channelId2",
-            "videoId2",
-            "http://mockurl2.com",
-            "Channel Basics",
-            "2024-11-06T04:41:46Z");
+            new Video(
+                    "Java Basics",
+                    "Basics of Java programming",
+                    "channelId2",
+                    "videoId2",
+                    "http://mockurl2.com",
+                    "Channel Basics",
+                    "2024-11-06T04:41:46Z");
     List<Video> mockVideos = Arrays.asList(video1, video2);
 
     // Mock YouTubeService to return the list of videos asynchronously
     when(mockYouTubeService.searchVideos("java", 50))
-        .thenReturn(CompletableFuture.completedFuture(mockVideos));
+            .thenReturn(CompletableFuture.completedFuture(mockVideos));
 
     // Act: Call the wordStats method
     CompletionStage<Result> resultStage = homeController.wordStats("java");
@@ -626,7 +626,7 @@ public class HomeControllerTest {
   public void testWordStats_NoVideos() {
     // Mock the YouTube service to return an empty list for the given query
     when(mockYouTubeService.searchVideos("test-query", 50))
-        .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
+            .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
 
     // Act: Call the wordStats method with a valid query
     CompletionStage<Result> resultStage = homeController.wordStats("test-query");
@@ -795,19 +795,19 @@ public class HomeControllerTest {
     // Arrange: Mock a valid video with tags
     List<String> mockTags = Arrays.asList("Tag1", "Tag2", "Tag3");
     Video mockVideo =
-        new Video(
-            "Mock Title",
-            "Mock Description",
-            "channelId123",
-            "videoId123",
-            "http://mockurl.com",
-            "Mock Channel",
-            "2024-11-06T04:41:46Z");
+            new Video(
+                    "Mock Title",
+                    "Mock Description",
+                    "channelId123",
+                    "videoId123",
+                    "http://mockurl.com",
+                    "Mock Channel",
+                    "2024-11-06T04:41:46Z");
     mockVideo.setTags(mockTags);
 
     // Mock the YouTubeService to return a completed future with the mock video
     when(mockYouTubeService.getVideoDetails("videoId123"))
-        .thenReturn(CompletableFuture.completedFuture(mockVideo));
+            .thenReturn(CompletableFuture.completedFuture(mockVideo));
 
     // Act: Call the showTags method
     Result result = homeController.showTags("videoId123").toCompletableFuture().join();
@@ -826,27 +826,27 @@ public class HomeControllerTest {
     // Arrange: Mock a list of videos with a specific tag
     String testTag = "testTag";
     List<Video> mockVideos =
-        Arrays.asList(
-            new Video(
-                "Test Video 1",
-                "Description 1",
-                "channelId1",
-                "videoId1",
-                "http://thumbnail1.com",
-                "Channel 1",
-                "2024-11-06T04:41:46Z"),
-            new Video(
-                "Test Video 2",
-                "Description 2",
-                "channelId2",
-                "videoId2",
-                "http://thumbnail2.com",
-                "Channel 2",
-                "2024-11-06T04:41:46Z"));
+            Arrays.asList(
+                    new Video(
+                            "Test Video 1",
+                            "Description 1",
+                            "channelId1",
+                            "videoId1",
+                            "http://thumbnail1.com",
+                            "Channel 1",
+                            "2024-11-06T04:41:46Z"),
+                    new Video(
+                            "Test Video 2",
+                            "Description 2",
+                            "channelId2",
+                            "videoId2",
+                            "http://thumbnail2.com",
+                            "Channel 2",
+                            "2024-11-06T04:41:46Z"));
 
     // Mock the YouTubeService to return the list of videos
     when(mockYouTubeService.searchVideosByTag(testTag))
-        .thenReturn(CompletableFuture.completedFuture(mockVideos));
+            .thenReturn(CompletableFuture.completedFuture(mockVideos));
 
     // Act: Call the searchByTag method
     Result result = homeController.searchByTag(testTag).toCompletableFuture().join();
@@ -869,7 +869,7 @@ public class HomeControllerTest {
 
     // Mock the YouTubeService to return an empty list
     when(mockYouTubeService.searchVideosByTag(testTag))
-        .thenReturn(CompletableFuture.completedFuture(emptyVideos));
+            .thenReturn(CompletableFuture.completedFuture(emptyVideos));
 
     // Act: Call the searchByTag method
     Result result = homeController.searchByTag(testTag).toCompletableFuture().join();

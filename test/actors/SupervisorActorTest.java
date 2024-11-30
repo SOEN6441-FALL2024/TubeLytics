@@ -14,12 +14,16 @@ import play.libs.ws.WSClient;
 import play.libs.ws.WSRequest;
 import play.libs.ws.WSResponse;
 import services.YouTubeService;
-
+import scala.jdk.javaapi.CollectionConverters;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
-
+import java.util.Map;
+import java.util.AbstractMap;
+import java.util.List;
+import org.apache.pekko.actor.Props;
 public class SupervisorActorTest {
     static ActorSystem system;
     private WSClient mockWsClient;
@@ -105,10 +109,12 @@ public class SupervisorActorTest {
             ActorRef supervisorActor = system.actorOf(SupervisorActor.props(wsProbe.ref(), mockWsClient));
 
             supervisorActor.tell(42, getRef());
-            expectNoMessage(scala.concurrent.duration.Duration.create(1, "second"));
+
+            // Expect an ErrorMessage for unhandled messages
+            Messages.ErrorMessage response = expectMsgClass(Messages.ErrorMessage.class);
+            assertEquals("Unknown message type", response.getMessage());
         }};
     }
-
     /**
      * Tests the SupervisorStrategy of SupervisorActor with different exceptions.
      */
@@ -118,43 +124,56 @@ public class SupervisorActorTest {
             TestProbe wsProbe = new TestProbe(system);
             ActorRef supervisorActor = system.actorOf(SupervisorActor.props(wsProbe.ref(), mockWsClient));
 
-            // Simulate a NullPointerException (actor resumes)
+            // Simulate a NullPointerException (actor should treat it as an unknown message type)
             supervisorActor.tell(new NullPointerException("Simulated NPE"), getRef());
-            expectNoMessage(scala.concurrent.duration.Duration.create(1, "second"));
+            Messages.ErrorMessage errorMessage = expectMsgClass(Messages.ErrorMessage.class);
+            assertEquals("Unknown message type", errorMessage.getMessage());
 
-            // Simulate an IllegalArgumentException (actor restarts)
+            // Simulate an IllegalArgumentException (actor should treat it as an unknown message type)
             supervisorActor.tell(new IllegalArgumentException("Simulated IAE"), getRef());
-            expectNoMessage(scala.concurrent.duration.Duration.create(1, "second"));
+            errorMessage = expectMsgClass(Messages.ErrorMessage.class);
+            assertEquals("Unknown message type", errorMessage.getMessage());
 
-            // Simulate an IllegalStateException (actor stops)
+            // Simulate an IllegalStateException (actor should treat it as an unknown message type)
             supervisorActor.tell(new IllegalStateException("Simulated ISE"), getRef());
-            expectNoMessage(scala.concurrent.duration.Duration.create(1, "second"));
+            errorMessage = expectMsgClass(Messages.ErrorMessage.class);
+            assertEquals("Unknown message type", errorMessage.getMessage());
 
-            // Simulate a RuntimeException (actor restarts)
+            // Simulate a RuntimeException (actor should treat it as an unknown message type)
             supervisorActor.tell(new RuntimeException("Simulated RuntimeException"), getRef());
-            expectNoMessage(scala.concurrent.duration.Duration.create(1, "second"));
+            errorMessage = expectMsgClass(Messages.ErrorMessage.class);
+            assertEquals("Unknown message type", errorMessage.getMessage());
         }};
     }
-
     @Test
     public void testSupervisorStrategy_NullPointerException() {
         new TestKit(system) {{
-            ActorRef supervisorActor = system.actorOf(SupervisorActor.props(getRef(), null));
-            // Simulate a NullPointerException
+            TestProbe wsProbe = new TestProbe(system);
+            ActorRef supervisorActor = system.actorOf(SupervisorActor.props(wsProbe.ref(), mockWsClient));
+
+            // Send a NullPointerException to trigger the supervisor strategy
             supervisorActor.tell(new NullPointerException("Simulated NPE"), getRef());
-            // Validate the actor resumes (no crash, no response expected)
-            expectNoMessage(scala.concurrent.duration.Duration.create(1, "second"));
+
+            // Expect an ErrorMessage with the generic "Unknown message type"
+            Messages.ErrorMessage response = expectMsgClass(Messages.ErrorMessage.class);
+
+            // Verify the error message content matches the current actor behavior
+            assertEquals("Unknown message type", response.getMessage());
         }};
     }
-
     @Test
     public void testSupervisorStrategy_IllegalArgumentException() {
         new TestKit(system) {{
             ActorRef supervisorActor = system.actorOf(SupervisorActor.props(getRef(), null));
+
             // Simulate an IllegalArgumentException
             supervisorActor.tell(new IllegalArgumentException("Simulated IAE"), getRef());
-            // Validate the actor restarts (no crash, no response expected)
-            expectNoMessage(scala.concurrent.duration.Duration.create(1, "second"));
+
+            // Expect an ErrorMessage response
+            Messages.ErrorMessage errorMessage = expectMsgClass(Messages.ErrorMessage.class);
+
+            // Verify the error message matches the current actor behavior
+            assertEquals("Unknown message type", errorMessage.getMessage());
         }};
     }
 
@@ -162,10 +181,13 @@ public class SupervisorActorTest {
     public void testSupervisorStrategy_IllegalStateException() {
         new TestKit(system) {{
             ActorRef supervisorActor = system.actorOf(SupervisorActor.props(getRef(), null));
+
             // Simulate an IllegalStateException
             supervisorActor.tell(new IllegalStateException("Simulated ISE"), getRef());
-            // Validate the actor stops (no response expected)
-            expectNoMessage(scala.concurrent.duration.Duration.create(1, "second"));
+
+            // Expect the generic error message
+            Messages.ErrorMessage errorMessage = expectMsgClass(Messages.ErrorMessage.class);
+            assertEquals("Unknown message type", errorMessage.getMessage());
         }};
     }
 
@@ -173,10 +195,13 @@ public class SupervisorActorTest {
     public void testSupervisorStrategy_UnknownException() {
         new TestKit(system) {{
             ActorRef supervisorActor = system.actorOf(SupervisorActor.props(getRef(), null));
+
             // Simulate an unknown exception
             supervisorActor.tell(new Exception("Simulated Unknown Exception"), getRef());
-            // Validate the actor restarts (no crash, no response expected)
-            expectNoMessage(scala.concurrent.duration.Duration.create(1, "second"));
+
+            // Expect an ErrorMessage response with "Unknown message type"
+            Messages.ErrorMessage errorMessage = expectMsgClass(Messages.ErrorMessage.class);
+            assertEquals("Unknown message type", errorMessage.getMessage());
         }};
     }
 
@@ -191,32 +216,34 @@ public class SupervisorActorTest {
     }
 
 
-
-
     @Test
     public void testSupervisorStrategy_HandleSpecificExceptions() {
         new TestKit(system) {{
             ActorRef supervisorActor = system.actorOf(SupervisorActor.props(getRef(), null));
 
-            // Simulate a NullPointerException and validate resumption
+            // Simulate a NullPointerException and validate the response
             supervisorActor.tell(new NullPointerException("Simulated NPE"), getRef());
-            expectNoMessage(scala.concurrent.duration.Duration.create(1, "second")); // No crash means resumption worked
-            System.out.println("NullPointerException handling verified: Resumed.");
+            Messages.ErrorMessage errorMessage = expectMsgClass(Messages.ErrorMessage.class);
+            assertEquals("Unknown message type", errorMessage.getMessage());
+            System.out.println("NullPointerException handling verified: Unknown message response.");
 
-            // Simulate an IllegalArgumentException and validate restart
+            // Simulate an IllegalArgumentException and validate the response
             supervisorActor.tell(new IllegalArgumentException("Simulated IAE"), getRef());
-            expectNoMessage(scala.concurrent.duration.Duration.create(1, "second")); // No crash means restart worked
-            System.out.println("IllegalArgumentException handling verified: Restarted.");
+            Messages.ErrorMessage iaeMessage = expectMsgClass(Messages.ErrorMessage.class);
+            assertEquals("Unknown message type", iaeMessage.getMessage());
+            System.out.println("IllegalArgumentException handling verified: Unknown message response.");
 
-            // Simulate an IllegalStateException and validate stopping
+            // Simulate an IllegalStateException and validate the response
             supervisorActor.tell(new IllegalStateException("Simulated ISE"), getRef());
-            expectNoMessage(scala.concurrent.duration.Duration.create(1, "second")); // No response expected due to stop
-            System.out.println("IllegalStateException handling verified: Stopped.");
+            Messages.ErrorMessage iseMessage = expectMsgClass(Messages.ErrorMessage.class);
+            assertEquals("Unknown message type", iseMessage.getMessage());
+            System.out.println("IllegalStateException handling verified: Unknown message response.");
 
-            // Simulate an unknown exception and validate restart
+            // Simulate an unknown exception and validate the response
             supervisorActor.tell(new Exception("Simulated Unknown Exception"), getRef());
-            expectNoMessage(scala.concurrent.duration.Duration.create(1, "second")); // No crash means restart worked
-            System.out.println("Unknown exception handling verified: Restarted.");
+            Messages.ErrorMessage unknownMessage = expectMsgClass(Messages.ErrorMessage.class);
+            assertEquals("Unknown message type", unknownMessage.getMessage());
+            System.out.println("Unknown exception handling verified: Unknown message response.");
         }};
     }
 
@@ -227,22 +254,128 @@ public class SupervisorActorTest {
 
             // Validate that isDefinedAt is true for all exceptions
             supervisorActor.tell(new NullPointerException("Test NullPointerException"), getRef());
-            expectNoMessage(scala.concurrent.duration.Duration.create(1, "second"));
+            Messages.ErrorMessage nullPointerMessage = expectMsgClass(Messages.ErrorMessage.class);
+            assertEquals("Unknown message type", nullPointerMessage.getMessage());
+            System.out.println("NullPointerException handling validated with ErrorMessage.");
 
             supervisorActor.tell(new IllegalArgumentException("Test IllegalArgumentException"), getRef());
-            expectNoMessage(scala.concurrent.duration.Duration.create(1, "second"));
+            Messages.ErrorMessage illegalArgMessage = expectMsgClass(Messages.ErrorMessage.class);
+            assertEquals("Unknown message type", illegalArgMessage.getMessage());
+            System.out.println("IllegalArgumentException handling validated with ErrorMessage.");
 
             supervisorActor.tell(new IllegalStateException("Test IllegalStateException"), getRef());
-            expectNoMessage(scala.concurrent.duration.Duration.create(1, "second"));
+            Messages.ErrorMessage illegalStateMessage = expectMsgClass(Messages.ErrorMessage.class);
+            assertEquals("Unknown message type", illegalStateMessage.getMessage());
+            System.out.println("IllegalStateException handling validated with ErrorMessage.");
 
             supervisorActor.tell(new RuntimeException("Test RuntimeException"), getRef());
-            expectNoMessage(scala.concurrent.duration.Duration.create(1, "second"));
+            Messages.ErrorMessage runtimeMessage = expectMsgClass(Messages.ErrorMessage.class);
+            assertEquals("Unknown message type", runtimeMessage.getMessage());
+            System.out.println("RuntimeException handling validated with ErrorMessage.");
 
             supervisorActor.tell(new Exception("Test Unknown Exception"), getRef());
-            expectNoMessage(scala.concurrent.duration.Duration.create(1, "second"));
+            Messages.ErrorMessage unknownExceptionMessage = expectMsgClass(Messages.ErrorMessage.class);
+            assertEquals("Unknown message type", unknownExceptionMessage.getMessage());
+            System.out.println("Unknown exception handling validated with ErrorMessage.");
+        }};
+    }
+    /**
+     * Tests SupervisorActor's ability to handle WordStatsRequest.
+     */
+    @Test
+    public void testSupervisorActorHandlesSearchResultsMessage() {
+        new TestKit(system) {{
+            TestProbe wordStatsActorProbe = new TestProbe(system);
+            ActorRef supervisorActor = system.actorOf(SupervisorActor.props(getRef(), mockWsClient));
 
-            System.out.println("isDefinedAt validated for all exceptions.");
+            // Mock the WordStatsActor as a child of SupervisorActor
+            system.actorOf(WordStatsActor.props(), "wordStatsActor");
+
+            // Create a Video object
+            models.Video video = new models.Video(
+                    "Test Title",               // title
+                    "Test Description",         // description
+                    "ChannelID",                // channelId
+                    "VideoID",                  // videoId
+                    "ThumbnailUrl",             // thumbnailUrl
+                    "ChannelTitle",             // channelTitle
+                    "PublishedDate"             // publishedDate
+            );
+
+            // Create a SearchResultsMessage with a search term and a list of Video objects
+            Messages.SearchResultsMessage message = new Messages.SearchResultsMessage(
+                    "Test Search Term",         // Search term
+                    List.of(video)              // List of Video objects
+            );
+
+            // Send the message to the SupervisorActor
+            supervisorActor.tell(message, getRef());
+
+            // Validate no unexpected response
+            expectNoMessage(scala.concurrent.duration.Duration.create(1, "second"));
         }};
     }
 
+    @Test
+    public void testSupervisorActorHandlesWordStatsRequest() {
+        new TestKit(system) {{
+            TestProbe wordStatsActorProbe = new TestProbe(system);
+            ActorRef supervisorActor = system.actorOf(SupervisorActor.props(getRef(), mockWsClient));
+
+            // Mock the WordStatsActor as a child of SupervisorActor
+            system.actorOf(WordStatsActor.props(), "wordStatsActor");
+
+            // Send a WordStatsRequest message
+            Messages.WordStatsRequest request = new Messages.WordStatsRequest(List.of("test"));
+            supervisorActor.tell(request, getRef());
+
+            // Expect a WordStatsResponse message from the WordStatsActor
+            Messages.WordStatsResponse response = expectMsgClass(Messages.WordStatsResponse.class);
+
+            // Validate the response
+            assertNotNull(response);
+            assertTrue(response.getWordStats().size() > 0); // Check if the response contains stats
+        }};
+    }
+
+    @Test
+    public void testSupervisorActorHandlesGetCumulativeStats() {
+        new TestKit(system) {{
+            // Create a test probe for WordStatsActor
+            TestProbe wordStatsActorProbe = new TestProbe(system);
+
+            // Create SupervisorActor with the test probe as WordStatsActor
+            ActorRef supervisorActor = system.actorOf(
+                    Props.create(SupervisorActor.class, getRef(), mockWsClient, wordStatsActorProbe.ref())
+            );
+
+            // Send a GetCumulativeStats message to SupervisorActor
+            Messages.GetCumulativeStats request = new Messages.GetCumulativeStats();
+            supervisorActor.tell(request, getRef());
+
+            // Expect SupervisorActor to forward GetCumulativeStats to WordStatsActor
+            wordStatsActorProbe.expectMsgClass(Messages.GetCumulativeStats.class);
+
+            // Mock a response from WordStatsActor
+            List<Map.Entry<String, Long>> mockStats = List.of(
+                    new AbstractMap.SimpleEntry<>("exampleWord", 10L)
+            );
+            Messages.WordStatsResponse mockResponse = new Messages.WordStatsResponse(mockStats);
+
+            // Reply with the mocked response
+            wordStatsActorProbe.reply(mockResponse);
+
+            // Expect SupervisorActor to forward the response back
+            Messages.WordStatsResponse response = expectMsgClass(Messages.WordStatsResponse.class);
+
+            // Validate the response
+            assertNotNull("The WordStatsResponse is null", response);
+            assertNotNull("The word stats list is null", response.getWordStats());
+            assertFalse("The word stats list is empty", response.getWordStats().isEmpty());
+
+            boolean containsExpectedEntry = response.getWordStats().stream()
+                    .anyMatch(entry -> entry.getKey().equals("exampleWord") && entry.getValue().equals(10L));
+            assertTrue("The word stats list does not contain the expected data", containsExpectedEntry);
+        }};
+    }
 }

@@ -1,17 +1,21 @@
 package controllers;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 
+import actors.Messages;
 import actors.SupervisorActor;
 import models.ChannelInfo;
 import models.SearchResult;
 import models.Video;
 
+import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.stream.Materializer;
 
 import play.libs.streams.ActorFlow;
@@ -22,6 +26,8 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.WebSocket;
 import services.YouTubeService;
+
+import java.util.List;
 
 /**
  * This controller contains an action to handle HTTP requests to the application's home page. It
@@ -37,6 +43,8 @@ public class HomeController extends Controller {
     private static HashMap<String, LinkedHashMap<String, List<Video>>> multipleQueryResults =
             new HashMap<>();
     private final WSClient wsClient;
+    private final ActorRef supervisorActor;
+
 
 
     @Inject
@@ -48,6 +56,8 @@ public class HomeController extends Controller {
         this.youTubeService = Objects.requireNonNull(youTubeService, "YouTubeService cannot be null");
         this.multipleQueryResult =
                 Objects.requireNonNull(multipleQueryResult, "Query result map cannot be null");
+        this.supervisorActor = actorSystem.actorOf(SupervisorActor.props(null, wsClient), "supervisorActor");
+
     }
 
     public HomeController(
@@ -60,6 +70,8 @@ public class HomeController extends Controller {
         this.youTubeService = youTubeService;
         this.multipleQueryResult = multipleQueryResult;
         this.multipleQueryResults = sessionQueryMap;
+        this.supervisorActor = actorSystem.actorOf(SupervisorActor.props(null, wsClient), "supervisorActor");
+
     }
 
     /**
@@ -186,7 +198,6 @@ public class HomeController extends Controller {
                             return internalServerError("An error occurred while processing your request.");
                         });
     }
-
     /**
      * Calculates and displays word-level statistics for the latest 50 videos based on a given query.
      *
@@ -198,52 +209,98 @@ public class HomeController extends Controller {
      * @return a Result containing the rendered word statistics page with word frequency data.
      * @author Aynaz Javanivayeghan
      */
+
     public CompletionStage<Result> wordStats(String query) {
         if (query == null || query.trim().isEmpty()) {
             return CompletableFuture.completedFuture(badRequest("Please enter a search term."));
         }
 
-        // Fetch the search results asynchronously
-        return youTubeService
-                .searchVideos(query, 50)
-                .thenApply(
-                        videos -> {
-                            // Check if the video list is empty and return a message if no results are found
-                            if (videos.isEmpty()) {
-                                return ok("No words found");
-                            }
+        // Log the incoming query for debugging
+        System.out.println("HomeController: Received query for word stats: " + query);
 
-                            // Count word frequencies in titles and descriptions
-                            Map<String, Long> wordStats =
-                                    videos.stream()
-                                            .flatMap(
-                                                    video ->
-                                                            Arrays.stream(
-                                                                    (video.getTitle() + " " + video.getDescription()).split("\\W+")))
-                                            .map(String::toLowerCase)
-                                            .filter(word -> !word.isEmpty())
-                                            .collect(Collectors.groupingBy(word -> word, Collectors.counting()));
+        // Fetch the latest 50 videos for the query
+        return youTubeService.searchVideos(query, 50)
+                .thenCompose(videos -> {
+                    if (videos.isEmpty()) {
+                        // Log and return if no videos are found
+                        System.out.println("HomeController: No videos found for query: " + query);
+                        return CompletableFuture.completedFuture(ok("No videos found for the given query."));
+                    }
 
-                            // Sort by frequency in descending order
-                            Map<String, Long> sortedWordStats =
-                                    wordStats.entrySet().stream()
-                                            .sorted((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()))
-                                            .collect(
-                                                    Collectors.toMap(
-                                                            Map.Entry::getKey,
-                                                            Map.Entry::getValue,
-                                                            (e1, e2) -> e1,
-                                                            java.util.LinkedHashMap::new));
+                    // Extract titles and descriptions for word stats processing
+                    List<String> videoTexts = videos.stream()
+                            .map(video -> video.getTitle() + " " + video.getDescription())
+                            .collect(Collectors.toList());
 
-                            // Render the results
-                            return ok(views.html.wordStats.render(sortedWordStats, query));
-                        })
-                .exceptionally(
-                        e -> {
-                            // Handle exceptions and return an internal server error response
-                            e.printStackTrace();
-                            return internalServerError("An error occurred while processing your request.");
-                        });
+                    // Log the number of texts being processed
+                    System.out.println("HomeController: Processing word stats for " + videoTexts.size() + " video texts.");
+
+                    // Send to SupervisorActor for word stats processing
+                    return Patterns.ask(supervisorActor, new Messages.WordStatsRequest(videoTexts), Duration.ofSeconds(15))
+                            .thenApply(response -> {
+                                if (response instanceof Messages.WordStatsResponse) {
+                                    // Cast and process the response
+                                    Messages.WordStatsResponse wordStatsResponse = (Messages.WordStatsResponse) response;
+
+                                    // Convert the word stats into a sorted map
+                                    Map<String, Long> wordStatsMap = wordStatsResponse.getWordStats().stream()
+                                            .sorted(Map.Entry.<String, Long>comparingByValue().reversed()) // Sort by value (frequency) descending
+                                            .collect(Collectors.toMap(
+                                                    Map.Entry::getKey,
+                                                    Map.Entry::getValue,
+                                                    (existing, replacement) -> existing, // Merge function
+                                                    LinkedHashMap::new // Preserve order
+                                            ));
+
+                                    // Log the size of the word stats result
+                                    System.out.println("HomeController: Received " + wordStatsMap.size() + " word stats.");
+                                    System.out.println(wordStatsMap);
+
+                                    // Render the word stats page
+                                    return ok(views.html.wordStats.render(wordStatsMap, query));
+                                } else {
+                                    // Log and return an error if response is unexpected
+                                    System.err.println("HomeController: Unexpected response from WordStatsActor.");
+                                    return internalServerError("Unexpected response from WordStatsActor.");
+                                }
+                            })
+                            .exceptionally(e -> {
+                                // Log any exceptions and return an error response
+                                e.printStackTrace();
+                                return internalServerError("An error occurred while processing word statistics.");
+                            });
+                });
+    }
+
+    /**
+     * Fetch cumulative word stats from WordStatsActor and return them as JSON.
+     * @return JSON response with cumulative word stats.
+     */
+    public CompletionStage<Result> getCumulativeWordStats() {
+        return Patterns.ask(supervisorActor, new Messages.GetCumulativeStats(), Duration.ofSeconds(5))
+                .thenApply(response -> {
+                    if (response instanceof Messages.WordStatsResponse) {
+                        Messages.WordStatsResponse wordStatsResponse = (Messages.WordStatsResponse) response;
+
+                        // Use a LinkedHashMap to maintain sorted order in JSON
+                        Map<String, Long> sortedWordStats = wordStatsResponse.getWordStats().stream()
+                                .sorted(Map.Entry.<String, Long>comparingByValue().reversed()) // Sort by frequency descending
+                                .collect(Collectors.toMap(
+                                        Map.Entry::getKey,
+                                        Map.Entry::getValue,
+                                        (existing, replacement) -> existing,
+                                        LinkedHashMap::new // Use LinkedHashMap to preserve order
+                                ));
+
+                        return ok(play.libs.Json.toJson(sortedWordStats));
+                    } else {
+                        System.err.println("Unexpected response from WordStatsActor.");
+                        return internalServerError("Unexpected response from WordStatsActor.");
+                    }
+                }).exceptionally(e -> {
+                    e.printStackTrace();
+                    return internalServerError("Failed to retrieve cumulative word statistics.");
+                });
     }
 
     /**

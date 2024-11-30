@@ -92,4 +92,29 @@ public final class Messages {
         }
     }
 
+
+    public static class CalculateReadabilityMessage {
+        private final List<Video> videos;
+
+        public CalculateReadabilityMessage(List<Video> videos) {
+            this.videos = videos;
+        }
+
+        public List<Video> getVideos() {
+            return videos;
+        }
+    }
+
+    public static class ReadabilityResultsMessage {
+        private final List<Video> videos;
+
+        public ReadabilityResultsMessage(List<Video> videos) {
+            this.videos = videos;
+        }
+
+        public List<Video> getVideos() {
+            return videos;
+        }
+    }
+
 }

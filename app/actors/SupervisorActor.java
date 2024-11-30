@@ -36,9 +36,11 @@ public class SupervisorActor extends AbstractActor {
                 "youTubeServiceActor"
         );
 
+        ActorRef readabilityActor = getContext().actorOf(ReadabilityActor.props(), "readabilityActor");
+
         // Create UserActor and pass the YouTubeServiceActor
         this.userActor = getContext().actorOf(
-                UserActor.props(wsOut, youtubeServiceActor),
+                UserActor.props(wsOut, youtubeServiceActor, readabilityActor),
                 "userActor"
         );
     }

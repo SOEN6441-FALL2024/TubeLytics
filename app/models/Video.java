@@ -12,8 +12,8 @@ public class Video {
   private final String videoId;
   private final String thumbnailUrl;
   private final String channelTitle;
-  private final double fleschKincaidGradeLevel;
-  private final double fleschReadingEaseScore;
+  private double fleschKincaidGradeLevel;
+  private double fleschReadingEaseScore;
   private final String submissionSentiment;
   private final double happyWordCount;
   private final double sadWordCount;
@@ -71,8 +71,16 @@ public class Video {
     return fleschKincaidGradeLevel;
   }
 
+  public void setFleschKincaidGradeLevel(double fleschKincaidGradeLevel) {
+    this.fleschKincaidGradeLevel = fleschKincaidGradeLevel;
+  }
+
   public double getFleschReadingEaseScore() {
     return fleschReadingEaseScore;
+  }
+
+  public void setFleschReadingEaseScore(double fleschReadingEaseScore) {
+    this.fleschReadingEaseScore = fleschReadingEaseScore;
   }
 
   public double getHappyWordCount() {

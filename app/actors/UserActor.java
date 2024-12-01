@@ -65,50 +65,25 @@ public class UserActor extends AbstractActor {
             + ", Number of new videos: "
             + videos.size());
 
-    // Add new results to the cumulative list
-    videos.forEach(
-        video -> {
-          if (!cumulativeResults.contains(video)) {
-            cumulativeResults.addFirst(video);
-          }
-        });
-
-    // Ensure we only keep the latest 10 results
-    while (cumulativeResults.size() > 10) {
-      cumulativeResults.removeLast();
-    }
-
-    double averageGradeLevel =
-        videos.stream()
-            .mapToDouble(Video::getFleschKincaidGradeLevel)
-            .limit(50)
-            .average()
-            .orElse(0);
-
-    double averageReadingEase =
-        videos.stream().mapToDouble(Video::getFleschReadingEaseScore).limit(50).average().orElse(0);
-
-    // Send JSON to WebSocket
-    ObjectMapper objectMapper = new ObjectMapper();
-    try {
-      JsonNode json =
-          objectMapper
-              .createObjectNode()
-              .put("searchTerm", response.getSearchTerm())
-              .put("averageGradeLevel", Helpers.formatDouble(averageGradeLevel))
-              .put("averageReadingEase", Helpers.formatDouble(averageReadingEase))
-              .set("videos", objectMapper.valueToTree(cumulativeResults));
-      ws.tell(objectMapper.writeValueAsString(json), getSelf());
-    } catch (JsonProcessingException e) {
-      e.printStackTrace();
-    }
+    readabilityActor.tell(new Messages.CalculateReadabilityMessage(videos), getSelf());
   }
 
   private void sendResultsToClient(Messages.ReadabilityResultsMessage readabilityResults) {
-    List<Video> videos = readabilityResults.getVideos();
-    cumulativeResults.addAll(videos);
+    // Safely handle null videos
+    List<Video> videos = Optional.ofNullable(readabilityResults.getVideos()).orElse(Collections.emptyList());
+    double averageGradeLevel = readabilityResults.getAverageGradeLevel();
+    double averageReadingEase = readabilityResults.getAverageReadingEase();
 
-    // Keep only the latest 10 results
+    log.info("UserActor received readability results. Number of videos: {}", videos.size());
+
+    // Add processed videos to the cumulative list
+    videos.forEach(video -> {
+      if (!cumulativeResults.contains(video)) {
+        cumulativeResults.addFirst(video);
+      }
+    });
+
+    // Ensure we only keep the latest 10 results
     while (cumulativeResults.size() > 10) {
       cumulativeResults.removeLast();
     }
@@ -116,10 +91,18 @@ public class UserActor extends AbstractActor {
     // Send results to WebSocket
     ObjectMapper objectMapper = new ObjectMapper();
     try {
-      String json = objectMapper.writeValueAsString(cumulativeResults);
-      ws.tell(json, getSelf());
-    } catch (Exception e) {
+      JsonNode json =
+              objectMapper
+                      .createObjectNode()
+                      .put("searchTerm", Optional.ofNullable(readabilityResults.getSearchTerm()).orElse("Unknown"))
+                      .put("averageGradeLevel", Helpers.formatDouble(averageGradeLevel))
+                      .put("averageReadingEase", Helpers.formatDouble(averageReadingEase))
+                      .set("videos", objectMapper.valueToTree(cumulativeResults));
+      ws.tell(objectMapper.writeValueAsString(json), getSelf());
+    } catch (JsonProcessingException e) {
       log.error("Failed to serialize videos to JSON", e);
     }
   }
+
+
 }

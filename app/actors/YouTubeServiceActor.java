@@ -24,7 +24,7 @@ import services.YouTubeService;
 public class YouTubeServiceActor extends AbstractActor {
   private final YouTubeService youTubeService;
   private final Set<String> processedVideoIds = new HashSet<>();
-  private static final int UPDATE_INTERVAL_SECONDS = 100;
+  private static final int UPDATE_INTERVAL_SECONDS = 10;
 
   public static Props props(WSClient wsClient, YouTubeService youTubeService) {
     return Props.create(YouTubeServiceActor.class, () -> new YouTubeServiceActor(youTubeService));

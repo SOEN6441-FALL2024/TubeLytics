@@ -13,6 +13,7 @@ import models.Video;
  * @author Jessica Chen
  */
 public final class Messages {
+  public static String lastSearchTerm;
 
   /**
    * Class used specifically for passing search results (query, List<Video>) from
@@ -27,6 +28,8 @@ public final class Messages {
     public SearchResultsMessage(String searchTerm, List<Video> videos) {
       this.searchTerm = searchTerm;
       this.videos = videos;
+      lastSearchTerm = searchTerm;
+
     }
 
     public String getSearchTerm() {
@@ -131,13 +134,32 @@ public final class Messages {
   public static class ReadabilityResultsMessage {
     private final List<Video> videos;
 
-    public ReadabilityResultsMessage(List<Video> videos) {
+    private final double averageGradeLevel;
+    private final double averageReadingEase;
+
+    public ReadabilityResultsMessage(List<Video> videos, double averageGradeLevel, double averageReadingEase) {
       this.videos = videos;
+      this.averageGradeLevel = averageGradeLevel;
+      this.averageReadingEase = averageReadingEase;
+
     }
 
     public List<Video> getVideos() {
       return videos;
     }
+
+    public String getSearchTerm() {
+      return lastSearchTerm;
+    }
+
+    public double getAverageGradeLevel() {
+      return averageGradeLevel;
+    }
+
+    public double getAverageReadingEase() {
+      return averageReadingEase;
+    }
+
   }
 
 

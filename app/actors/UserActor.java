@@ -33,11 +33,11 @@ public class UserActor extends AbstractActor {
   }
 
   public UserActor(
-      final ActorRef wsOut, final ActorRef youTubeServiceActor, ActorRef readabilityActor) {
+      final ActorRef wsOut, final ActorRef youTubeServiceActor, ActorRef readabilityActor, ActorRef submissionSentimentActor) {
     this.ws = wsOut;
     this.youTubeServiceActor = youTubeServiceActor;
     this.readabilityActor = readabilityActor;
-      this.submissionSentimentActor = submissionSentimentActor;
+    this.submissionSentimentActor = submissionSentimentActor;
   }
 
   @Override
@@ -46,7 +46,6 @@ public class UserActor extends AbstractActor {
         .match(String.class, this::handleSearchQuery)
         .match(Messages.SearchResultsMessage.class, this::processReceivedResults)
         .match(Messages.ReadabilityResultsMessage.class, this::sendResultsToClient)
-            .match(Messages.SearchResultsMessage.class, this::processReceivedSentimentResults)
         .build();
   }
 
@@ -90,10 +89,6 @@ public class UserActor extends AbstractActor {
 
     double averageReadingEase =
         videos.stream().mapToDouble(Video::getFleschReadingEaseScore).limit(50).average().orElse(0);
-
-      Messages.SearchResultsMessage responseWithSentiment =
-              new Messages.SearchResultsMessage(response.getSearchTerm(), new ArrayList<>(cumulativeResults));
-      submissionSentimentActor.tell(responseWithSentiment, getSelf());
 
     // Send JSON to WebSocket
     ObjectMapper objectMapper = new ObjectMapper();

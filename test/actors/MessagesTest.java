@@ -301,36 +301,15 @@ public class MessagesTest {
   }
 
   /**
-   * Tests creating an AnalyzeVideoSentiments class and its getters
+   * Tests creating SentimentAndReadabilityResult class and its getters
    *
    * @author Jessica Chen
    */
   @Test
-  public void testAnalyzeVideoSentiments() {
-    List<Video> videos = new ArrayList<>();
-    videos.add(
-            new Video(
-                    "Title",
-                    "Description",
-                    "ChannelId",
-                    "VideoId",
-                    "ThumbnailUrl",
-                    "channelTitle",
-                    "2024-11-06T04:41:46Z"));
-
-    Messages.AnalyzeVideoSentiments test1 = new Messages.AnalyzeVideoSentiments(videos);
-    assertEquals(videos, test1.getVideos());
-    assertNotNull(test1);
-  }
-
-  /**
-   * Tests creating SentimentAnalysisResult class and its getters
-   *
-   * @author Jessica Chen
-   */
-  @Test
-  public void testSentimentAnalysisResult() {
+  public void testSentimentAndReadabilityResult() {
     String sentiment = ":-|";
+    double avgGradeLevel = 3.14;
+    double avgReadingEase = 1.59;
     List<Video> videos = new ArrayList<>();
     videos.add(
             new Video(
@@ -341,25 +320,15 @@ public class MessagesTest {
                     "ThumbnailUrl",
                     "channelTitle",
                     "2024-11-06T04:41:46Z"));
+    String searchTerm = "test";
 
-    Messages.SentimentAnalysisResult test1 = new Messages.SentimentAnalysisResult(sentiment, videos);
+    Messages.SentimentAndReadabilityResult test1 =
+            new Messages.SentimentAndReadabilityResult(sentiment, videos, avgGradeLevel, avgReadingEase);
     assertEquals(sentiment, test1.getSentiment());
-    assertEquals(videos, test1.getVideos());
-    assertNotNull(test1);
-  }
-
-  /**
-   * Tests creating an AnalyzeVideoSentiments class and its getters
-   *
-   * @author Jessica Chen
-   */
-  @Test
-  public void testNullAnalyzeVideoSentiments() {
-    List<Video> videos = new ArrayList<>();
-
-    Messages.AnalyzeVideoSentiments test1 = new Messages.AnalyzeVideoSentiments(videos);
-    assertEquals(0, test1.getVideos().size());
-    assertNotNull(test1);
+    assertNotNull("Video list is empty, not null", test1.getVideos());
+    assertEquals(videos.size(), test1.getVideos().size());
+    assertEquals(avgGradeLevel, test1.getAverageGradeLevel(), 0.00);
+    assertEquals(avgReadingEase, test1.getAverageReadingEase(), 0.00);
   }
 
   /**
@@ -370,11 +339,37 @@ public class MessagesTest {
   @Test
   public void testNullSentimentAnalysisResult() {
     String sentiment = "N/A";
+    double avgGradeLevel = 3.14;
+    double avgReadingEase = 1.59;
+    List<Video> videos = null;
+    String searchTerm = "test";
+
+    Messages.SentimentAndReadabilityResult test1 =
+            new Messages.SentimentAndReadabilityResult(sentiment, videos, avgGradeLevel, avgReadingEase);
+    assertEquals(sentiment, test1.getSentiment());
+    assertNull("Video list is null", test1.getVideos());
+    assertEquals(avgGradeLevel, test1.getAverageGradeLevel(), 0.00);
+    assertEquals(avgReadingEase, test1.getAverageReadingEase(), 0.00);
+  }
+
+
+  /**
+   * Tests creating SentimentAnalysisResult class and its getters
+   *
+   * @author Jessica Chen
+   */
+  @Test
+  public void testEmptySentimentAnalysisResult() {
+    String sentiment = "N/A";
+    double avgGradeLevel = 3.14;
+    double avgReadingEase = 1.59;
     List<Video> videos = new ArrayList<>();
 
-    Messages.SentimentAnalysisResult test1 = new Messages.SentimentAnalysisResult(sentiment, videos);
+    Messages.SentimentAndReadabilityResult test1 =
+            new Messages.SentimentAndReadabilityResult(sentiment, videos, avgGradeLevel, avgReadingEase);
     assertEquals(sentiment, test1.getSentiment());
-    assertEquals(0, test1.getVideos().size());
-    assertNotNull(test1);
+    assertNotNull("Video list is empty, not null", test1.getVideos());
+    assertEquals(avgGradeLevel, test1.getAverageGradeLevel(), 0.00);
+    assertEquals(avgReadingEase, test1.getAverageReadingEase(), 0.00);
   }
 }

@@ -46,8 +46,8 @@ public class UserActor extends AbstractActor {
     return receiveBuilder()
         .match(String.class, this::handleSearchQuery)
         .match(Messages.SearchResultsMessage.class, this::processReceivedResults)
-        .match(Messages.SentimentAnalysisResult.class, this::processSentimentResults)
-        .match(Messages.ReadabilityResultsMessage.class, this::sendResultsToClient)
+        .match(Messages.ReadabilityResultsMessage.class, this::sendResultsToSentimentActor)
+        .match(Messages.SentimentAndReadabilityResult.class, this::sendResultsToClient)
         .build();
   }
 
@@ -61,6 +61,11 @@ public class UserActor extends AbstractActor {
     youTubeServiceActor.tell(query, getSelf());
   }
 
+  /**
+   * Sends list of videos received from YouTubeServiceActor to ReadabilityActor to add more information.
+   *
+   * @param response includes search term and the list of videos corresponding to it
+   */
   private void processReceivedResults(Messages.SearchResultsMessage response) {
     List<Video> videos = response.getVideos() == null ? new ArrayList<>() : response.getVideos();
     System.out.println(
@@ -71,20 +76,38 @@ public class UserActor extends AbstractActor {
 
     // Send the videos to the ReadabilityActor for processing
     readabilityActor.tell(new Messages.CalculateReadabilityMessage(videos), getSelf());
-      sentimentActor.tell(new Messages.AnalyzeVideoSentiments(videos), getSelf());
   }
 
   /**
-   * Sends the readability results to the client
+   * Sends the readability results to the sentimentActor for further processing
    *
    * @param readabilityResults the readability results to send
-   * @author Deniz Dinchdonmez
+   * @author Deniz Dinchdonmez, Jessica Chen
    */
-  private void sendResultsToClient(Messages.ReadabilityResultsMessage readabilityResults) {
+  private void sendResultsToSentimentActor(Messages.ReadabilityResultsMessage readabilityResults) {
     // Safely handle null videos
     List<Video> videos = Optional.ofNullable(readabilityResults.getVideos()).orElse(Collections.emptyList());
     double averageGradeLevel = readabilityResults.getAverageGradeLevel();
     double averageReadingEase = readabilityResults.getAverageReadingEase();
+
+    // Sends message with videos to SentimentActor
+    sentimentActor.tell(new Messages.ReadabilityResultsMessage(videos, averageGradeLevel, averageReadingEase),
+            getSelf());
+  }
+
+  /**
+   * Sends the sentiment results combined with readability results to the client
+   *
+   * @param sentimentAndReadabilityResult the sentiment/readability results to send
+   * @author Deniz Dinchdonmez
+   */
+  private void sendResultsToClient(Messages.SentimentAndReadabilityResult sentimentAndReadabilityResult) {
+    // Safely handle null videos
+    List<Video> videos = Optional.ofNullable(sentimentAndReadabilityResult.getVideos()).orElse(Collections.emptyList());
+    double averageGradeLevel = sentimentAndReadabilityResult.getAverageGradeLevel();
+    double averageReadingEase = sentimentAndReadabilityResult.getAverageReadingEase();
+
+    String sentiment = sentimentAndReadabilityResult.getSentiment();
 
     log.info("UserActor received readability results. Number of videos: {}", videos.size());
 
@@ -104,32 +127,16 @@ public class UserActor extends AbstractActor {
       JsonNode json =
               objectMapper
                       .createObjectNode()
-                      .put("searchTerm", Optional.ofNullable(readabilityResults.getSearchTerm()).orElse("Unknown"))
+                      .put("searchTerm", Optional.ofNullable(sentimentAndReadabilityResult.getSearchTerm()).orElse("Unknown"))
                       .put("averageGradeLevel", Helpers.formatDouble(averageGradeLevel))
                       .put("averageReadingEase", Helpers.formatDouble(averageReadingEase))
+                      .put("sentiment", sentiment)
                       .set("videos", objectMapper.valueToTree(cumulativeResults));
       ws.tell(objectMapper.writeValueAsString(json), getSelf());
     } catch (JsonProcessingException e) {
       log.error("Failed to serialize videos to JSON", e);
     }
   }
-
-    private void processSentimentResults(Messages.SentimentAnalysisResult sentimentAnalysisResult) {
-        String sentimentResult = sentimentAnalysisResult.getSentiment();
-        List<Video> videos = sentimentAnalysisResult.getVideos();
-        cumulativeResults.addAll(videos);
-        // Send JSON to WebSocket
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            JsonNode json =
-                    objectMapper
-                            .createObjectNode()
-                            .put("sentiment", sentimentResult);
-            ws.tell(objectMapper.writeValueAsString(json), getSelf());
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-    }
 
   /**
    * Sets the object mapper for the actor
@@ -140,6 +147,4 @@ public class UserActor extends AbstractActor {
   public void setObjectMapper(ObjectMapper objectMapper) {
     this.objectMapper = objectMapper;
   }
-
-
 }

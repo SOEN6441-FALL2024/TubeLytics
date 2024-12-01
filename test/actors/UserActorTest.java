@@ -6,9 +6,8 @@ import static org.mockito.Mockito.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+
+import java.util.*;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.Video;
@@ -114,6 +113,20 @@ public class UserActorTest {
                 new Messages.ReadabilityResultsMessage(videos, 5.0, 80.0);
         readActorProbe.reply(mockReadabilityResults);
 
+        Messages.ReadabilityResultsMessage sentimentRequest =
+                sentimentActorProbe.expectMsgClass(Messages.ReadabilityResultsMessage.class);
+        assertEquals(videos, sentimentRequest.getVideos());
+
+        Messages.SentimentAndReadabilityResult mockSentimentResult =
+                new Messages.SentimentAndReadabilityResult(
+                ":-)",
+                        videos,
+                5.0,
+                80.0
+        );
+
+        sentimentActorProbe.reply(mockSentimentResult);
+
         String jsonResponse = wsProbe.expectMsgClass(String.class);
 
         try {
@@ -122,6 +135,9 @@ public class UserActorTest {
 
           assertEquals(query, jsonNode.get("searchTerm").asText());
           assertEquals(1, jsonNode.get("videos").size());
+          assertEquals(":-)", jsonNode.get("sentiment").asText());
+          assertEquals("5.0", jsonNode.get("averageGradeLevel").asText());
+          assertEquals("80.0", jsonNode.get("averageReadingEase").asText());
         } catch (JsonProcessingException e) {
           fail("JSON parsing failed: " + e.getMessage());
         }
@@ -161,6 +177,19 @@ public class UserActorTest {
               new Messages.ReadabilityResultsMessage(Collections.emptyList(), 0.0, 0.0);
       readActorProbe.reply(mockReadabilityResults);
 
+      Messages.ReadabilityResultsMessage sentimentRequest =
+              sentimentActorProbe.expectMsgClass(Messages.ReadabilityResultsMessage.class);
+
+      Messages.SentimentAndReadabilityResult mockSentimentResult =
+              new Messages.SentimentAndReadabilityResult(
+                      "N/A",
+                      Collections.emptyList(),
+                      0.0,
+                      0.0
+              );
+
+      sentimentActorProbe.reply(mockSentimentResult);
+
       String jsonResponse = wsProbe.expectMsgClass(String.class);
 
       try {
@@ -174,6 +203,7 @@ public class UserActorTest {
         // Validate videos
         assertTrue(jsonNode.has("videos") && jsonNode.get("videos").isArray());
         assertEquals(0, jsonNode.get("videos").size());
+        assertEquals("N/A", jsonNode.get("sentiment").asText());
       } catch (JsonProcessingException e) {
         fail("JSON parsing failed: " + e.getMessage());
       }
@@ -231,6 +261,7 @@ public class UserActorTest {
       TestProbe wsProbe = new TestProbe(system);
       TestProbe youTubeServiceActorProbe = new TestProbe(system);
       TestProbe readActorProbe = new TestProbe(system);
+      TestProbe sentimentActorProbe = new TestProbe(system);
 
       ActorRef userActor =
               system.actorOf(
@@ -245,6 +276,16 @@ public class UserActorTest {
       // Mock readability results
       readActorProbe.expectMsgClass(Messages.CalculateReadabilityMessage.class);
       readActorProbe.reply(new Messages.ReadabilityResultsMessage(Collections.emptyList(), 0.0, 0.0));
+
+      // Mock readability and sentiment results combined
+      sentimentActorProbe.expectMsgClass(Messages.ReadabilityResultsMessage.class);
+      sentimentActorProbe.reply(
+              new Messages.SentimentAndReadabilityResult(
+                      "N/A",
+                      Collections.emptyList(),
+                      0.0,
+                      0.0
+              ));
 
       String nullJsonResponse = wsProbe.expectMsgClass(FiniteDuration.create(5, "seconds"), String.class);
       try {
@@ -278,6 +319,15 @@ public class UserActorTest {
       readActorProbe.expectMsgClass(Messages.CalculateReadabilityMessage.class);
       readActorProbe.reply(new Messages.ReadabilityResultsMessage(videos, 5.0, 80.0));
 
+      sentimentActorProbe.expectMsgClass(Messages.ReadabilityResultsMessage.class);
+      sentimentActorProbe.reply(
+              new Messages.SentimentAndReadabilityResult(
+                      ":-|",
+                      videos,
+                      5.0,
+                      80.0
+              ));
+
       String largeJsonResponse = wsProbe.expectMsgClass(FiniteDuration.create(5, "seconds"), String.class);
       try {
         ObjectMapper mapper = new ObjectMapper();
@@ -299,11 +349,76 @@ public class UserActorTest {
   }
 
   @Test
+  public void testProcessReceivedResultsDuplicates() {
+    new TestKit(system) {{
+      TestProbe wsProbe = new TestProbe(system);
+      TestProbe youTubeServiceActorProbe = new TestProbe(system);
+      TestProbe readActorProbe = new TestProbe(system);
+      TestProbe sentimentActorProbe = new TestProbe(system);
+
+      ActorRef userActor =
+              system.actorOf(
+                      UserActor.props(
+                              wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref(), sentimentActorProbe.ref()));
+
+      List<Video> videos = new ArrayList<>();
+      Video video = new Video(
+                        "Title",
+                        "Description",
+                        "ChannelId",
+                        "VideoId",
+                        "ThumbnailUrl",
+                        "ChannelTitle",
+                        "2024-11-06T04:41:46Z");
+      videos.add(video);
+      videos.add(video);
+
+      Messages.SearchResultsMessage largeResponse =
+              new Messages.SearchResultsMessage("test-query", videos);
+      userActor.tell(largeResponse, getRef());
+
+      readActorProbe.expectMsgClass(Messages.CalculateReadabilityMessage.class);
+      readActorProbe.reply(new Messages.ReadabilityResultsMessage(videos, 5.0, 80.0));
+      sentimentActorProbe.expectMsgClass(Messages.ReadabilityResultsMessage.class);
+      sentimentActorProbe.reply(
+              new Messages.SentimentAndReadabilityResult(
+                      ":-|",
+                      videos,
+                      5.0,
+                      80.0
+              ));
+
+      String largeJsonResponse = wsProbe.expectMsgClass(FiniteDuration.create(5, "seconds"), String.class);
+      try {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode jsonNode = mapper.readTree(largeJsonResponse);
+
+        assertEquals("test-query", jsonNode.get("searchTerm").asText());
+        assertEquals(1, jsonNode.get("videos").size());
+
+        // Adding titles to a set to check if there are any duplicates
+        Set<String> titles = new HashSet<>();
+        for (int i = 0; i < jsonNode.get("videos").size(); i++) {
+          JsonNode videoNode = jsonNode.get("videos").get(i);
+          String title = videoNode.get("title").asText();
+          titles.add(title);
+        }
+
+        assertEquals("List of video titles should be unique.", 1, titles.size());
+      } catch (JsonProcessingException e) {
+        fail("JSON parsing failed for largeResponse: " + e.getMessage());
+      }
+    }};
+  }
+
+
+  @Test
   public void testSendResultsToClientJsonProcessingException() throws JsonProcessingException {
     new TestKit(system) {{
       TestProbe wsProbe = new TestProbe(system);
       TestProbe youTubeServiceActorProbe = new TestProbe(system);
       TestProbe readActorProbe = new TestProbe(system);
+      TestProbe sentimentActorProbe = new TestProbe(system);
 
       // Create a mock for ObjectMapper
       ObjectMapper mockObjectMapper = Mockito.mock(ObjectMapper.class);
@@ -339,6 +454,9 @@ public class UserActorTest {
       Messages.ReadabilityResultsMessage mockReadabilityResults =
               new Messages.ReadabilityResultsMessage(videos, 5.0, 80.0);
 
+      Messages.SentimentAndReadabilityResult mockSentimentAndReadabilityRestuls =
+              new Messages.SentimentAndReadabilityResult(":-|", videos, 5.0, 80.0);
+
       // Inject the mocked ObjectMapper into UserActor
       TestActorRef<UserActor> testUserActor = TestActorRef.create(system,
               UserActor.props(wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref(), sentimentActorProbe.ref()));
@@ -348,6 +466,8 @@ public class UserActorTest {
       // Send the message
       testUserActor.tell(mockReadabilityResults, getRef());
 
+      testUserActor.tell(mockSentimentAndReadabilityRestuls, getRef());
+
       // Verify that the error log is triggered
       Mockito.verify(mockObjectMapper, Mockito.times(1)).writeValueAsString(Mockito.any());
 
@@ -355,6 +475,4 @@ public class UserActorTest {
       wsProbe.expectNoMessage();
     }};
   }
-
-
 }

@@ -6,11 +6,14 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
 import utils.Helpers;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
- * SentimentActor to calculate the submission sentiment for a list of videos per search result. Packages up
+ * SentimentActor used to calculate the submission sentiment for a list of videos per search result. Packages up
  * the information and sends it back to the UserActor for processing.
+ *
  * @author Jessica Chen
  */
 public class SentimentActor extends AbstractActor {
@@ -22,21 +25,30 @@ public class SentimentActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(Messages.AnalyzeVideoSentiments.class, this::calculateOverallSentiment)
+                .match(Messages.ReadabilityResultsMessage.class, this::calculateOverallSentiment)
                 .build();
     }
 
     /**
-     * Evaluates the overall sentiment based on sentiments of each video in the list of video results from a query
-     * @param searchResults message obtained from the UserActor who obtained the results from the YouTubeServiceActor
+     * Evaluates the overall sentiment based on sentiments of each video in the list of video results from a query and
+     * ensures previously calculated averageGradeLevel and averageReadingEase are stored to send back to UserActor
+     *
+     * @param readabilityResults message obtained from the UserActor who obtained the results from the YouTubeServiceActor
+     * @author Jessica Chen
      */
-    private void calculateOverallSentiment(Messages.AnalyzeVideoSentiments searchResults) {
+    private void calculateOverallSentiment(Messages.ReadabilityResultsMessage readabilityResults) {
         ActorRef sender = getSender();
-        List<Video> videos = searchResults.getVideos();
-        if (videos == null || videos.isEmpty()) {
-            Messages.SentimentAnalysisResult sentiment = new Messages.SentimentAnalysisResult("N/A", videos);
-            // Adding sentiment as "Unavailable" if there are no videos in the list and sending it back to the UserActor
-            sender.tell(sentiment, getSelf());
+        List<Video> videos = Optional.ofNullable(readabilityResults.getVideos()).orElse(Collections.emptyList());
+        double averageGradeLevel = readabilityResults.getAverageGradeLevel();
+        double averageReadingEase = readabilityResults.getAverageReadingEase();
+        //If video is empty then sentiment is set to "N/A"
+        if (videos.isEmpty()) {
+            String sentimentResult = "N/A";
+            System.out.println("SentimentActor received no videos.");
+            Messages.SentimentAndReadabilityResult sentimentResultEmptyVid =
+                    new Messages.SentimentAndReadabilityResult(sentimentResult, videos, averageGradeLevel, averageReadingEase);
+            // Adding sentiment for list of videos and sending it back to the UserActor
+            sender.tell(sentimentResultEmptyVid, getSelf());
             return;
         }
         // Calls calculateHappyWordCount from Helpers class for each video in stream
@@ -54,7 +66,12 @@ public class SentimentActor extends AbstractActor {
         // Calls calculateSentiment for overall sentiment calculations and setting it to searchResults
         String result = Helpers.calculateSentiment(totalHappyWordCount, totalSadWordCount);
 
-        Messages.SentimentAnalysisResult sentiment = new Messages.SentimentAnalysisResult(result, videos);
+        System.out.println("SentimentActor received and processed " + videos.size() + " videos.");
+        System.out.println("SentimentActor calculated: Happy Word Count: " + totalHappyWordCount
+                + ", Sad Word Count: " + totalSadWordCount + ", Overall Sentiment: " + result);
+
+        Messages.SentimentAndReadabilityResult sentiment =
+                new Messages.SentimentAndReadabilityResult(result, videos, averageGradeLevel, averageReadingEase);
         // Adding sentiment for list of videos and sending it back to the UserActor
         sender.tell(sentiment, getSelf());
     }

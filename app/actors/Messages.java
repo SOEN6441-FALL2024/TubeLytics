@@ -258,36 +258,77 @@ public final class Messages {
   }
 
   /**
-   * Class used to help calculate sentiment analysis for stream of videos
+   * Combines readability results with newly calculated sentiment results to send from SentimentActor back to UserActor
+   * to package and eventually to the client.
+   *
    * @author Jessica Chen
    */
-  public static class AnalyzeVideoSentiments {
-    private final List<Video> videos;
-
-    public AnalyzeVideoSentiments(List<Video> videos) {
-      this.videos = videos;
-    }
-
-    public List<Video> getVideos() {
-      return videos;
-    }
-  }
-
-  public static class SentimentAnalysisResult {
+  public static class SentimentAndReadabilityResult {
     private final String sentiment;
     private final List<Video> videos;
 
-    public SentimentAnalysisResult(String sentiment, List<Video> videos) {
+    private final double averageGradeLevel;
+    private final double averageReadingEase;
+
+    public SentimentAndReadabilityResult(String sentiment, List<Video> videos,
+                                         double averageGradeLevel, double averageReadingEase) {
       this.sentiment = sentiment;
       this.videos = videos;
+      this.averageGradeLevel = averageGradeLevel;
+      this.averageReadingEase = averageReadingEase;
     }
 
+    /**
+     * Get sentiment calculated in SentimentActor class of stream of videos
+     *
+     * @return String that could be either :-| :-) or :-(
+     * @author Jessica Chen
+     */
     public String getSentiment() {
       return sentiment;
     }
 
+    /**
+     * Get same video list that was sent to SentimentActor by UserActor who processed it after the receiving it from
+     * the ReadabilityActor
+     *
+     * @return List of videos
+     * @author Jessica Chen
+     */
     public List<Video> getVideos() {
       return videos;
+    }
+
+    /**
+     * Get the searchTerm that is corresponding to all of these messages
+     *
+     * @return String searchTerm
+     * @author Jessica Chen
+     */
+    public String getSearchTerm() {
+      return lastSearchTerm;
+    }
+
+    /**
+     * Get previously calculated average grade level from ReadabilityActor who passed it to UserActor who passed it
+     * to SentimentActor
+     *
+     * @return double
+     * @author Jessica Chen
+     */
+    public double getAverageGradeLevel() {
+      return averageGradeLevel;
+    }
+
+    /**
+     * Get previously calculated average reading ease from ReadabilityActor who passed it to UserActor who passed it
+     * to SentimentActor
+     *
+     * @return double
+     * @author Jessica Chen
+     */
+    public double getAverageReadingEase() {
+      return averageReadingEase;
     }
   }
 }

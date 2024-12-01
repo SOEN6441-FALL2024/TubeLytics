@@ -9,11 +9,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
+import utils.Helpers;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for SentimentActor class
@@ -47,7 +48,8 @@ public class SentimentActorTest {
         new TestKit(system) {{
             TestProbe senderProbe = new TestProbe(system);
             ActorRef sentimentActor = system.actorOf(SentimentActor.props());
-
+            double avgGradeLevel = 3.14;
+            double avgReadingEase = 1.59;
             List<Video> testVideos = new ArrayList<>();
             Video vid1 = new Video(
                     "cats1",
@@ -69,14 +71,23 @@ public class SentimentActorTest {
             testVideos.add(vid1);
             testVideos.add(vid2);
 
-            Messages.AnalyzeVideoSentiments testSearchResultMsg = new Messages.AnalyzeVideoSentiments(testVideos);
+            long HappyWordCount = 0;
+            long SadWordCount = 0;
+
+            for (Video video : testVideos) {
+                HappyWordCount += Helpers.calculateSadWordCount(video.getDescription());
+                SadWordCount+=Helpers.calculateHappyWordCount(video.getDescription());
+            }
+            String actualSentiment = Helpers.calculateSentiment(HappyWordCount, SadWordCount);
+            Messages.ReadabilityResultsMessage testSearchResultMsg =
+                    new Messages.ReadabilityResultsMessage(testVideos, avgGradeLevel, avgReadingEase);
             sentimentActor.tell(testSearchResultMsg, senderProbe.ref());
 
-            Messages.SentimentAnalysisResult results =
-                    senderProbe.expectMsgClass(Messages.SentimentAnalysisResult.class);
+            Messages.SentimentAndReadabilityResult results =
+                    senderProbe.expectMsgClass(Messages.SentimentAndReadabilityResult.class);
 
-            assertEquals(2, results.getVideos().size());
-            assertEquals(":-|", results.getSentiment());
+            assertEquals(testVideos.size(), results.getVideos().size());
+            assertEquals(actualSentiment, results.getSentiment());
         }};
     }
 
@@ -90,17 +101,25 @@ public class SentimentActorTest {
         new TestKit(system) {{
             TestProbe senderProbe = new TestProbe(system);
             ActorRef sentimentActor = system.actorOf(SentimentActor.props());
+            double avgGradeLevel = 3.14;
+            double avgReadingEase = 1.59;
 
             List<Video> testVideos = null;
 
-            Messages.AnalyzeVideoSentiments testSearchResultMsg = new Messages.AnalyzeVideoSentiments(testVideos);
+            long HappyWordCount = 0;
+            long SadWordCount = 0;
+
+            String actualSentiment = "N/A";
+
+            Messages.ReadabilityResultsMessage testSearchResultMsg =
+                    new Messages.ReadabilityResultsMessage(testVideos, avgGradeLevel, avgReadingEase);
             sentimentActor.tell(testSearchResultMsg, senderProbe.ref());
 
-            Messages.SentimentAnalysisResult results =
-                    senderProbe.expectMsgClass(Messages.SentimentAnalysisResult.class);
+            Messages.SentimentAndReadabilityResult results =
+                    senderProbe.expectMsgClass(Messages.SentimentAndReadabilityResult.class);
 
-            assertEquals(null, results.getVideos());
-            assertEquals("N/A", results.getSentiment());
+            assertTrue("testVideos should be empty.", results.getVideos().isEmpty());
+            assertEquals(actualSentiment, results.getSentiment());
         }};
     }
 
@@ -114,17 +133,22 @@ public class SentimentActorTest {
         new TestKit(system) {{
             TestProbe senderProbe = new TestProbe(system);
             ActorRef sentimentActor = system.actorOf(SentimentActor.props());
+            double avgGradeLevel = 3.14;
+            double avgReadingEase = 1.59;
+            String lastSearchTerm = "cats";
 
             List<Video> testVideos = new ArrayList<>();
 
-            Messages.AnalyzeVideoSentiments testSearchResultMsg = new Messages.AnalyzeVideoSentiments(testVideos);
+            String actualSentiment = "N/A";
+            Messages.ReadabilityResultsMessage testSearchResultMsg =
+                    new Messages.ReadabilityResultsMessage(testVideos, avgGradeLevel, avgReadingEase);
             sentimentActor.tell(testSearchResultMsg, senderProbe.ref());
 
-            Messages.SentimentAnalysisResult results =
-                    senderProbe.expectMsgClass(Messages.SentimentAnalysisResult.class);
+            Messages.SentimentAndReadabilityResult results =
+                    senderProbe.expectMsgClass(Messages.SentimentAndReadabilityResult.class);
 
-            assertEquals(0, results.getVideos().size());
-            assertEquals("N/A", results.getSentiment());
+            assertEquals(testVideos.size(), results.getVideos().size());
+            assertEquals(actualSentiment, results.getSentiment());
         }};
     }
 }

@@ -260,4 +260,18 @@ public final class Messages {
     // Empty message to request cumulative stats
     public GetCumulativeStats() {}
   }
+
+
+
+  public static class SentimentAnalysis {
+    private final String sentiment;
+
+    public SentimentAnalysis(String sentiment) {
+      this.sentiment = sentiment;
+    }
+
+    public String getSentiment() {
+      return sentiment;
+    }
+  }
 }

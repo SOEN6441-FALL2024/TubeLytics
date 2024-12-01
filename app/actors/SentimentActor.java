@@ -9,14 +9,14 @@ import utils.Helpers;
 import java.util.List;
 
 /**
- * SubmissionSentimentActor to calculate the submission sentiment for a list of videos per search result. Packages up
+ * SentimentActor to calculate the submission sentiment for a list of videos per search result. Packages up
  * the information and sends it back to the UserActor for processing.
  * @author Jessica Chen
  */
-public class SubmissionSentimentActor extends AbstractActor {
+public class SentimentActor extends AbstractActor {
 
     public static Props props() {
-        return Props.create(SubmissionSentimentActor.class);
+        return Props.create(SentimentActor.class);
     }
 
     @Override
@@ -34,21 +34,28 @@ public class SubmissionSentimentActor extends AbstractActor {
         ActorRef sender = getSender();
         List<Video> videos = searchResults.getVideos();
         if (videos == null || videos.isEmpty()) {
-            searchResults.setSentiment("Unavailable");
+            Messages.SentimentAnalysis sentiment = new Messages.SentimentAnalysis("Unavailable");
             // Adding sentiment as "Unavailable" if there are no videos in the list and sending it back to the UserActor
-            sender.tell(searchResults, getSelf());
+            sender.tell(sentiment, getSelf());
             return;
         }
         // Calls calculateHappyWordCount from Helpers class for each video in stream
-        double totalHappyWordCount =
-                videos.stream().limit(50).mapToDouble(video
-                        -> Helpers.calculateHappyWordCount(video.getDescription())).sum();
+        double totalHappyWordCount = videos.stream()
+                .limit(50)
+                .mapToDouble(video -> Helpers.calculateHappyWordCount(video.getDescription()))
+                .sum();
+
         // Calls calculateSadWordCount from Helpers class for each video in stream
-        double totalSadWordCount = videos.stream().limit(50).mapToDouble(video
-                -> Helpers.calculateSadWordCount(video.getDescription())).sum();
+        double totalSadWordCount = videos.stream()
+                .limit(50)
+                .mapToDouble(video -> Helpers.calculateSadWordCount(video.getDescription()))
+                .sum();
+
         // Calls calculateSentiment for overall sentiment calculations and setting it to searchResults
-        searchResults.setSentiment(Helpers.calculateSentiment(totalHappyWordCount, totalSadWordCount));
+        String result = Helpers.calculateSentiment(totalHappyWordCount, totalSadWordCount);
+
+        Messages.SentimentAnalysis sentiment = new Messages.SentimentAnalysis(result);
         // Adding sentiment for list of videos and sending it back to the UserActor
-        sender.tell(searchResults, getSelf());
+        sender.tell(sentiment, getSelf());
     }
 }

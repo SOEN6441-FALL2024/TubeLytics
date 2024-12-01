@@ -14,6 +14,14 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import utils.Helpers;
 
+/**
+ * Tests for the ReadabilityActor
+ *
+ * <p>Tests the handleReadabilityCalculation method
+ *
+ * @author Deniz Dinchdonmez
+ *     <p>Tests
+ */
 public class ReadabilityActorTest {
 
   private static ActorSystem system;
@@ -29,6 +37,13 @@ public class ReadabilityActorTest {
     system = null;
   }
 
+  /**
+   * Tests the handleReadabilityCalculation method
+   *
+   * <p>Tests that the actor correctly calculates the readability metrics for a list of videos
+   *
+   * @author Deniz Dinchdonmez
+   */
   @Test
   public void testHandleReadabilityCalculation() {
     new TestKit(system) {
@@ -94,6 +109,14 @@ public class ReadabilityActorTest {
     };
   }
 
+  /**
+   * Tests the handleReadabilityCalculation method
+   *
+   * <p>Tests that the actor correctly calculates the readability metrics for an empty list of
+   * videos
+   *
+   * @author Deniz Dinchdonmez
+   */
   @Test
   public void testHandleEmptyVideoList() {
     new TestKit(system) {
@@ -115,6 +138,14 @@ public class ReadabilityActorTest {
     };
   }
 
+  /**
+   * Tests the handleReadabilityCalculation method
+   *
+   * <p>Tests that the actor correctly calculates the readability metrics for a video with a null
+   * description
+   *
+   * @author Deniz Dinchdonmez
+   */
   @Test
   public void testHandleNullDescriptions() {
     new TestKit(system) {

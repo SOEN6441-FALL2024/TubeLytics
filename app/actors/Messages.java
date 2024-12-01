@@ -260,4 +260,71 @@ public final class Messages {
     // Empty message to request cumulative stats
     public GetCumulativeStats() {}
   }
+  /**
+   * Messages related to Tags functionality
+   */
+  public static final class FetchTagsMessage {
+    private final String tag;
+
+    public FetchTagsMessage(String tag) {
+      this.tag = tag;
+    }
+
+    public String getTag() {
+      return tag;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      FetchTagsMessage that = (FetchTagsMessage) o;
+      return Objects.equals(tag, that.tag);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(tag);
+    }
+
+    @Override
+    public String toString() {
+      return "FetchTagsMessage{" +
+              "tag='" + tag + '\'' +
+              '}';
+    }
+  }
+
+  public static final class TagsResultsMessage {
+    private final List<Video> videos;
+
+    public TagsResultsMessage(List<Video> videos) {
+      this.videos = videos;
+    }
+
+    public List<Video> getVideos() {
+      return videos;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      TagsResultsMessage that = (TagsResultsMessage) o;
+      return Objects.equals(videos, that.videos);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(videos);
+    }
+
+    @Override
+    public String toString() {
+      return "TagsResultsMessage{" +
+              "videos=" + videos +
+              '}';
+    }
+  }
+
 }

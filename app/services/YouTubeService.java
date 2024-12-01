@@ -18,7 +18,7 @@ public class YouTubeService {
     @Inject
     public YouTubeService(WSClient ws, Config config) {
         this.ws = ws;
-        this.apiKey = "";
+        this.apiKey = "AIzaSyC6d8v6quYzFKHPoNN7FFCTnF43bryfH_M";
     }
 
     public CompletionStage<List<Video>> searchVideos(String query, int limit) {
@@ -255,4 +255,37 @@ public class YouTubeService {
                             return videos;
                         });
     }
+    public CompletionStage<List<Video>> getVideosByTag(String tag, int limit) {
+        // Construct the YouTube API request URL
+        String youtubeUrl = "https://www.googleapis.com/youtube/v3/search";
+        String url =
+                String.format(
+                        "%s?part=snippet&q=%s&type=video&maxResults=%d&key=%s",
+                        youtubeUrl, tag, limit, apiKey);
+
+        // Make the asynchronous HTTP GET request
+        return ws.url(url)
+                .get()
+                .thenApply(response -> {
+                    JsonNode items = response.asJson().get("items");
+                    List<Video> videos = new ArrayList<>();
+                    if (items != null) {
+                        items.forEach(item -> {
+                            JsonNode snippet = item.get("snippet");
+                            videos.add(new Video(
+                                    snippet.get("title").asText(),
+                                    snippet.get("description").asText(),
+                                    "channelIdPlaceholder",  // Placeholder for channelId
+                                    "videoIdPlaceholder",    // Placeholder for videoId
+                                    "thumbnailUrlPlaceholder", // Placeholder for thumbnail URL
+                                    snippet.get("channelTitle").asText(),
+                                    "publishedDatePlaceholder" // Placeholder for published date
+                            ));
+                        });
+                    }
+                    return videos;
+                });
+    }
+
+
 }

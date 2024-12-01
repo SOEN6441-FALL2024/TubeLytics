@@ -1,39 +1,31 @@
 # Routes
 # This file defines all application routes (Higher priority routes first)
-# ~~~~
 
-# An example controller showing a sample home page
-GET     /               controllers.HomeController.index(query: String ?= null, request: Request)
+# Sample home page
+GET     /                               controllers.HomeController.index(query: String ?= null, request: Request)
 
-GET     /ws-test        controllers.Assets.at(path="/public", file="index.html")
+# WebSocket routes
+GET     /ws-test                        controllers.Assets.at(path="/public", file="index.html")
+GET     /ws                             controllers.HomeController.ws()
 
-GET   /ws               controllers.HomeController.ws()
-#GET   /wsTestIndex      controllers.HomeController.wsTestIndex()
+# Static assets
+GET     /assets/*file                   controllers.Assets.versioned(path="/public", file: Asset)
 
+# Search routes
+GET     /search                         controllers.HomeController.search(query: String)
+POST    /search                         controllers.HomeController.search(query: String)
 
-GET     /ws-test        controllers.Assets.at(path="/public", file="index.html")
+# Word statistics routes
+GET     /word-stats                     controllers.HomeController.wordStats(query: String)
+GET     /getCumulativeWordStats         controllers.HomeController.getCumulativeWordStats
 
-GET     /ws             controllers.HomeController.ws
+# Channel routes
+GET     /channel/:channelId             controllers.HomeController.channelProfile(channelId: String)
+GET     /api/channel/:channelId/latest-videos controllers.HomeController.fetchLatestVideos(channelId: String)
 
-# Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
-GET     /assets/*file        controllers.Assets.versioned(path="/public", file: Asset)
+# Tag routes
+GET     /tags/:videoId                  controllers.HomeController.showTags(videoId: String)
+GET     /search/tag/:tag                controllers.HomeController.searchByTag(tag: String)
 
-GET     /search         controllers.HomeController.search(query: String)
-POST    /search                 controllers.HomeController.search(query: String)
-
-GET     /word-stats      controllers.HomeController.wordStats(query: String)
-
-GET     /getCumulativeWordStats     controllers.HomeController.getCumulativeWordStats
-GET     /channel/:channelId       controllers.HomeController.channelProfile(channelId:String)
-
-#     Showing tags for  video
-GET     /tags/:videoId                   controllers.HomeController.showTags(videoId: String)
-
-#     searching a special tag
-GET     /search/tag/:tag                 controllers.HomeController.searchByTag(tag: String)
-GET    /api/channel/:channelId/latest-videos    controllers.HomeController.fetchLatestVideos(channelId: String)
-
-
-
-
+# Videos by tag
+GET     /videos/tag/:tag                controllers.HomeController.getVideosByTag(tag: String)

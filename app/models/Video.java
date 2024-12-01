@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import utils.Helpers;
 
+
 public class Video {
   private final String title;
   private final String description;

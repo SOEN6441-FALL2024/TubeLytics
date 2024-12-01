@@ -7,6 +7,8 @@ import java.util.List;
 import models.Video;
 import org.junit.Test;
 
+
+
 public class MessagesTest {
 
   @Test
@@ -280,5 +282,83 @@ public class MessagesTest {
         "Hash codes should differ for unequal objects.",
         errorMessage1.hashCode(),
         errorMessage3.hashCode());
+  }
+  @Test
+  public void testFetchTagsMessage() {
+    Messages.FetchTagsMessage message1 = new Messages.FetchTagsMessage("tag1");
+    Messages.FetchTagsMessage message2 = new Messages.FetchTagsMessage("tag1");
+    Messages.FetchTagsMessage message3 = new Messages.FetchTagsMessage("tag2");
+
+    // Test constructor and getters
+    assertEquals("tag1", message1.getTag());
+
+    // Test equality
+    assertEquals(message1, message2);
+    assertNotEquals(message1, message3);
+
+    // Test hashCode
+    assertEquals(message1.hashCode(), message2.hashCode());
+    assertNotEquals(message1.hashCode(), message3.hashCode());
+
+    // Test toString
+    String expectedString = "FetchTagsMessage{tag='tag1'}";
+    assertEquals(expectedString, message1.toString());
+  }
+
+  @Test
+  public void testTagsResultsMessage() {
+    // Arrange: Create videos and set tags
+    Video video1 = new Video("Title1", "Description1", "Channel1", "VideoId1", "Thumbnail1", "ChannelTitle1", "2024-11-06T04:41:46Z");
+    video1.setTags(new ArrayList<>());
+
+    Video video2 = new Video("Title2", "Description2", "Channel2", "VideoId2", "Thumbnail2", "ChannelTitle2", "2024-11-06T04:41:46Z");
+    video2.setTags(new ArrayList<>());
+
+    List<Video> videos = List.of(video1, video2);
+
+    // Act: Create the TagsResultsMessage
+    Messages.TagsResultsMessage message = new Messages.TagsResultsMessage(videos);
+
+    // Assert: Verify that the message contains the expected videos
+    assertEquals(videos, message.getVideos());
+  }
+
+  @Test
+  public void testErrorMessage() {
+    Messages.ErrorMessage message1 = new Messages.ErrorMessage("Error A");
+    Messages.ErrorMessage message2 = new Messages.ErrorMessage("Error A");
+    Messages.ErrorMessage message3 = new Messages.ErrorMessage("Error B");
+
+    // Test constructor and getters
+    assertEquals("Error A", message1.getMessage());
+
+    // Test equality
+    assertEquals(message1, message2);
+    assertNotEquals(message1, message3);
+
+    // Test hashCode
+    assertEquals(message1.hashCode(), message2.hashCode());
+    assertNotEquals(message1.hashCode(), message3.hashCode());
+
+    // Test toString
+    String expectedString = "ErrorMessage{message='Error A'}";
+    assertEquals(expectedString, message1.toString());
+  }
+
+  @Test
+  public void testEqualityAndHashCodeForDifferentMessages() {
+    Messages.FetchTagsMessage fetchTagsMessage = new Messages.FetchTagsMessage("tag1");
+    Messages.TagsResultsMessage tagsResultsMessage = new Messages.TagsResultsMessage(new ArrayList<>());
+    Messages.ErrorMessage errorMessage = new Messages.ErrorMessage("Error");
+
+    // Test equality between different message types
+    assertNotEquals(fetchTagsMessage, tagsResultsMessage);
+    assertNotEquals(fetchTagsMessage, errorMessage);
+    assertNotEquals(tagsResultsMessage, errorMessage);
+
+    // Test hashCode consistency
+    assertNotEquals(fetchTagsMessage.hashCode(), tagsResultsMessage.hashCode());
+    assertNotEquals(fetchTagsMessage.hashCode(), errorMessage.hashCode());
+    assertNotEquals(tagsResultsMessage.hashCode(), errorMessage.hashCode());
   }
 }

@@ -96,6 +96,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     <p class="channel-link"><strong>Channel:</strong> <a href="/channel/${video.channelId}" target="_blank">${video.channelTitle}</a></p>
                     <p class="video-description"><strong>Description:</strong> ${video.description || "No description available"}...</p>
                     <p class="video-readability"><strong>Readability:</strong> Grade Level = ${video.fleschKincaidGradeLevel || "N/A"}, Ease Score = ${video.fleschReadingEaseScore || "N/A"}</p>
+                    <p class="video-tags"><strong>Tags:</strong> <a href="/tags/${video.videoId}" target="_blank">Show Tags</a></p>
+
                 </div>
                 <div class="video-thumbnail">
                     <img src="${video.thumbnailUrl}" alt="Thumbnail">

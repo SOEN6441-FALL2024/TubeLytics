@@ -9,14 +9,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.Video;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.TestProbe;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import play.libs.ws.WSClient;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
@@ -288,5 +292,64 @@ public class UserActorTest {
       }
     }};
   }
+
+  @Test
+  public void testSendResultsToClientJsonProcessingException() throws JsonProcessingException {
+    new TestKit(system) {{
+      TestProbe wsProbe = new TestProbe(system);
+      TestProbe youTubeServiceActorProbe = new TestProbe(system);
+      TestProbe readActorProbe = new TestProbe(system);
+
+      // Create a mock for ObjectMapper
+      ObjectMapper mockObjectMapper = Mockito.mock(ObjectMapper.class);
+
+      // Mock behavior to return a valid ObjectNode for createObjectNode
+      ObjectNode mockObjectNode = new ObjectMapper().createObjectNode(); // Create a real ObjectNode
+      Mockito.when(mockObjectMapper.createObjectNode()).thenReturn(mockObjectNode);
+
+      // Mock behavior to throw JsonProcessingException for writeValueAsString
+      try {
+        Mockito.when(mockObjectMapper.writeValueAsString(Mockito.any()))
+                .thenThrow(new JsonProcessingException("Mocked JSON processing error") {});
+      } catch (JsonProcessingException e) {
+        fail("Mock setup failed: " + e.getMessage());
+      }
+
+      // Create the UserActor
+      ActorRef userActor =
+              system.actorOf(
+                      UserActor.props(wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref()));
+
+      // Send a mock ReadabilityResultsMessage to trigger the method
+      List<Video> videos = List.of(
+              new Video(
+                      "Title",
+                      "Description",
+                      "ChannelId",
+                      "VideoId",
+                      "ThumbnailUrl",
+                      "ChannelTitle",
+                      "2024-11-06T04:41:46Z")
+      );
+      Messages.ReadabilityResultsMessage mockReadabilityResults =
+              new Messages.ReadabilityResultsMessage(videos, 5.0, 80.0);
+
+      // Inject the mocked ObjectMapper into UserActor
+      TestActorRef<UserActor> testUserActor = TestActorRef.create(system,
+              UserActor.props(wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref()));
+
+      testUserActor.underlyingActor().setObjectMapper(mockObjectMapper);
+
+      // Send the message
+      testUserActor.tell(mockReadabilityResults, getRef());
+
+      // Verify that the error log is triggered
+      Mockito.verify(mockObjectMapper, Mockito.times(1)).writeValueAsString(Mockito.any());
+
+      // Assert no message is sent to WebSocket
+      wsProbe.expectNoMessage();
+    }};
+  }
+
 
 }

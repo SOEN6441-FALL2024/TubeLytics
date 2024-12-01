@@ -629,7 +629,7 @@ public class HomeControllerTest {
   /**
    * Tests the {@code wordStats} method with a query that yields no videos.
    *
-   * @author: Deniz Dinchdonmez
+   * @author Deniz Dinchdonmez
    */
   @Test
   public void testWordStats_NullQuery() {
@@ -641,7 +641,7 @@ public class HomeControllerTest {
   /**
    * Tests the {@code wordStats} method with a query that yields no videos.
    *
-   * @author: Deniz Dinchdonmez
+   * @author Deniz Dinchdonmez
    */
   @Test
   public void testWordStats_EmptyQuery() {
@@ -653,7 +653,7 @@ public class HomeControllerTest {
   /**
    * Tests the {@code wordStats} method with a query that yields no videos.
    *
-   * @author: Deniz Dinchdonmez
+   * @author Deniz Dinchdonmez
    */
   @Test
   public void testWordStats_NoVideos() {

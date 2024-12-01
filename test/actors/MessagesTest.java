@@ -7,6 +7,9 @@ import java.util.List;
 import models.Video;
 import org.junit.Test;
 
+/**
+ * Unit tests for Messages class
+ */
 public class MessagesTest {
 
   @Test
@@ -78,6 +81,11 @@ public class MessagesTest {
         msg1.equals("Not a SearchResultsMessage"));
   }
 
+  /**
+   * Tests creating a searchResultMessage class and its getters
+   *
+   * @author Jessica Chen
+   */
   @Test
   public void testSearchResultMessage() {
     String query = "sample";
@@ -99,6 +107,11 @@ public class MessagesTest {
     assertNotNull(msg);
   }
 
+  /**
+   * Tests creating a searchResultMessage class and its getters
+   *
+   * @author Jessica Chen
+   */
   @Test
   public void testNullSearchResultsMessage() {
     Messages.SearchResultsMessage message = new Messages.SearchResultsMessage(null, null);
@@ -107,6 +120,11 @@ public class MessagesTest {
     assertNull(message.getVideos());
   }
 
+  /**
+   * Tests creating a searchResultMessage class and its getters
+   *
+   * @author Jessica Chen
+   */
   @Test
   public void testEmptySearchResultsMessage() {
     Messages.SearchResultsMessage message =
@@ -280,5 +298,78 @@ public class MessagesTest {
         "Hash codes should differ for unequal objects.",
         errorMessage1.hashCode(),
         errorMessage3.hashCode());
+  }
+
+  /**
+   * Tests creating SentimentAndReadabilityResult class and its getters
+   *
+   * @author Jessica Chen
+   */
+  @Test
+  public void testSentimentAndReadabilityResult() {
+    String sentiment = ":-|";
+    double avgGradeLevel = 3.14;
+    double avgReadingEase = 1.59;
+    List<Video> videos = new ArrayList<>();
+    videos.add(
+            new Video(
+                    "Title",
+                    "Description",
+                    "ChannelId",
+                    "VideoId",
+                    "ThumbnailUrl",
+                    "channelTitle",
+                    "2024-11-06T04:41:46Z"));
+    String searchTerm = "test";
+
+    Messages.SentimentAndReadabilityResult test1 =
+            new Messages.SentimentAndReadabilityResult(sentiment, videos, avgGradeLevel, avgReadingEase);
+    assertEquals(sentiment, test1.getSentiment());
+    assertNotNull("Video list is empty, not null", test1.getVideos());
+    assertEquals(videos.size(), test1.getVideos().size());
+    assertEquals(avgGradeLevel, test1.getAverageGradeLevel(), 0.00);
+    assertEquals(avgReadingEase, test1.getAverageReadingEase(), 0.00);
+  }
+
+  /**
+   * Tests creating SentimentAnalysisResult class and its getters
+   *
+   * @author Jessica Chen
+   */
+  @Test
+  public void testNullSentimentAnalysisResult() {
+    String sentiment = "N/A";
+    double avgGradeLevel = 3.14;
+    double avgReadingEase = 1.59;
+    List<Video> videos = null;
+    String searchTerm = "test";
+
+    Messages.SentimentAndReadabilityResult test1 =
+            new Messages.SentimentAndReadabilityResult(sentiment, videos, avgGradeLevel, avgReadingEase);
+    assertEquals(sentiment, test1.getSentiment());
+    assertNull("Video list is null", test1.getVideos());
+    assertEquals(avgGradeLevel, test1.getAverageGradeLevel(), 0.00);
+    assertEquals(avgReadingEase, test1.getAverageReadingEase(), 0.00);
+  }
+
+
+  /**
+   * Tests creating SentimentAnalysisResult class and its getters
+   *
+   * @author Jessica Chen
+   */
+  @Test
+  public void testEmptySentimentAnalysisResult() {
+    String sentiment = "N/A";
+    double avgGradeLevel = 3.14;
+    double avgReadingEase = 1.59;
+    List<Video> videos = new ArrayList<>();
+
+    Messages.SentimentAndReadabilityResult test1 =
+            new Messages.SentimentAndReadabilityResult(sentiment, videos, avgGradeLevel, avgReadingEase);
+    assertEquals(sentiment, test1.getSentiment());
+    assertNotNull("Video list is empty, not null", test1.getVideos());
+    assertEquals(avgGradeLevel, test1.getAverageGradeLevel(), 0.00);
+    assertEquals(avgReadingEase, test1.getAverageReadingEase(), 0.00);
   }
 }

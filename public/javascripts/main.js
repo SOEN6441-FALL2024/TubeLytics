@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 errorElement.style.color = 'red';
                 searchResults.prepend(errorElement);
             } else if (data.videos && Array.isArray(data.videos)) {
-                appendSearchResults(data.searchTerm, data.videos, data.averageGradeLevel, data.averageReadingEase);
+                appendSearchResults(data.searchTerm, data.videos, data.averageGradeLevel, data.averageReadingEase, data.sentiment);
             } else {
                 console.error('Unexpected data format:', data);
             }
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Function to append search results to the page
-    function appendSearchResults(searchTerm, videos, averageGradeLevel, averageReadingEase) {
+    function appendSearchResults(searchTerm, videos, averageGradeLevel, averageReadingEase, sentiment) {
         if (!videos || !Array.isArray(videos)) {
             console.error('Invalid videos data or videos is not an array:', videos);
             return;
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
         searchStats.classList.add('search-stats');
         searchStats.innerHTML = `
             <a href="/word-stats?query=${encodeURIComponent(searchTerm)}" target="_blank">Search term: <strong>${searchTerm}</strong></a>
-            <p>Static Placeholder: (Sentiment: :-) , Flesch-Kincaid Grade Level Avg: ${averageGradeLevel.toFixed(2)} Flesch Reading Ease Score Avg: ${averageReadingEase.toFixed(2)})</p>
+            <p>Sentiment: <strong>${sentiment}</strong>, Flesch-Kincaid Grade Level Avg: ${averageGradeLevel.toFixed(2)} Flesch Reading Ease Score Avg: ${averageReadingEase.toFixed(2)}</p>
             <a href="/word-stats?query=${encodeURIComponent(searchTerm)}" target="_blank">Word stats</a>
         `;
         searchTermSection.appendChild(searchStats);

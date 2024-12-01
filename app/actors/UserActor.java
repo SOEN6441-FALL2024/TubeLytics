@@ -22,21 +22,23 @@ public class UserActor extends AbstractActor {
   private final ActorRef ws;
   private final ActorRef youTubeServiceActor;
   private final ActorRef readabilityActor;
+  private final ActorRef sentimentActor;
   private final Set<String> processedQueries = new HashSet<>();
   private final LinkedList<Video> cumulativeResults =
       new LinkedList<>(); // Stores the latest 10 results
   ObjectMapper objectMapper = new ObjectMapper();
 
   public static Props props(
-      final ActorRef wsOut, final ActorRef youTubeServiceActor, final ActorRef readabilityActor) {
-    return Props.create(UserActor.class, wsOut, youTubeServiceActor, readabilityActor);
+      final ActorRef wsOut, final ActorRef youTubeServiceActor, final ActorRef readabilityActor, final ActorRef sentimentActor) {
+    return Props.create(UserActor.class, wsOut, youTubeServiceActor, readabilityActor, sentimentActor);
   }
 
   public UserActor(
-      final ActorRef wsOut, final ActorRef youTubeServiceActor, ActorRef readabilityActor) {
+      final ActorRef wsOut, final ActorRef youTubeServiceActor, ActorRef readabilityActor, ActorRef sentimentActor) {
     this.ws = wsOut;
     this.youTubeServiceActor = youTubeServiceActor;
     this.readabilityActor = readabilityActor;
+    this.sentimentActor = sentimentActor;
   }
 
   @Override
@@ -44,7 +46,8 @@ public class UserActor extends AbstractActor {
     return receiveBuilder()
         .match(String.class, this::handleSearchQuery)
         .match(Messages.SearchResultsMessage.class, this::processReceivedResults)
-        .match(Messages.ReadabilityResultsMessage.class, this::sendResultsToClient)
+        .match(Messages.ReadabilityResultsMessage.class, this::sendResultsToSentimentActor)
+        .match(Messages.SentimentAndReadabilityResult.class, this::sendResultsToClient)
         .build();
   }
 
@@ -58,6 +61,11 @@ public class UserActor extends AbstractActor {
     youTubeServiceActor.tell(query, getSelf());
   }
 
+  /**
+   * Sends list of videos received from YouTubeServiceActor to ReadabilityActor to add more information.
+   *
+   * @param response includes search term and the list of videos corresponding to it
+   */
   private void processReceivedResults(Messages.SearchResultsMessage response) {
     List<Video> videos = response.getVideos() == null ? new ArrayList<>() : response.getVideos();
     System.out.println(
@@ -71,16 +79,35 @@ public class UserActor extends AbstractActor {
   }
 
   /**
-   * Sends the readability results to the client
+   * Sends the readability results to the sentimentActor for further processing
    *
    * @param readabilityResults the readability results to send
-   * @author Deniz Dinchdonmez
+   * @author Deniz Dinchdonmez, Jessica Chen
    */
-  private void sendResultsToClient(Messages.ReadabilityResultsMessage readabilityResults) {
+  private void sendResultsToSentimentActor(Messages.ReadabilityResultsMessage readabilityResults) {
     // Safely handle null videos
     List<Video> videos = Optional.ofNullable(readabilityResults.getVideos()).orElse(Collections.emptyList());
     double averageGradeLevel = readabilityResults.getAverageGradeLevel();
     double averageReadingEase = readabilityResults.getAverageReadingEase();
+
+    // Sends message with videos to SentimentActor
+    sentimentActor.tell(new Messages.ReadabilityResultsMessage(videos, averageGradeLevel, averageReadingEase),
+            getSelf());
+  }
+
+  /**
+   * Sends the sentiment results combined with readability results to the client
+   *
+   * @param sentimentAndReadabilityResult the sentiment/readability results to send
+   * @author Deniz Dinchdonmez
+   */
+  private void sendResultsToClient(Messages.SentimentAndReadabilityResult sentimentAndReadabilityResult) {
+    // Safely handle null videos
+    List<Video> videos = Optional.ofNullable(sentimentAndReadabilityResult.getVideos()).orElse(Collections.emptyList());
+    double averageGradeLevel = sentimentAndReadabilityResult.getAverageGradeLevel();
+    double averageReadingEase = sentimentAndReadabilityResult.getAverageReadingEase();
+
+    String sentiment = sentimentAndReadabilityResult.getSentiment();
 
     log.info("UserActor received readability results. Number of videos: {}", videos.size());
 
@@ -100,9 +127,10 @@ public class UserActor extends AbstractActor {
       JsonNode json =
               objectMapper
                       .createObjectNode()
-                      .put("searchTerm", Optional.ofNullable(readabilityResults.getSearchTerm()).orElse("Unknown"))
+                      .put("searchTerm", Optional.ofNullable(sentimentAndReadabilityResult.getSearchTerm()).orElse("Unknown"))
                       .put("averageGradeLevel", Helpers.formatDouble(averageGradeLevel))
                       .put("averageReadingEase", Helpers.formatDouble(averageReadingEase))
+                      .put("sentiment", sentiment)
                       .set("videos", objectMapper.valueToTree(cumulativeResults));
       ws.tell(objectMapper.writeValueAsString(json), getSelf());
     } catch (JsonProcessingException e) {
@@ -119,6 +147,4 @@ public class UserActor extends AbstractActor {
   public void setObjectMapper(ObjectMapper objectMapper) {
     this.objectMapper = objectMapper;
   }
-
-
 }

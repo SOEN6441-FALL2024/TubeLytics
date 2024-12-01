@@ -7,6 +7,9 @@ import java.util.List;
 import models.Video;
 import org.junit.Test;
 
+/**
+ * Unit tests for Messages class
+ */
 public class MessagesTest {
 
   @Test
@@ -78,6 +81,11 @@ public class MessagesTest {
         msg1.equals("Not a SearchResultsMessage"));
   }
 
+  /**
+   * Tests creating a searchResultMessage class and its getters
+   *
+   * @author Jessica Chen
+   */
   @Test
   public void testSearchResultMessage() {
     String query = "sample";
@@ -99,6 +107,11 @@ public class MessagesTest {
     assertNotNull(msg);
   }
 
+  /**
+   * Tests creating a searchResultMessage class and its getters
+   *
+   * @author Jessica Chen
+   */
   @Test
   public void testNullSearchResultsMessage() {
     Messages.SearchResultsMessage message = new Messages.SearchResultsMessage(null, null);
@@ -107,6 +120,11 @@ public class MessagesTest {
     assertNull(message.getVideos());
   }
 
+  /**
+   * Tests creating a searchResultMessage class and its getters
+   *
+   * @author Jessica Chen
+   */
   @Test
   public void testEmptySearchResultsMessage() {
     Messages.SearchResultsMessage message =
@@ -280,5 +298,83 @@ public class MessagesTest {
         "Hash codes should differ for unequal objects.",
         errorMessage1.hashCode(),
         errorMessage3.hashCode());
+  }
+
+  /**
+   * Tests creating an AnalyzeVideoSentiments class and its getters
+   *
+   * @author Jessica Chen
+   */
+  @Test
+  public void testAnalyzeVideoSentiments() {
+    List<Video> videos = new ArrayList<>();
+    videos.add(
+            new Video(
+                    "Title",
+                    "Description",
+                    "ChannelId",
+                    "VideoId",
+                    "ThumbnailUrl",
+                    "channelTitle",
+                    "2024-11-06T04:41:46Z"));
+
+    Messages.AnalyzeVideoSentiments test1 = new Messages.AnalyzeVideoSentiments(videos);
+    assertEquals(videos, test1.getVideos());
+    assertNotNull(test1);
+  }
+
+  /**
+   * Tests creating SentimentAnalysisResult class and its getters
+   *
+   * @author Jessica Chen
+   */
+  @Test
+  public void testSentimentAnalysisResult() {
+    String sentiment = ":-|";
+    List<Video> videos = new ArrayList<>();
+    videos.add(
+            new Video(
+                    "Title",
+                    "Description",
+                    "ChannelId",
+                    "VideoId",
+                    "ThumbnailUrl",
+                    "channelTitle",
+                    "2024-11-06T04:41:46Z"));
+
+    Messages.SentimentAnalysisResult test1 = new Messages.SentimentAnalysisResult(sentiment, videos);
+    assertEquals(sentiment, test1.getSentiment());
+    assertEquals(videos, test1.getVideos());
+    assertNotNull(test1);
+  }
+
+  /**
+   * Tests creating an AnalyzeVideoSentiments class and its getters
+   *
+   * @author Jessica Chen
+   */
+  @Test
+  public void testNullAnalyzeVideoSentiments() {
+    List<Video> videos = new ArrayList<>();
+
+    Messages.AnalyzeVideoSentiments test1 = new Messages.AnalyzeVideoSentiments(videos);
+    assertEquals(0, test1.getVideos().size());
+    assertNotNull(test1);
+  }
+
+  /**
+   * Tests creating SentimentAnalysisResult class and its getters
+   *
+   * @author Jessica Chen
+   */
+  @Test
+  public void testNullSentimentAnalysisResult() {
+    String sentiment = "N/A";
+    List<Video> videos = new ArrayList<>();
+
+    Messages.SentimentAnalysisResult test1 = new Messages.SentimentAnalysisResult(sentiment, videos);
+    assertEquals(sentiment, test1.getSentiment());
+    assertEquals(0, test1.getVideos().size());
+    assertNotNull(test1);
   }
 }

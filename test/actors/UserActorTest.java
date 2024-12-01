@@ -25,16 +25,21 @@ import play.libs.ws.WSClient;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
+/**
+ * Unit test for UserActor
+ */
 public class UserActorTest {
   private ActorSystem system;
   private WSClient mockWsClient;
   private TestProbe readActorProbe;
+  private TestProbe sentimentActorProbe;
 
   @Before
   public void setUp() {
     system = ActorSystem.create();
     mockWsClient = mock(WSClient.class);
     readActorProbe = new TestProbe(system);
+    sentimentActorProbe = new TestProbe(system);
   }
 
   @After
@@ -57,7 +62,7 @@ public class UserActorTest {
         ActorRef userActor =
             system.actorOf(
                 UserActor.props(
-                    wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref()));
+                    wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref(), sentimentActorProbe.ref()));
 
         String query = "cats";
         userActor.tell(query, getRef());
@@ -83,7 +88,7 @@ public class UserActorTest {
         ActorRef userActor =
             system.actorOf(
                 UserActor.props(
-                    wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref()));
+                    wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref(), sentimentActorProbe.ref()));
 
         String query = "sample";
         List<Video> videos =
@@ -139,7 +144,7 @@ public class UserActorTest {
       ActorRef userActor =
               system.actorOf(
                       UserActor.props(
-                              wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref()));
+                              wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref(), sentimentActorProbe.ref()));
 
       String query = null;
       List<Video> videos = null;
@@ -185,7 +190,7 @@ public class UserActorTest {
         ActorRef userActor =
             system.actorOf(
                 UserActor.props(
-                    wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref()));
+                    wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref(), sentimentActorProbe.ref()));
 
         String query = "repeated-query";
 
@@ -209,7 +214,7 @@ public class UserActorTest {
         ActorRef userActor =
             system.actorOf(
                 UserActor.props(
-                    wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref()));
+                    wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref(), sentimentActorProbe.ref()));
 
         // Send an unsupported message type
         userActor.tell(42, getRef());
@@ -230,7 +235,7 @@ public class UserActorTest {
       ActorRef userActor =
               system.actorOf(
                       UserActor.props(
-                              wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref()));
+                              wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref(), sentimentActorProbe.ref()));
 
       // Case 1: Test with null videos in response
       Messages.SearchResultsMessage nullResponse =
@@ -318,7 +323,7 @@ public class UserActorTest {
       // Create the UserActor
       ActorRef userActor =
               system.actorOf(
-                      UserActor.props(wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref()));
+                      UserActor.props(wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref(), sentimentActorProbe.ref()));
 
       // Send a mock ReadabilityResultsMessage to trigger the method
       List<Video> videos = List.of(
@@ -336,7 +341,7 @@ public class UserActorTest {
 
       // Inject the mocked ObjectMapper into UserActor
       TestActorRef<UserActor> testUserActor = TestActorRef.create(system,
-              UserActor.props(wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref()));
+              UserActor.props(wsProbe.ref(), youTubeServiceActorProbe.ref(), readActorProbe.ref(), sentimentActorProbe.ref()));
 
       testUserActor.underlyingActor().setObjectMapper(mockObjectMapper);
 

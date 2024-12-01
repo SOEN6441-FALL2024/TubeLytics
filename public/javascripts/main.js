@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
         searchStats.classList.add('search-stats');
         searchStats.innerHTML = `
             <a href="/word-stats?query=${encodeURIComponent(searchTerm)}" target="_blank">Search term: <strong>${searchTerm}</strong></a>
-            <p>Static Placeholder: (Sentiment: :-) , Flesch-Kincaid Grade Level Avg: ${averageGradeLevel.toFixed(2)} Flesch Reading Ease Score Avg: ${averageReadingEase.toFixed(2)})</p>
+            <p>Sentiment: <strong>${sentiment}</strong>, Flesch-Kincaid Grade Level Avg: ${averageGradeLevel.toFixed(2)} Flesch Reading Ease Score Avg: ${averageReadingEase.toFixed(2)})</p>
             <a href="/word-stats?query=${encodeURIComponent(searchTerm)}" target="_blank">Word stats</a>
         `;
         searchTermSection.appendChild(searchStats);

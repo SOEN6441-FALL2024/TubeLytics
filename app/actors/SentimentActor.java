@@ -22,7 +22,7 @@ public class SentimentActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(Messages.SearchResultsMessage.class, this::calculateOverallSentiment)
+                .match(Messages.AnalyzeVideoSentiments.class, this::calculateOverallSentiment)
                 .build();
     }
 
@@ -30,11 +30,11 @@ public class SentimentActor extends AbstractActor {
      * Evaluates the overall sentiment based on sentiments of each video in the list of video results from a query
      * @param searchResults message obtained from the UserActor who obtained the results from the YouTubeServiceActor
      */
-    private void calculateOverallSentiment(Messages.SearchResultsMessage searchResults) {
+    private void calculateOverallSentiment(Messages.AnalyzeVideoSentiments searchResults) {
         ActorRef sender = getSender();
         List<Video> videos = searchResults.getVideos();
         if (videos == null || videos.isEmpty()) {
-            Messages.SentimentAnalysis sentiment = new Messages.SentimentAnalysis("Unavailable");
+            Messages.SentimentAnalysisResult sentiment = new Messages.SentimentAnalysisResult("N/A", videos);
             // Adding sentiment as "Unavailable" if there are no videos in the list and sending it back to the UserActor
             sender.tell(sentiment, getSelf());
             return;
@@ -54,7 +54,7 @@ public class SentimentActor extends AbstractActor {
         // Calls calculateSentiment for overall sentiment calculations and setting it to searchResults
         String result = Helpers.calculateSentiment(totalHappyWordCount, totalSadWordCount);
 
-        Messages.SentimentAnalysis sentiment = new Messages.SentimentAnalysis(result);
+        Messages.SentimentAnalysisResult sentiment = new Messages.SentimentAnalysisResult(result, videos);
         // Adding sentiment for list of videos and sending it back to the UserActor
         sender.tell(sentiment, getSelf());
     }

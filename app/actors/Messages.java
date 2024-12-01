@@ -7,11 +7,7 @@ import java.util.SortedMap;
 
 import models.Video;
 
-/**
- * Class used to better pass responses through actors
- *
- * @author Jessica Chen
- */
+/** Class used to better pass responses through actors */
 public final class Messages {
   public static String lastSearchTerm;
 
@@ -261,17 +257,37 @@ public final class Messages {
     public GetCumulativeStats() {}
   }
 
+  /**
+   * Class used to help calculate sentiment analysis for stream of videos
+   * @author Jessica Chen
+   */
+  public static class AnalyzeVideoSentiments {
+    private final List<Video> videos;
 
+    public AnalyzeVideoSentiments(List<Video> videos) {
+      this.videos = videos;
+    }
 
-  public static class SentimentAnalysis {
+    public List<Video> getVideos() {
+      return videos;
+    }
+  }
+
+  public static class SentimentAnalysisResult {
     private final String sentiment;
+    private final List<Video> videos;
 
-    public SentimentAnalysis(String sentiment) {
+    public SentimentAnalysisResult(String sentiment, List<Video> videos) {
       this.sentiment = sentiment;
+      this.videos = videos;
     }
 
     public String getSentiment() {
       return sentiment;
+    }
+
+    public List<Video> getVideos() {
+      return videos;
     }
   }
 }

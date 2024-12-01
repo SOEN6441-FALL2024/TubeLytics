@@ -22,23 +22,23 @@ public class UserActor extends AbstractActor {
   private final ActorRef ws;
   private final ActorRef youTubeServiceActor;
   private final ActorRef readabilityActor;
-  private final ActorRef submissionSentimentActor;
+  private final ActorRef sentimentActor;
   private final Set<String> processedQueries = new HashSet<>();
   private final LinkedList<Video> cumulativeResults =
       new LinkedList<>(); // Stores the latest 10 results
   ObjectMapper objectMapper = new ObjectMapper();
 
   public static Props props(
-      final ActorRef wsOut, final ActorRef youTubeServiceActor, final ActorRef readabilityActor, final ActorRef submissionSentimentActor) {
-    return Props.create(UserActor.class, wsOut, youTubeServiceActor, readabilityActor, submissionSentimentActor);
+      final ActorRef wsOut, final ActorRef youTubeServiceActor, final ActorRef readabilityActor, final ActorRef sentimentActor) {
+    return Props.create(UserActor.class, wsOut, youTubeServiceActor, readabilityActor, sentimentActor);
   }
 
   public UserActor(
-      final ActorRef wsOut, final ActorRef youTubeServiceActor, ActorRef readabilityActor, ActorRef submissionSentimentActor) {
+      final ActorRef wsOut, final ActorRef youTubeServiceActor, ActorRef readabilityActor, ActorRef sentimentActor) {
     this.ws = wsOut;
     this.youTubeServiceActor = youTubeServiceActor;
     this.readabilityActor = readabilityActor;
-    this.submissionSentimentActor = submissionSentimentActor;
+    this.sentimentActor = sentimentActor;
   }
 
   @Override
@@ -46,6 +46,7 @@ public class UserActor extends AbstractActor {
     return receiveBuilder()
         .match(String.class, this::handleSearchQuery)
         .match(Messages.SearchResultsMessage.class, this::processReceivedResults)
+        .match(Messages.SentimentAnalysisResult.class, this::processSentimentResults)
         .match(Messages.ReadabilityResultsMessage.class, this::sendResultsToClient)
         .build();
   }
@@ -70,6 +71,7 @@ public class UserActor extends AbstractActor {
 
     // Send the videos to the ReadabilityActor for processing
     readabilityActor.tell(new Messages.CalculateReadabilityMessage(videos), getSelf());
+      sentimentActor.tell(new Messages.AnalyzeVideoSentiments(videos), getSelf());
   }
 
   /**
@@ -111,6 +113,23 @@ public class UserActor extends AbstractActor {
       log.error("Failed to serialize videos to JSON", e);
     }
   }
+
+    private void processSentimentResults(Messages.SentimentAnalysisResult sentimentAnalysisResult) {
+        String sentimentResult = sentimentAnalysisResult.getSentiment();
+        List<Video> videos = sentimentAnalysisResult.getVideos();
+        cumulativeResults.addAll(videos);
+        // Send JSON to WebSocket
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            JsonNode json =
+                    objectMapper
+                            .createObjectNode()
+                            .put("sentiment", sentimentResult);
+            ws.tell(objectMapper.writeValueAsString(json), getSelf());
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+    }
 
   /**
    * Sets the object mapper for the actor

@@ -114,9 +114,10 @@ public class SupervisorActor extends AbstractActor {
                 })
                 .build();
     }
-
     /**
      * Processes the user input and returns the formatted result.
+     *
+     * @author Aynaz Javanivayeghan
      */
     @Override
     public SupervisorStrategy supervisorStrategy() {

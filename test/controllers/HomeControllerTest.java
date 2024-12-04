@@ -864,6 +864,7 @@ public class HomeControllerTest {
   public void testSearchByTagWithResults() {
     // Arrange: Mock a list of videos with a specific tag
     String testTag = "testTag";
+    System.out.println("Test Tag: " + testTag);
     List<Video> mockVideos =
             Arrays.asList(
                     new Video(
@@ -1030,4 +1031,70 @@ public class HomeControllerTest {
   public void testActorSystemInitialization() {
     assertEquals("TestActorSystem", system.name());
   }
+  @Test
+  public void testSearchVideosByTagWithResults() {
+    // Arrange
+    String testTag = "exampleTag";
+    List<Map<String, String>> mockVideoData = List.of(
+            Map.of(
+                    "title", "Test Video 1",
+                    "description", "Description for Test Video 1",
+                    "channelId", "channelId1",
+                    "videoId", "videoId1",
+                    "thumbnailUrl", "http://thumbnail1.com",
+                    "channelTitle", "Test Channel 1",
+                    "publishedDate", "2024-11-06T04:41:46Z"
+            ),
+            Map.of(
+                    "title", "Test Video 2",
+                    "description", "Description for Test Video 2",
+                    "channelId", "channelId2",
+                    "videoId", "videoId2",
+                    "thumbnailUrl", "http://thumbnail2.com",
+                    "channelTitle", "Test Channel 2",
+                    "publishedDate", "2024-11-06T04:41:46Z"
+            )
+    );
+
+    List<Video> mockVideos = mockVideoData.stream()
+            .map(data -> new Video(
+                    data.get("title"),
+                    data.get("description"),
+                    data.get("channelId"),
+                    data.get("videoId"),
+                    data.get("thumbnailUrl"),
+                    data.get("channelTitle"),
+                    data.get("publishedDate")
+            ))
+            .collect(Collectors.toList());
+
+    when(mockYouTubeService.searchVideosByTag(testTag))
+            .thenReturn(CompletableFuture.completedFuture(mockVideos));
+
+    // Act
+    CompletionStage<Result> resultStage = homeController.searchByTag(testTag);
+    Result result = resultStage.toCompletableFuture().join();
+
+    // Debugging
+    System.out.println("Status Code: " + result.status());
+    String content = contentAsString(result);
+    System.out.println("Response Content: " + content);
+
+    // Assert
+    assertEquals("Expected status code is 200 (OK)", 200, result.status());
+    assertNotNull("Response content should not be null", content);
+
+    // Validate HTML content
+    assertTrue("The HTML header is missing or incorrect.",
+            content.contains("<h1>YouTube Search Results for \"Videos with tag: exampleTag\"</h1>"));
+    assertTrue("Expected video title 'Test Video 1' not found in response.",
+            content.contains("Test Video 1"));
+    assertTrue("Expected video description 'Description for Test Video 1' not found in response.",
+            content.contains("Description for Test Video 1"));
+    assertTrue("Expected video title 'Test Video 2' not found in response.",
+            content.contains("Test Video 2"));
+    assertTrue("Expected video description 'Description for Test Video 2' not found in response.",
+            content.contains("Description for Test Video 2"));
+  }
+
 }

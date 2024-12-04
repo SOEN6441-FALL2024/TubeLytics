@@ -37,3 +37,4 @@ GET    /api/channel/:channelId/latest-videos    controllers.HomeController.fetch
 
 
 
+GET     /searchByTag/:tag     controllers.HomeController.searchVideosByTag(tag: String)

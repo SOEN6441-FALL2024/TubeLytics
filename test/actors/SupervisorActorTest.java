@@ -2,6 +2,11 @@ package actors;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import java.lang.reflect.Field;
+
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.concurrent.CompletableFuture;
@@ -61,7 +66,7 @@ public class SupervisorActorTest {
 
         TestProbe wsProbe = new TestProbe(system);
         ActorRef supervisorActor =
-            system.actorOf(SupervisorActor.props(wsProbe.ref(), mockWsClient));
+                system.actorOf(SupervisorActor.props(wsProbe.ref(), mockWsClient));
 
         supervisorActor.tell("cats", getRef());
         expectNoMessage(scala.concurrent.duration.Duration.create(1, "second"));
@@ -80,7 +85,7 @@ public class SupervisorActorTest {
       {
         TestProbe wsProbe = new TestProbe(system);
         ActorRef supervisorActor =
-            system.actorOf(SupervisorActor.props(wsProbe.ref(), mockWsClient));
+                system.actorOf(SupervisorActor.props(wsProbe.ref(), mockWsClient));
         assertNotNull(system.actorSelection(supervisorActor.path().child("userActor")));
         assertNotNull(system.actorSelection(supervisorActor.path().child("youTubeServiceActor")));
       }
@@ -94,7 +99,7 @@ public class SupervisorActorTest {
       {
         TestProbe wsProbe = new TestProbe(system);
         ActorRef supervisorActor =
-            system.actorOf(SupervisorActor.props(wsProbe.ref(), mockWsClient));
+                system.actorOf(SupervisorActor.props(wsProbe.ref(), mockWsClient));
 
         assertNotNull(system.actorSelection(supervisorActor.path().child("userActor")));
         assertNotNull(system.actorSelection(supervisorActor.path().child("youTubeServiceActor")));
@@ -195,7 +200,7 @@ public class SupervisorActorTest {
       }
     };
   }
-//  @Test
+  //  @Test
 //  public void testSupervisorStrategy_IllegalStateException() {
 //    new TestKit(system) {{
 //      // Create the supervisor actor
@@ -250,29 +255,29 @@ public class SupervisorActorTest {
         // Simulate a NullPointerException and validate resumption
         supervisorActor.tell(new NullPointerException("Simulated NPE"), getRef());
         expectNoMessage(
-            scala.concurrent.duration.Duration.create(
-                1, "second")); // No crash means resumption worked
+                scala.concurrent.duration.Duration.create(
+                        1, "second")); // No crash means resumption worked
         System.out.println("NullPointerException handling verified: Resumed.");
 
         // Simulate an IllegalArgumentException and validate restart
         supervisorActor.tell(new IllegalArgumentException("Simulated IAE"), getRef());
         expectNoMessage(
-            scala.concurrent.duration.Duration.create(
-                1, "second")); // No crash means restart worked
+                scala.concurrent.duration.Duration.create(
+                        1, "second")); // No crash means restart worked
         System.out.println("IllegalArgumentException handling verified: Restarted.");
 
         // Simulate an IllegalStateException and validate stopping
         supervisorActor.tell(new IllegalStateException("Simulated ISE"), getRef());
         expectNoMessage(
-            scala.concurrent.duration.Duration.create(
-                1, "second")); // No response expected due to stop
+                scala.concurrent.duration.Duration.create(
+                        1, "second")); // No response expected due to stop
         System.out.println("IllegalStateException handling verified: Stopped.");
 
         // Simulate an unknown exception and validate restart
         supervisorActor.tell(new Exception("Simulated Unknown Exception"), getRef());
         expectNoMessage(
-            scala.concurrent.duration.Duration.create(
-                1, "second")); // No crash means restart worked
+                scala.concurrent.duration.Duration.create(
+                        1, "second")); // No crash means restart worked
         System.out.println("Unknown exception handling verified: Restarted.");
       }
     };
@@ -289,7 +294,7 @@ public class SupervisorActorTest {
         expectNoMessage(scala.concurrent.duration.Duration.create(1, "second"));
 
         supervisorActor.tell(
-            new IllegalArgumentException("Test IllegalArgumentException"), getRef());
+                new IllegalArgumentException("Test IllegalArgumentException"), getRef());
         expectNoMessage(scala.concurrent.duration.Duration.create(1, "second"));
 
         supervisorActor.tell(new IllegalStateException("Test IllegalStateException"), getRef());
@@ -305,4 +310,58 @@ public class SupervisorActorTest {
       }
     };
   }
+  @Test
+  public void testSupervisorActorForwardToTagsActor() {
+    new TestKit(system) {
+      {
+        // Mock WebSocket and SupervisorActor
+        TestProbe wsProbe = new TestProbe(system);
+        ActorRef supervisorActor =
+                system.actorOf(SupervisorActor.props(wsProbe.ref(), mockWsClient));
+
+        // Send GetVideosByTag message to SupervisorActor
+        String testTag = "exampleTag";
+        supervisorActor.tell(new TagsActor.GetVideosByTag(testTag), getRef());
+
+        // Expect VideosByTagResponse
+        TagsActor.VideosByTagResponse response = expectMsgClass(TagsActor.VideosByTagResponse.class);
+
+        // Validate response
+        assertNotNull(response);
+        assertEquals(testTag, response.tag);
+        assertNotNull(response.videos);
+        assertFalse(response.videos.isEmpty());
+      }
+    };
+  }
+  @Test
+  public void testSupervisorActorWithInvalidMessage() throws NoSuchFieldException, IllegalAccessException {
+    new TestKit(system) {
+      {
+        // Mock WebSocket and SupervisorActor
+        TestProbe wsProbe = new TestProbe(system);
+        ActorRef supervisorActor =
+                system.actorOf(SupervisorActor.props(wsProbe.ref(), mockWsClient));
+
+        // Send an invalid message to SupervisorActor
+        supervisorActor.tell(42, getRef()); // Sending an Integer instead of a valid message
+
+        // Expect an ErrorMessage
+        Messages.ErrorMessage errorMessage = expectMsgClass(Messages.ErrorMessage.class);
+
+        // Validate the ErrorMessage content
+        assertNotNull(errorMessage);
+
+        // Access private 'message' field using reflection
+        Field messageField = Messages.ErrorMessage.class.getDeclaredField("message");
+        messageField.setAccessible(true); // Allow access to private field
+
+        String actualMessage = (String) messageField.get(errorMessage);
+
+        // Validate the actual message content
+        assertEquals("Unknown message type", actualMessage);
+      }
+    };
+  }
+
 }

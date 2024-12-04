@@ -2,6 +2,11 @@ name := """TubeLytics"""
 
 version := "1.0-SNAPSHOT"
 
+
+javacOptions ++= Seq("--release", "17")
+scalacOptions ++= Seq("-release", "17")
+
+
 lazy val root = (project in file(".")).enablePlugins(PlayJava)
 
 scalaVersion := "2.13.15"

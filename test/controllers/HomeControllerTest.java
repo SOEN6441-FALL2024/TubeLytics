@@ -1121,6 +1121,50 @@ public class HomeControllerTest {
       expectMsgClass(Duration.ofSeconds(10), Messages.GetCumulativeStats.class);
     }};
   }
+  @Test
+  public void testSearchVideosByTagWithNullTag() {
+    // Act
+    CompletionStage<Result> resultStage = homeController.searchVideosByTag(null);
+    Result result = resultStage.toCompletableFuture().join();
+
+    // Assert
+    assertEquals(BAD_REQUEST, result.status());
+    assertEquals("Tag cannot be empty.", contentAsString(result));
+  }
+
+  @Test
+  public void testSearchVideosByTagWithEmptyTag() {
+    // Act
+    CompletionStage<Result> resultStage = homeController.searchVideosByTag(" ");
+    Result result = resultStage.toCompletableFuture().join();
+
+    // Assert
+    assertEquals(BAD_REQUEST, result.status());
+    assertEquals("Tag cannot be empty.", contentAsString(result));
+  }
+
+  @Test
+  public void testSearchVideosByTagWithValidTagButNoResults() {
+    new TestKit(system) {{
+      // Arrange
+      String validTag = "exampleTag";
+      TestProbe probe = new TestProbe(system);
+      homeController.setSupervisorActor(probe.ref());
+
+      // Act
+      CompletionStage<Result> resultStage = homeController.searchVideosByTag(validTag);
+
+      // Simulate actor response with empty videos
+      probe.expectMsgClass(TagsActor.GetVideosByTag.class);
+      probe.reply(new TagsActor.VideosByTagResponse(validTag, Collections.emptyList()));
+
+      // Assert
+      Result result = resultStage.toCompletableFuture().join();
+      assertEquals(NOT_FOUND, result.status());
+      assertTrue(contentAsString(result).contains("No videos found for the tag: " + validTag));
+    }};
+  }
+
 
 }
 

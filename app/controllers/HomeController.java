@@ -61,7 +61,8 @@ public class HomeController extends Controller {
     private final ActorSystem actorSystem;
     private final Materializer materializer;
     private final YouTubeService youTubeService;
-    private final ActorRef supervisorActor;
+    private ActorRef supervisorActor;
+    //private final ActorRef supervisorActor;
 
     private final LinkedHashMap<String, List<Video>> multipleQueryResult;
     private static HashMap<String, LinkedHashMap<String, List<Video>>> multipleQueryResults =
@@ -75,12 +76,14 @@ public class HomeController extends Controller {
             WSClient wsClient,
             YouTubeService youTubeService,
             LinkedHashMap<String, List<Video>> multipleQueryResult) {
-        this.actorSystem = actorSystem;
-        this.materializer = materializer;
-        this.wsClient = wsClient;
+        this.actorSystem = Objects.requireNonNull(actorSystem, "ActorSystem cannot be null");
+        this.materializer = Objects.requireNonNull(materializer, "Materializer cannot be null");
+        this.wsClient = Objects.requireNonNull(wsClient, "WSClient cannot be null");
         this.youTubeService = Objects.requireNonNull(youTubeService, "YouTubeService cannot be null");
         this.multipleQueryResult =
                 Objects.requireNonNull(multipleQueryResult, "Query result map cannot be null");
+
+        // Create a unique name for the supervisor actor instance
         String uniqueActorName = "supervisorActor-" + UUID.randomUUID().toString();
         this.supervisorActor = actorSystem.actorOf(SupervisorActor.props(null, wsClient), uniqueActorName);
     }
@@ -91,19 +94,30 @@ public class HomeController extends Controller {
             WSClient wsClient,
             YouTubeService youTubeService,
             LinkedHashMap<String, List<Video>> multipleQueryResult,
-            HashMap<String, LinkedHashMap<String, List<Video>>> sessionQueryMap
-    ) {
+            HashMap<String, LinkedHashMap<String, List<Video>>> sessionQueryMap) {
         this.actorSystem = Objects.requireNonNull(actorSystem, "ActorSystem cannot be null");
-        this.materializer = materializer;
-        this.wsClient = wsClient;
+        this.materializer = Objects.requireNonNull(materializer, "Materializer cannot be null");
+        this.wsClient = Objects.requireNonNull(wsClient, "WSClient cannot be null");
         this.youTubeService = Objects.requireNonNull(youTubeService, "YouTubeService cannot be null");
-        this.multipleQueryResult = Objects.requireNonNull(multipleQueryResult, "Query result map cannot be null");
+        this.multipleQueryResult =
+                Objects.requireNonNull(multipleQueryResult, "Query result map cannot be null");
+
+        // Initialize session-specific query map or default to a new map
         this.multipleQueryResults = sessionQueryMap != null ? sessionQueryMap : new HashMap<>();
 
-        // Use a unique name for each supervisorActor instance
+        // Create a unique name for the supervisor actor instance
         String uniqueActorName = "supervisorActor-" + UUID.randomUUID().toString();
         this.supervisorActor = this.actorSystem.actorOf(SupervisorActor.props(null, wsClient), uniqueActorName);
     }
+    /**
+     * Setter for supervisorActor, used for injecting mock in tests.
+     *
+     * @param supervisorActor the mock ActorRef for testing purposes
+     */
+    public void setSupervisorActor(ActorRef supervisorActor) {
+        this.supervisorActor = supervisorActor;
+    }
+
 
     /**
      * Start of webSocket connection, which will create a supervisor actor who is in charge of looking

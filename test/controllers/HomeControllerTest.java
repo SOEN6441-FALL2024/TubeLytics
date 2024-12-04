@@ -13,6 +13,12 @@ import static play.test.Helpers.contentAsString;
 import actors.Messages;
 import actors.SupervisorActor;
 import com.typesafe.config.Config;
+import actors.TagsActor;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.testkit.TestActorRef;
+import org.apache.pekko.testkit.javadsl.TestKit;
+
 
 import java.time.Duration;
 import java.util.*;
@@ -22,11 +28,9 @@ import java.util.stream.Collectors;
 
 import models.ChannelInfo;
 import models.Video;
-import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.stream.Materializer;
 import org.apache.pekko.testkit.TestProbe;
-import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -41,6 +45,10 @@ import play.mvc.WebSocket;
 import play.test.Helpers;
 import services.YouTubeService;
 import actors.WordStatsActor;
+import static play.mvc.Http.Status.NOT_FOUND;
+import static org.junit.Assert.assertNotNull;
+
+
 import actors.SupervisorActor;
 import java.time.Duration;
 import org.apache.pekko.actor.Props;
@@ -94,6 +102,7 @@ public class HomeControllerTest {
                     sessionQueryMap);
 
     query = "cat";
+
 
     // Adding mock entries into List<Video>
     videos = new ArrayList<>();
@@ -1096,5 +1105,22 @@ public class HomeControllerTest {
     assertTrue("Expected video description 'Description for Test Video 2' not found in response.",
             content.contains("Description for Test Video 2"));
   }
+  @Test
+  public void testGetCumulativeWordStats() {
+    new TestKit(system) {{
+      // Create a mock SupervisorActor
+      ActorRef mockSupervisorActor = getRef();
+
+      // Inject the mock SupervisorActor into the homeController
+      homeController.setSupervisorActor(mockSupervisorActor);
+
+      // Trigger the method
+      homeController.getCumulativeWordStats().toCompletableFuture().join();
+
+      // Verify the message sent to the actor
+      expectMsgClass(Duration.ofSeconds(10), Messages.GetCumulativeStats.class);
+    }};
+  }
 
 }
+

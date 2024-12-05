@@ -23,9 +23,9 @@ public class SearchResult {
     this.query = query;
     this.videos = videos;
     this.averageFleschKincaidGradeLevel =
-        Helpers.formatDouble(getAverageFleschKincaidGradeLevel(videos));
+            Helpers.formatDouble(getAverageFleschKincaidGradeLevel(videos));
     this.averageFleschReadingEaseScore =
-        Helpers.formatDouble(getAverageFleschReadingEaseScore(videos));
+            Helpers.formatDouble(getAverageFleschReadingEaseScore(videos));
     this.overallSentiment = calculateOverallSentiment(videos);
   }
 
@@ -109,10 +109,10 @@ public class SearchResult {
       return 0;
     }
     return videos.stream()
-        .mapToDouble(Video::getFleschKincaidGradeLevel)
-        .limit(50)
-        .average()
-        .orElse(0);
+            .mapToDouble(Video::getFleschKincaidGradeLevel)
+            .limit(50)
+            .average()
+            .orElse(0);
   }
 
   /**
@@ -128,10 +128,10 @@ public class SearchResult {
       return 0;
     }
     return videos.stream()
-        .mapToDouble(Video::getFleschReadingEaseScore)
-        .limit(50)
-        .average()
-        .orElse(0);
+            .mapToDouble(Video::getFleschReadingEaseScore)
+            .limit(50)
+            .average()
+            .orElse(0);
   }
 
   /**
@@ -158,7 +158,7 @@ public class SearchResult {
       return "Unavailable";
     }
     double totalHappyWordCount =
-        videos.stream().limit(50).mapToDouble(Video::getHappyWordCount).sum();
+            videos.stream().limit(50).mapToDouble(Video::getHappyWordCount).sum();
     double totalSadWordCount = videos.stream().limit(50).mapToDouble(Video::getSadWordCount).sum();
 
     return Helpers.calculateSentiment(totalHappyWordCount, totalSadWordCount);

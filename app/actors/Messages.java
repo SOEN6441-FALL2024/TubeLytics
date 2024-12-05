@@ -73,12 +73,12 @@ public final class Messages {
     @Override
     public String toString() {
       return "SearchResultsMessage{"
-          + "searchTerm='"
-          + searchTerm
-          + '\''
-          + ", videos="
-          + videos
-          + '}';
+              + "searchTerm='"
+              + searchTerm
+              + '\''
+              + ", videos="
+              + videos
+              + '}';
     }
   }
 
@@ -169,7 +169,7 @@ public final class Messages {
     private final double averageReadingEase;
 
     public ReadabilityResultsMessage(
-        List<Video> videos, double averageGradeLevel, double averageReadingEase) {
+            List<Video> videos, double averageGradeLevel, double averageReadingEase) {
       this.videos = videos;
       this.averageGradeLevel = averageGradeLevel;
       this.averageReadingEase = averageReadingEase;

@@ -13,6 +13,12 @@ import static play.test.Helpers.contentAsString;
 import actors.Messages;
 import actors.SupervisorActor;
 import com.typesafe.config.Config;
+import actors.TagsActor;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.testkit.TestActorRef;
+import org.apache.pekko.testkit.javadsl.TestKit;
+
 
 import java.time.Duration;
 import java.util.*;
@@ -22,11 +28,9 @@ import java.util.stream.Collectors;
 
 import models.ChannelInfo;
 import models.Video;
-import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.stream.Materializer;
 import org.apache.pekko.testkit.TestProbe;
-import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -41,6 +45,10 @@ import play.mvc.WebSocket;
 import play.test.Helpers;
 import services.YouTubeService;
 import actors.WordStatsActor;
+import static play.mvc.Http.Status.NOT_FOUND;
+import static org.junit.Assert.assertNotNull;
+
+
 import actors.SupervisorActor;
 import java.time.Duration;
 import org.apache.pekko.actor.Props;
@@ -94,6 +102,7 @@ public class HomeControllerTest {
                     sessionQueryMap);
 
     query = "cat";
+
 
     // Adding mock entries into List<Video>
     videos = new ArrayList<>();
@@ -864,6 +873,7 @@ public class HomeControllerTest {
   public void testSearchByTagWithResults() {
     // Arrange: Mock a list of videos with a specific tag
     String testTag = "testTag";
+    System.out.println("Test Tag: " + testTag);
     List<Video> mockVideos =
             Arrays.asList(
                     new Video(
@@ -1030,4 +1040,131 @@ public class HomeControllerTest {
   public void testActorSystemInitialization() {
     assertEquals("TestActorSystem", system.name());
   }
+  @Test
+  public void testSearchVideosByTagWithResults() {
+    // Arrange
+    String testTag = "exampleTag";
+    List<Map<String, String>> mockVideoData = List.of(
+            Map.of(
+                    "title", "Test Video 1",
+                    "description", "Description for Test Video 1",
+                    "channelId", "channelId1",
+                    "videoId", "videoId1",
+                    "thumbnailUrl", "http://thumbnail1.com",
+                    "channelTitle", "Test Channel 1",
+                    "publishedDate", "2024-11-06T04:41:46Z"
+            ),
+            Map.of(
+                    "title", "Test Video 2",
+                    "description", "Description for Test Video 2",
+                    "channelId", "channelId2",
+                    "videoId", "videoId2",
+                    "thumbnailUrl", "http://thumbnail2.com",
+                    "channelTitle", "Test Channel 2",
+                    "publishedDate", "2024-11-06T04:41:46Z"
+            )
+    );
+
+    List<Video> mockVideos = mockVideoData.stream()
+            .map(data -> new Video(
+                    data.get("title"),
+                    data.get("description"),
+                    data.get("channelId"),
+                    data.get("videoId"),
+                    data.get("thumbnailUrl"),
+                    data.get("channelTitle"),
+                    data.get("publishedDate")
+            ))
+            .collect(Collectors.toList());
+
+    when(mockYouTubeService.searchVideosByTag(testTag))
+            .thenReturn(CompletableFuture.completedFuture(mockVideos));
+
+    // Act
+    CompletionStage<Result> resultStage = homeController.searchByTag(testTag);
+    Result result = resultStage.toCompletableFuture().join();
+
+    // Debugging
+    System.out.println("Status Code: " + result.status());
+    String content = contentAsString(result);
+    System.out.println("Response Content: " + content);
+
+    // Assert
+    assertEquals("Expected status code is 200 (OK)", 200, result.status());
+    assertNotNull("Response content should not be null", content);
+
+    // Validate HTML content
+    assertTrue("The HTML header is missing or incorrect.",
+            content.contains("<h1>YouTube Search Results for \"Videos with tag: exampleTag\"</h1>"));
+    assertTrue("Expected video title 'Test Video 1' not found in response.",
+            content.contains("Test Video 1"));
+    assertTrue("Expected video description 'Description for Test Video 1' not found in response.",
+            content.contains("Description for Test Video 1"));
+    assertTrue("Expected video title 'Test Video 2' not found in response.",
+            content.contains("Test Video 2"));
+    assertTrue("Expected video description 'Description for Test Video 2' not found in response.",
+            content.contains("Description for Test Video 2"));
+  }
+  @Test
+  public void testGetCumulativeWordStats() {
+    new TestKit(system) {{
+      // Create a mock SupervisorActor
+      ActorRef mockSupervisorActor = getRef();
+
+      // Inject the mock SupervisorActor into the homeController
+      homeController.setSupervisorActor(mockSupervisorActor);
+
+      // Trigger the method
+      homeController.getCumulativeWordStats().toCompletableFuture().join();
+
+      // Verify the message sent to the actor
+      expectMsgClass(Duration.ofSeconds(10), Messages.GetCumulativeStats.class);
+    }};
+  }
+  @Test
+  public void testSearchVideosByTagWithNullTag() {
+    // Act
+    CompletionStage<Result> resultStage = homeController.searchVideosByTag(null);
+    Result result = resultStage.toCompletableFuture().join();
+
+    // Assert
+    assertEquals(BAD_REQUEST, result.status());
+    assertEquals("Tag cannot be empty.", contentAsString(result));
+  }
+
+  @Test
+  public void testSearchVideosByTagWithEmptyTag() {
+    // Act
+    CompletionStage<Result> resultStage = homeController.searchVideosByTag(" ");
+    Result result = resultStage.toCompletableFuture().join();
+
+    // Assert
+    assertEquals(BAD_REQUEST, result.status());
+    assertEquals("Tag cannot be empty.", contentAsString(result));
+  }
+
+  @Test
+  public void testSearchVideosByTagWithValidTagButNoResults() {
+    new TestKit(system) {{
+      // Arrange
+      String validTag = "exampleTag";
+      TestProbe probe = new TestProbe(system);
+      homeController.setSupervisorActor(probe.ref());
+
+      // Act
+      CompletionStage<Result> resultStage = homeController.searchVideosByTag(validTag);
+
+      // Simulate actor response with empty videos
+      probe.expectMsgClass(TagsActor.GetVideosByTag.class);
+      probe.reply(new TagsActor.VideosByTagResponse(validTag, Collections.emptyList()));
+
+      // Assert
+      Result result = resultStage.toCompletableFuture().join();
+      assertEquals(NOT_FOUND, result.status());
+      assertTrue(contentAsString(result).contains("No videos found for the tag: " + validTag));
+    }};
+  }
+
+
 }
+
